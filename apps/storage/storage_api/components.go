@@ -1,4 +1,4 @@
-package demo_api
+package storage_api
 
 import (
 	"github.com/pavlo67/common/common"

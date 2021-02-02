@@ -1,4 +1,4 @@
-package demo_api
+package storage_api
 
 import (
 	"fmt"
@@ -15,25 +15,25 @@ import (
 )
 
 func Starter() starter.Operator {
-	return &demoStarter{}
+	return &storageStarter{}
 }
 
 var l logger.Operator
 
-var _ starter.Operator = &demoStarter{}
+var _ starter.Operator = &storageStarter{}
 
-type demoStarter struct {
+type storageStarter struct {
 	prefix string
 	// baseDir string
 
 	// skipAbsentEndpoints bool
 }
 
-func (ss *demoStarter) Name() string {
+func (ss *storageStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *demoStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ss *storageStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 	if l == nil {
 		return nil, fmt.Errorf("no logger for %s:-(", ss.Name())
@@ -45,22 +45,17 @@ func (ss *demoStarter) Init(cfg *config.Config, lCommon logger.Operator, options
 	return nil, nil
 }
 
-func (ss *demoStarter) Setup() error {
+func (ss *storageStarter) Setup() error {
 	return nil
 }
-
-// Swagger-UI sorts sections due to the first their path occurrences, so:
-// 1. unauthorized       /auth
-// 2. admin              /front/add_plan
-// 3. any_authenticated
 
 var Endpoints = server_http.Endpoints{
 	auth.EPAuth: {Path: "/auth", Tags: []string{"unauthorized"}, HandlerKey: auth.AuthHandlerKey},
 }
 
-func (ss *demoStarter) Run(joinerOp joiner.Operator) error {
-	srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
-	if !ok {
+func (ss *storageStarter) Run(joinerOp joiner.Operator) error {
+	srvOp, _ := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
+	if srvOp == nil {
 		return fmt.Errorf("no server_http.UserKey with key %s", server_http.InterfaceKey)
 	}
 
