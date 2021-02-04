@@ -33,6 +33,7 @@ github.com/onsi/ginkgo v1.7.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+W
 github.com/onsi/gomega v1.4.3/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1CpauHY=
 github.com/pavlo67/common v0.0.3 h1:qVpfEbCbx0CTZ2oysKHPONHGXVb7tdS9b69IWaTPn9A=
 github.com/pavlo67/common v0.0.3/go.mod h1:r5lwVKcC4/ARQG0QhH/1uDCDBorGvT+h8UtQrpGq1vs=
+github.com/pavlo67/workshop v0.0.3 h1:2DQ1kjRTGIGlZ0lN6cGNa+ht20OnKMaUsb2oL4DyrJM=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=

@@ -13,7 +13,6 @@ import (
 	"github.com/pavlo67/common/common/starter"
 
 	"github.com/pavlo67/tools/components/files"
-	"github.com/pavlo67/tools/components/files/files_scenarios"
 )
 
 func TestFilesFS(t *testing.T) {
@@ -34,5 +33,5 @@ func TestFilesFS(t *testing.T) {
 	require.NotNil(t, joinerOp)
 	defer joinerOp.CloseAll()
 
-	files_scenarios.FilesTestScenario(t, joinerOp, files.InterfaceKey, bucketID)
+	files.FilesTestScenario(t, joinerOp, files.InterfaceKey, bucketID)
 }

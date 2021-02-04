@@ -1,4 +1,4 @@
-package files_scenarios
+package files
 
 import (
 	"path/filepath"
@@ -7,8 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/joiner"
-
-	"github.com/pavlo67/tools/components/files"
 )
 
 const path1 = "bbb/ccc"
@@ -19,8 +17,8 @@ const path2 = "aaa"
 
 var fileData2 = []byte("fileData2")
 
-func FilesTestScenario(t *testing.T, joinerOp joiner.Operator, interfaceKey joiner.InterfaceKey, bucketID files.BucketID) {
-	filesOp, _ := joinerOp.Interface(interfaceKey).(files.Operator)
+func FilesTestScenario(t *testing.T, joinerOp joiner.Operator, interfaceKey joiner.InterfaceKey, bucketID BucketID) {
+	filesOp, _ := joinerOp.Interface(interfaceKey).(Operator)
 	require.NotNil(t, filesOp)
 
 	path1Saved := saveTest(t, filesOp, bucketID, path1, fileData1)
@@ -30,7 +28,7 @@ func FilesTestScenario(t *testing.T, joinerOp joiner.Operator, interfaceKey join
 	require.NotEmpty(t, path2Saved)
 }
 
-func saveTest(t *testing.T, filesOp files.Operator, bucketID files.BucketID, path string, data []byte) (pathCorrected string) {
+func saveTest(t *testing.T, filesOp Operator, bucketID BucketID, path string, data []byte) (pathCorrected string) {
 
 	// check original path info ---------------------------------------------
 
