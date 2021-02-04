@@ -1,12 +1,10 @@
-package test
+package files_fs
 
 import (
 	"testing"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/tools/components/files/files_fs"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/apps"
@@ -16,7 +14,7 @@ import (
 )
 
 func TestFilesFS(t *testing.T) {
-	_, cfgService := apps.PrepareTests(t, "test_service", "../../../../apps/", "test")
+	_, cfgService := apps.PrepareTests(t, "test_service", "../../../apps/", "test")
 	require.NotNil(t, cfgService)
 
 	var cfg config.Access
@@ -25,7 +23,7 @@ func TestFilesFS(t *testing.T) {
 
 	bucketID := files.BucketID("test_bucket")
 	components := []starter.Starter{
-		{files_fs.Starter(), common.Map{"buckets": files_fs.Buckets{bucketID: cfg.Path}}},
+		{Starter(), common.Map{"buckets": Buckets{bucketID: cfg.Path}}},
 	}
 
 	joinerOp, err := starter.Run(components, cfgService, "CLI BUILD FOR TEST")
@@ -33,5 +31,5 @@ func TestFilesFS(t *testing.T) {
 	require.NotNil(t, joinerOp)
 	defer joinerOp.CloseAll()
 
-	files.FilesTestScenario(t, joinerOp, files.InterfaceKey, bucketID)
+	files.FilesTestScenario(t, joinerOp, files.InterfaceKey, files.InterfaceCleanerKey, bucketID)
 }

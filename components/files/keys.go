@@ -5,7 +5,7 @@ import "github.com/pavlo67/common/common/joiner"
 //  --------------------------------------------------------
 
 const InterfaceKey = joiner.InterfaceKey("files")
-const CleanerKey = joiner.InterfaceKey("files_cleaner")
+const InterfaceCleanerKey = joiner.InterfaceKey("files_cleaner")
 
 const EPSave = "files_save"
 const EPRead = "files_read"

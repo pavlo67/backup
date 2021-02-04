@@ -51,21 +51,26 @@ func (filesOp *filesFS) Save(bucketID files.BucketID, path, newFilePattern strin
 		return "", errors.Errorf(onSave+": wrong bucket (%s)", bucketID)
 	}
 
+	path = basePath + path
+
 	var err error
 	var dirPath string
 	var file *os.File
 
 	// TODO!!! check if dirPath doesn't contain "/../"
 	if newFilePattern != "" {
-		if dirPath, err = filelib.Dir(basePath + path); err != nil {
-			return "", errors.Wrapf(err, onSave+": wrong path (%s)", basePath+path)
+		if dirPath, err = filelib.Dir(path); err != nil {
+			return "", errors.Wrapf(err, onSave+": wrong path (%s)", path)
 		}
 		if file, err = ioutil.TempFile(dirPath, newFilePattern); err != nil {
 			return "", errors.Wrapf(err, onSave+": can't ioutil.TempFile(%s, %s)", dirPath, newFilePattern)
 		}
 	} else {
 		var filename string
-		dirPath, filename = basePath+filepath.Dir(path)+"/", filepath.Base(path)
+		dirPath, filename = filepath.Dir(path), filepath.Base(path)
+
+		dirPath, err = filelib.Dir(dirPath)
+
 		if file, err = os.OpenFile(dirPath+filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644); err != nil {
 			return "", errors.Wrapf(err, onSave+": can't os.OpenFile(%s, os.O_CREATE | os.O_TRUNC | os.O_WRONLY, 0644)", dirPath+filename)
 		}
@@ -126,7 +131,6 @@ func (filesOp *filesFS) Remove(bucketID files.BucketID, path string) error {
 const onList = "on filesFS.List()"
 
 func (filesOp *filesFS) List(bucketID files.BucketID, path string, depth int) (files.FilesInfo, error) {
-
 	basePath := filesOp.buckets[bucketID]
 	if basePath == "" {
 		return nil, errors.Errorf(onRead+": wrong bucket (%s)", bucketID)
@@ -137,12 +141,13 @@ func (filesOp *filesFS) List(bucketID files.BucketID, path string, depth int) (f
 
 	if depth == 0 {
 		fis, err := ioutil.ReadDir(filePath)
+
 		if err != nil {
 			return nil, errors.Wrapf(err, onList+": can't ioutil.ReadDir(%s)", filePath)
 		}
 
 		for _, fi := range fis {
-			filesInfo, err = filesInfo.Append(basePath, path, fi)
+			filesInfo, err = filesInfo.Append("", fi) // basePath
 			if err != nil {
 				return nil, errors.Wrap(err, onList)
 			}
@@ -152,12 +157,12 @@ func (filesOp *filesFS) List(bucketID files.BucketID, path string, depth int) (f
 	}
 
 	// TODO: process depth > 0 more thoroughly here
-	err := filepath.Walk(filePath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(filePath, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		filesInfo, err = filesInfo.Append(basePath, path, info)
+		filesInfo, err = filesInfo.Append("", fi) // basePath
 		if err != nil {
 			return errors.Wrap(err, onList)
 		}
@@ -170,23 +175,43 @@ func (filesOp *filesFS) List(bucketID files.BucketID, path string, depth int) (f
 
 const onStat = "on filesFS.Stat()"
 
-func (filesOp *filesFS) Stat(bucketID files.BucketID, path string) (*files.FileInfo, error) {
+func (filesOp *filesFS) Stat(bucketID files.BucketID, path string, depth int) (*files.FileInfo, error) {
 	basePath := filesOp.buckets[bucketID]
 	if basePath == "" {
 		return nil, errors.Errorf(onStat+": wrong bucket (%s)", bucketID)
 	}
 	filePath := basePath + path
 
-	var filesInfo files.FilesInfo
 	fi, err := os.Stat(filePath)
 	if err != nil {
+		//if os.IsNotExist(err) {
+		//	return nil, nil
+		//}
 		return nil, errors.Wrapf(err, onStat+": can't  os.Stat(%s)", filePath)
 	}
 
-	filesInfo, err = filesInfo.Append(basePath, filePath, fi)
+	filesInfo, err := files.FilesInfo{}.Append("", fi) // basePath
 	if err != nil || len(filesInfo) != 1 {
 		return nil, errors.Errorf(onStat+": got %#v / %s", filesInfo, err)
 	}
 
-	return &filesInfo[0], nil
+	fileInfo := filesInfo[0]
+
+	if depth != 0 && fileInfo.IsDir {
+		// TODO: process depth > 0 more thoroughly here
+		err = filepath.Walk(filePath, func(path string, fi os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !fi.IsDir() {
+				fileInfo.Size += fi.Size()
+			}
+
+			return nil
+		})
+	}
+
+	return &fileInfo, err
+
 }
