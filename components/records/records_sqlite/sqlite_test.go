@@ -4,14 +4,14 @@ import (
 	"os"
 	"testing"
 
+	"github.com/pavlo67/tools/components/records"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/libraries/filelib"
+	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/serializer"
-	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 )
 
 const serviceName = "notebook"
@@ -36,15 +36,10 @@ func TestCRUD(t *testing.T) {
 
 	l.Infof("%#v", cfgSQLite)
 
-	taggerOp, taggerCleanerOp, err := tagger_sqlite.New(cfgSQLite, "")
-	require.NoError(t, err)
-
-	dataOp, cleanerOp, err := New(cfgSQLite, "storage", "", taggerOp, taggerCleanerOp)
+	dataOp, cleanerOp, err := New(cfgSQLite, "storage", "")
 	require.NoError(t, err)
 
 	l.Debugf("%#v", dataOp)
 
-	testCases := data.TestCases(dataOp, cleanerOp)
-
-	data.OperatorTestScenario(t, testCases, l)
+	records.OperatorTestScenario(t, l)
 }

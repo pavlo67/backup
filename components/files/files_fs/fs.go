@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/libraries/filelib"
+	"github.com/pavlo67/common/common/filelib"
 
 	"github.com/pavlo67/tools/components/files"
 )

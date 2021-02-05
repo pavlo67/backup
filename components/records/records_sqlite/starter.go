@@ -1,40 +1,36 @@
 package records_sqlite
 
 import (
+	"github.com/pavlo67/tools/components/records"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
-	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/tagger"
 )
 
 func Starter() starter.Operator {
-	return &dataSQLiteStarter{}
+	return &recordsSQLiteStarter{}
 }
 
 var l logger.Operator
-var _ starter.Operator = &dataSQLiteStarter{}
+var _ starter.Operator = &recordsSQLiteStarter{}
 
-type dataSQLiteStarter struct {
+type recordsSQLiteStarter struct {
 	config config.Access
 	table  string
 
 	interfaceKey joiner.InterfaceKey
 	cleanerKey   joiner.InterfaceKey
-
-	noTagger bool
 }
 
-func (ts *dataSQLiteStarter) Name() string {
+func (ts *recordsSQLiteStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ts *dataSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ts *recordsSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	var cfgSQLite config.Access
@@ -45,17 +41,15 @@ func (ts *dataSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.
 
 	ts.config = cfgSQLite
 	ts.table, _ = options.String("table")
-	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
-	ts.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(data.CleanerInterfaceKey)))
-
-	ts.noTagger = options.IsTrue("no_tagger")
+	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(records.InterfaceKey)))
+	ts.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(records.CleanerInterfaceKey)))
 
 	// sqllib.CheckTables
 
 	return nil, nil
 }
 
-func (ts *dataSQLiteStarter) Setup() error {
+func (ts *recordsSQLiteStarter) Setup() error {
 	return nil
 
 	//return sqllib.SetupTables(
@@ -65,36 +59,34 @@ func (ts *dataSQLiteStarter) Setup() error {
 	//)
 }
 
-func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
+func (ts *recordsSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	var ok bool
-	var taggerOp tagger.Operator
-	var taggercleanerOp crud.Cleaner
 
-	if !ts.noTagger {
-		taggerOp, ok = joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
-		if !ok {
-			return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
-		}
-
-		taggercleanerOp, ok = joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)
-		if !ok {
-			return errors.Errorf("no tagger.Cleaner with key %s", tagger.InterfaceKey)
-		}
+	//if !ts.noTagger {
+	//	taggerOp, ok = joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
+	//	if !ok {
+	//		return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
+	//	}
+	//
+	//	taggercleanerOp, ok = joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)
+	//	if !ok {
+	//		return errors.Errorf("no tagger.Cleaner with key %s", tagger.InterfaceKey)
+	//	}
+	//}
+	//
+	recordsOp, recordscleanerOp, err := New(ts.config, ts.table, ts.interfaceKey)
+	if err != nil {
+		return errors.Wrap(err, "can't init records.Operator")
 	}
 
-	dataOp, datacleanerOp, err := New(ts.config, ts.table, ts.interfaceKey, taggerOp, taggercleanerOp)
+	err = joinerOp.Join(recordsOp, ts.interfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't init data.Operator")
+		return errors.Wrapf(err, "can't join *recordsSQLite as records.Operator with key '%s'", ts.interfaceKey)
 	}
 
-	err = joinerOp.Join(dataOp, ts.interfaceKey)
+	err = joinerOp.Join(recordscleanerOp, ts.cleanerKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *dataSQLite as data.Operator with key '%s'", ts.interfaceKey)
-	}
-
-	err = joinerOp.Join(datacleanerOp, ts.cleanerKey)
-	if err != nil {
-		return errors.Wrapf(err, "can't join *dataSQLite as crud.Cleaner with key '%s'", ts.cleanerKey)
+		return errors.Wrapf(err, "can't join *recordsSQLite as crud.Cleaner with key '%s'", ts.cleanerKey)
 	}
 
 	return nil
