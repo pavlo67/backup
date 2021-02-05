@@ -1,5 +1,5 @@
-package records
+package ns
 
 import "github.com/pavlo67/common/common"
 
-type TypeKey common.IDStr
+type ID common.IDStr

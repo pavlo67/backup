@@ -1,45 +1,36 @@
 package records_sqlite
 
 import (
-	"os"
 	"testing"
 
-	"github.com/pavlo67/tools/components/records"
+	"github.com/pavlo67/tools/components/connect/connect_sqlite"
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/filelib"
-	"github.com/pavlo67/common/common/logger"
-	"github.com/pavlo67/common/common/serializer"
+	"github.com/pavlo67/common/common/starter"
+
+	"github.com/pavlo67/tools/components/records"
 )
 
-const serviceName = "notebook"
-
 func TestCRUD(t *testing.T) {
-	env := "test"
-	err := os.Setenv("ENV", env)
+	_, cfgService := apps.PrepareTests(t, "test_service", "../../../apps/", "test")
+	require.NotNil(t, cfgService)
+
+	var cfg config.Access
+	err := cfgService.Value("files_fs", &cfg)
+	require.NoErrorf(t, err, "%#v", cfgService)
+
+	components := []starter.Starter{
+		{connect_sqlite.Starter(), nil},
+		{Starter(), nil},
+	}
+
+	joinerOp, err := starter.Run(components, cfgService, "CLI BUILD FOR TEST")
 	require.NoError(t, err)
+	require.NotNil(t, joinerOp)
+	defer joinerOp.CloseAll()
 
-	l, err = logger.Init(logger.Config{})
-	require.NoError(t, err)
-	require.NotNil(t, l)
-
-	configPath := filelib.CurrentPath() + "../../../environments/" + serviceName + "." + env + ".yaml"
-	cfg, err := config.Get(configPath, serializer.MarshalerYAML)
-	require.NoError(t, err)
-	require.NotNil(t, cfg)
-
-	cfgSQLite := config.Access{}
-	err = cfg.Value("sqlite", &cfgSQLite)
-	require.NoError(t, err)
-
-	l.Infof("%#v", cfgSQLite)
-
-	dataOp, cleanerOp, err := New(cfgSQLite, "storage", "")
-	require.NoError(t, err)
-
-	l.Debugf("%#v", dataOp)
-
-	records.OperatorTestScenario(t, l)
+	records.OperatorTestScenarioNoRBAC(t, joinerOp, l)
 }
