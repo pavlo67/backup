@@ -94,6 +94,11 @@ func (dataOp *dataSQLite) Save(item records.Item, options *crud.Options) (*recor
 
 	// TODO!!! rbac check
 
+	if item.ID == "" {
+		// TODO!!!
+		item.OwnerID = options.Identity.ID
+	}
+
 	var err error
 
 	var embeddedBytes []byte
@@ -127,9 +132,6 @@ func (dataOp *dataSQLite) Save(item records.Item, options *crud.Options) (*recor
 		item.IssuedID, item.OwnerID, item.ViewerID, historyBytes}
 
 	if item.ID == "" {
-
-		// TODO!!!
-		item.OwnerID = options.Identity.ID
 
 		res, err := dataOp.stmInsert.Exec(values...)
 		if err != nil {
