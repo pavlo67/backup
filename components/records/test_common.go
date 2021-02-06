@@ -60,9 +60,6 @@ func readOkTest(t *testing.T, recordsOp Operator, item Item, options crud.Option
 	require.NoError(t, err)
 	require.NotNil(t, itemReaded)
 
-	//t.Logf("%#v", &item)
-	//t.Logf("%#v", itemReaded)
-
 	require.Equal(t, item.ID, itemReaded.ID)
 	require.Equal(t, item.Content, itemReaded.Content)
 	require.Equal(t, item.OwnerID, itemReaded.OwnerID)

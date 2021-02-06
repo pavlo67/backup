@@ -31,5 +31,5 @@ func TestFilesFS(t *testing.T) {
 	require.NotNil(t, joinerOp)
 	defer joinerOp.CloseAll()
 
-	files.FilesTestScenario(t, joinerOp, files.InterfaceKey, files.InterfaceCleanerKey, bucketID)
+	files.FilesTestScenario(t, joinerOp, files.InterfaceKey, files.InterfaceKeyCleaner, bucketID)
 }

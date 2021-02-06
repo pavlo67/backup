@@ -3,6 +3,8 @@ package files
 import (
 	"os"
 	"time"
+
+	"github.com/pavlo67/common/common/crud"
 )
 
 type BucketID string
@@ -44,9 +46,9 @@ func (fis FilesInfo) Append(basePath string, info os.FileInfo) (FilesInfo, error
 }
 
 type Operator interface {
-	Save(bucketID BucketID, path, newFilePattern string, data []byte) (string, error)
-	Read(bucketID BucketID, path string) ([]byte, error)
-	Remove(bucketID BucketID, path string) error
-	List(bucketID BucketID, path string, depth int) (FilesInfo, error)
-	Stat(bucketID BucketID, path string, depth int) (*FileInfo, error)
+	Save(bucketID BucketID, path, newFilePattern string, data []byte, options *crud.Options) (string, error)
+	Read(bucketID BucketID, path string, options *crud.Options) ([]byte, error)
+	Remove(bucketID BucketID, path string, options *crud.Options) error
+	List(bucketID BucketID, path string, depth int, options *crud.Options) (FilesInfo, error)
+	Stat(bucketID BucketID, path string, depth int, options *crud.Options) (*FileInfo, error)
 }

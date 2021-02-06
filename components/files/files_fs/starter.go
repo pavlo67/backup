@@ -52,7 +52,7 @@ func (ffs *filesFSStarter) Init(cfg *config.Config, lCommon logger.Operator, opt
 		return nil, errors.Errorf("no 'interface_key' in options (%#v)", options)
 	}
 
-	ffs.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(files.InterfaceCleanerKey)))
+	ffs.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(files.InterfaceKeyCleaner)))
 	if ffs.cleanerKey == "" {
 		return nil, errors.Errorf("no 'cleaner_key' in options (%#v)", options)
 	}
