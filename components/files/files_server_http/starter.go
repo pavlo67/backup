@@ -1,6 +1,8 @@
 package files_server_http
 
 import (
+	"fmt"
+
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/tools/components/files"
 	"github.com/pkg/errors"
@@ -33,21 +35,20 @@ func (mshs *managementServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (mshs *managementServerHTTPStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-	if lCommon == nil {
-		return nil, errors.New("no logger")
-	}
-	l = lCommon
-
+func (mshs *managementServerHTTPStarter) Prepare(cfg *config.Config, options common.Map) error {
 	mshs.filesKey = joiner.InterfaceKey(options.StringDefault("files_key", string(files.InterfaceKey)))
 	mshs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
-	return nil, nil
+	return nil
 }
 
 const onRun = "on managementServerHTTPStarter.Execute()"
 
 func (mshs *managementServerHTTPStarter) Run(joinerOp joiner.Operator) error {
+	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
+		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+	}
+
 	if filesOp, _ = joinerOp.Interface(mshs.filesKey).(files.Operator); filesOp == nil {
 		return errors.Errorf(onRun+": no files.Operator with key %s", mshs.filesKey)
 	}

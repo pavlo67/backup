@@ -1,4 +1,4 @@
-package storage_api
+package nb_api
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"github.com/pavlo67/common/common/errata"
 
 	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/joiner"
@@ -15,44 +16,49 @@ import (
 )
 
 func Starter() starter.Operator {
-	return &storageStarter{}
+	return &nbStarter{}
 }
+
+var _ starter.Operator = &nbStarter{}
+
+type nbStarter struct {
+	prefix string
+}
+
+// --------------------------------------------------------------------------
 
 var l logger.Operator
 
-var _ starter.Operator = &storageStarter{}
-
-type storageStarter struct {
-	prefix string
-	// baseDir string
-
-	// skipAbsentEndpoints bool
-}
-
-func (ss *storageStarter) Name() string {
+func (ns *nbStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *storageStarter) Prepare(cfg *config.Config, options common.Map) error {
+func (ns *nbStarter) Prepare(cfg *config.Config, options common.Map) error {
 	var cfgStorage common.Map
-	if err := cfg.Value("storage_api", &cfgStorage); err != nil {
+	if err := cfg.Value("nb_api", &cfgStorage); err != nil {
 		return errata.CommonError(err, fmt.Sprintf("in config: %#v", cfg))
 	}
 
-	ss.prefix = cfgStorage.StringDefault("prefix", "")
+	ns.prefix = cfgStorage.StringDefault("prefix", "")
 
 	return nil
 }
 
+// Swagger-UI sorts interface sections due to the first their path occurrences, so:
+// 1. unauthorized   /auth/...
+// 2. admin          /front/...
+
+// TODO!!! keep in mind that EndpointsConfig key and corresponding .HandlerKey not necessarily are the same, they can be defined different
+
 var serverConfig = server_http.Config{
-	Title:            "Storage REST API",
-	Version:          "0.0.1",
+	Title:   "Notebook REST API",
+	Version: "0.0.1",
 	EndpointsSettled: map[joiner.InterfaceKey]server_http.EndpointSettled{
-		// auth.IntefaceKeyAuthenticate: {Path: "/auth", Tags: []string{"unauthorized"}, EndpointInternalKey: auth.IntefaceKeyAuthenticate},
+		auth.IntefaceKeyAuthenticate: {Path: "/auth", Tags: []string{"unauthorized"}, EndpointInternalKey: auth.IntefaceKeyAuthenticate},
 	},
 }
 
-func (ss *storageStarter) Run(joinerOp joiner.Operator) error {
+func (ns *nbStarter) Run(joinerOp joiner.Operator) error {
 	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
 	}
@@ -64,7 +70,7 @@ func (ss *storageStarter) Run(joinerOp joiner.Operator) error {
 
 	srvPort, isHTTPS := srvOp.Addr()
 
-	if err := serverConfig.CompleteWithJoiner(joinerOp, "", srvPort, ss.prefix); err != nil {
+	if err := serverConfig.CompleteWithJoiner(joinerOp, "", srvPort, ns.prefix); err != nil {
 		return err
 	}
 

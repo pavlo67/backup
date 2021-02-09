@@ -1,6 +1,8 @@
 package files_fs
 
 import (
+	"fmt"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
@@ -29,12 +31,11 @@ func (ffs *filesFSStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ffs *filesFSStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-	l = lCommon
+func (ffs *filesFSStarter) Prepare(cfg *config.Config, options common.Map) error {
 
 	ffs.buckets, _ = options["buckets"].(Buckets)
 	if ffs.buckets == nil {
-		return nil, errors.Errorf("no 'buckets' in options: %#v", options)
+		return errors.Errorf("no 'buckets' in options: %#v", options)
 	}
 
 	//configKey := strings.TrimSpace(options.StringDefault("config_key", "buckets"))
@@ -49,31 +50,32 @@ func (ffs *filesFSStarter) Init(cfg *config.Config, lCommon logger.Operator, opt
 
 	ffs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(files.InterfaceKey)))
 	if ffs.interfaceKey == "" {
-		return nil, errors.Errorf("no 'interface_key' in options (%#v)", options)
+		return errors.Errorf("no 'interface_key' in options (%#v)", options)
 	}
 
 	ffs.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(files.InterfaceKeyCleaner)))
 	if ffs.cleanerKey == "" {
-		return nil, errors.Errorf("no 'cleaner_key' in options (%#v)", options)
+		return errors.Errorf("no 'cleaner_key' in options (%#v)", options)
 	}
 
-	return nil, nil
+	return nil
 }
 
 func (ffs *filesFSStarter) Run(joinerOp joiner.Operator) error {
+	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
+		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+	}
 
 	filesOp, filesCleanerOp, err := New(ffs.buckets)
 	if err != nil {
 		return errors.Wrap(err, "can't init *filesFS{} as files.Operator")
 	}
 
-	err = joinerOp.Join(filesOp, ffs.interfaceKey)
-	if err != nil {
+	if err = joinerOp.Join(filesOp, ffs.interfaceKey); err != nil {
 		return errors.Wrapf(err, "can't join *filesFS{} as files.Operator with key '%s'", ffs.interfaceKey)
 	}
 
-	err = joinerOp.Join(filesCleanerOp, ffs.cleanerKey)
-	if err != nil {
+	if err = joinerOp.Join(filesCleanerOp, ffs.cleanerKey); err != nil {
 		return errors.Wrapf(err, "can't join *filesFS{} as crud.Cleaner with key '%s'", ffs.cleanerKey)
 	}
 

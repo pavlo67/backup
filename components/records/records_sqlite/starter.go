@@ -37,8 +37,7 @@ func (rss *recordsSQLiteStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (rss *recordsSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-	l = lCommon
+func (rss *recordsSQLiteStarter) Prepare(cfg *config.Config, options common.Map) error {
 
 	rss.table, _ = options.String("table")
 	rss.connectKey = joiner.InterfaceKey(options.StringDefault("connect_key", string(connect.InterfaceSQLiteKey)))
@@ -48,10 +47,14 @@ func (rss *recordsSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operato
 
 	// sqllib.CheckTables
 
-	return nil, nil
+	return nil
 }
 
 func (rss *recordsSQLiteStarter) Run(joinerOp joiner.Operator) error {
+	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
+		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+	}
+
 	db, _ := joinerOp.Interface(rss.connectKey).(*sql.DB)
 	if db == nil {
 		return errors.Errorf("no *sql.DB with key %s", rss.connectKey)
