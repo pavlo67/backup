@@ -20,7 +20,7 @@ var l logger.Operator
 var _ starter.Operator = &filesFSStarter{}
 
 type filesFSStarter struct {
-	buckets      Buckets
+	buckets      files.Buckets
 	interfaceKey joiner.InterfaceKey
 	cleanerKey   joiner.InterfaceKey
 
@@ -33,7 +33,7 @@ func (ffs *filesFSStarter) Name() string {
 
 func (ffs *filesFSStarter) Prepare(cfg *config.Config, options common.Map) error {
 
-	ffs.buckets, _ = options["buckets"].(Buckets)
+	ffs.buckets, _ = options["buckets"].(files.Buckets)
 	if ffs.buckets == nil {
 		return errors.Errorf("no 'buckets' in options: %#v", options)
 	}

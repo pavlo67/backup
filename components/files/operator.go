@@ -9,6 +9,8 @@ import (
 
 type BucketID string
 
+type Buckets map[BucketID]string
+
 type FileInfo struct {
 	Path string
 	// Name      string

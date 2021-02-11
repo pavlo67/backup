@@ -15,7 +15,7 @@ import (
 )
 
 func TestCRUD(t *testing.T) {
-	_, cfgService := apps.PrepareTests(t, "test_service", "../../../apps/", "test")
+	_, cfgService, l := apps.PrepareTests(t, "test_service", "../../../apps/", "test", "records_sqlite")
 	require.NotNil(t, cfgService)
 
 	var cfg config.Access
@@ -27,7 +27,7 @@ func TestCRUD(t *testing.T) {
 		{Starter(), nil},
 	}
 
-	joinerOp, err := starter.Run(components, cfgService, "CLI BUILD FOR TEST")
+	joinerOp, err := starter.Run(components, cfgService, "CLI BUILD FOR TEST", l)
 	require.NoError(t, err)
 	require.NotNil(t, joinerOp)
 	defer joinerOp.CloseAll()

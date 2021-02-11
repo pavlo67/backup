@@ -1,10 +1,10 @@
 {
  "info": {
-  "title": "Demo REST API",
+  "title": "Notebook REST API",
   "version": "0.0.1"
  },
  "paths": {
-  "/backend/auth": {
+  "/auth": {
    "post": {
     "operationId": "auth_authenticate",
     "parameters": [
@@ -24,7 +24,7 @@
    }
   }
  },
- "port": ":3001",
+ "port": ":3002",
  "schemes": [
   "https",
   "http"

@@ -16,15 +16,13 @@ import (
 
 var _ files.Operator = &filesFS{}
 
-type Buckets map[files.BucketID]string
-
 type filesFS struct {
-	buckets Buckets
+	buckets files.Buckets
 }
 
 const onNew = "on filesFS.New(): "
 
-func New(buckets Buckets) (files.Operator, crud.Cleaner, error) {
+func New(buckets files.Buckets) (files.Operator, crud.Cleaner, error) {
 	if len(buckets) < 1 {
 		return nil, nil, errors.New(onNew + ": no buckets to process")
 	}

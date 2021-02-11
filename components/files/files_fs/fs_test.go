@@ -14,7 +14,7 @@ import (
 )
 
 func TestFilesFS(t *testing.T) {
-	_, cfgService := apps.PrepareTests(t, "test_service", "../../../apps/", "test")
+	_, cfgService, l := apps.PrepareTests(t, "test_service", "../../../apps/", "test", "files_fs")
 	require.NotNil(t, cfgService)
 
 	var cfg config.Access
@@ -23,10 +23,10 @@ func TestFilesFS(t *testing.T) {
 
 	bucketID := files.BucketID("test_bucket")
 	components := []starter.Starter{
-		{Starter(), common.Map{"buckets": Buckets{bucketID: cfg.Path}}},
+		{Starter(), common.Map{"buckets": files.Buckets{bucketID: cfg.Path}}},
 	}
 
-	joinerOp, err := starter.Run(components, cfgService, "CLI BUILD FOR TEST")
+	joinerOp, err := starter.Run(components, cfgService, "CLI BUILD FOR TEST", l)
 	require.NoError(t, err)
 	require.NotNil(t, joinerOp)
 	defer joinerOp.CloseAll()

@@ -59,7 +59,7 @@ func (rss *recordsSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	if db == nil {
 		return errors.Errorf("no *sql.DB with key %s", rss.connectKey)
 	}
-	recordsOp, recordsCleanerOp, err := New(db, rss.table, rss.interfaceKey)
+	recordsOp, recordsCleanerOp, err := New(db, rss.table)
 	if err != nil {
 		return errata.CommonError(err, "can't init records.Operator")
 	}

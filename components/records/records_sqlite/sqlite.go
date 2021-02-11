@@ -14,7 +14,6 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errata"
-	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/selectors/selectors_sql"
 	"github.com/pavlo67/common/common/sqllib"
 	"github.com/pavlo67/common/common/strlib"
@@ -34,26 +33,24 @@ var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
 var fieldsToList = append(fieldsToRead, "id")
 var fieldsToListStr = strings.Join(fieldsToList, ", ")
 
-var _ records.Operator = &dataSQLite{}
+var _ records.Operator = &recordsSQLite{}
 
-type dataSQLite struct {
+type recordsSQLite struct {
 	db    *sql.DB
 	table string
 
 	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlClean string
 	stmInsert, stmUpdate, stmRead, stmRemove, stmClean *sql.Stmt
-
-	interfaceKey joiner.InterfaceKey
 }
 
-const onNew = "on dataSQLite.New(): "
+const onNew = "on recordsSQLite.New(): "
 
-func New(db *sql.DB, table string, interfaceKey joiner.InterfaceKey) (records.Operator, crud.Cleaner, error) {
+func New(db *sql.DB, table string) (records.Operator, crud.Cleaner, error) {
 	if table == "" {
 		table = records.CollectionDefault
 	}
 
-	recordsOp := dataSQLite{
+	recordsOp := recordsSQLite{
 		db:    db,
 		table: table,
 
@@ -63,8 +60,6 @@ func New(db *sql.DB, table string, interfaceKey joiner.InterfaceKey) (records.Op
 		sqlRead:   "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = ?",
 
 		sqlClean: "DELETE FROM " + table,
-
-		interfaceKey: interfaceKey,
 	}
 
 	sqlStmts := []sqllib.SqlStmt{
@@ -84,9 +79,9 @@ func New(db *sql.DB, table string, interfaceKey joiner.InterfaceKey) (records.Op
 	return &recordsOp, &recordsOp, nil
 }
 
-const onSave = "on dataSQLite.Save(): "
+const onSave = "on recordsSQLite.Save(): "
 
-func (dataOp *dataSQLite) Save(item records.Item, options *crud.Options) (*records.Item, error) {
+func (dataOp *recordsSQLite) Save(item records.Item, options *crud.Options) (*records.Item, error) {
 
 	if options == nil || options.Identity == nil {
 		return nil, errata.CommonError(errata.NoRightsKey)
@@ -155,9 +150,9 @@ func (dataOp *dataSQLite) Save(item records.Item, options *crud.Options) (*recor
 	return &item, nil
 }
 
-const onRead = "on dataSQLite.Read(): "
+const onRead = "on recordsSQLite.Read(): "
 
-func (dataOp *dataSQLite) Read(id records.ID, options *crud.Options) (*records.Item, error) {
+func (dataOp *recordsSQLite) Read(id records.ID, options *crud.Options) (*records.Item, error) {
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
 		return nil, errors.Errorf(onRead+"wrong id (%s)", id)
@@ -199,9 +194,9 @@ func (dataOp *dataSQLite) Read(id records.ID, options *crud.Options) (*records.I
 	return &item, nil
 }
 
-const onRemove = "on dataSQLite.Remove()"
+const onRemove = "on recordsSQLite.Remove()"
 
-func (dataOp *dataSQLite) Remove(id records.ID, options *crud.Options) error {
+func (dataOp *recordsSQLite) Remove(id records.ID, options *crud.Options) error {
 
 	// TODO!!! rbac check
 
@@ -217,9 +212,9 @@ func (dataOp *dataSQLite) Remove(id records.ID, options *crud.Options) error {
 	return nil
 }
 
-const onList = "on dataSQLite.List()"
+const onList = "on recordsSQLite.List()"
 
-func (dataOp *dataSQLite) List(options *crud.Options) ([]records.Item, error) {
+func (dataOp *recordsSQLite) List(options *crud.Options) ([]records.Item, error) {
 	selector := options.GetSelector()
 	condition, values, err := selectors_sql.Use(selector)
 	if err != nil {
@@ -289,9 +284,9 @@ func (dataOp *dataSQLite) List(options *crud.Options) ([]records.Item, error) {
 	return items, nil
 }
 
-const onCount = "on dataSQLite.Count(): "
+const onCount = "on recordsSQLite.Count(): "
 
-func (dataOp *dataSQLite) Stat(*crud.Options) (common.Map, error) {
+func (dataOp *recordsSQLite) Stat(*crud.Options) (common.Map, error) {
 	//condition, values, err := selectors_sql.Use(term)
 	//if err != nil {
 	//	termStr, _ := json.Marshal(term)
@@ -314,14 +309,14 @@ func (dataOp *dataSQLite) Stat(*crud.Options) (common.Map, error) {
 	return nil, errata.NotImplemented
 }
 
-func (dataOp *dataSQLite) Close() error {
-	return errors.Wrap(dataOp.db.Close(), "on dataSQLite.Close()")
+func (dataOp *recordsSQLite) Close() error {
+	return errors.Wrap(dataOp.db.Close(), "on recordsSQLite.Close()")
 }
 
 //
-//const onDetails = "on dataSQLite.Details(): "
+//const onDetails = "on recordsSQLite.Details(): "
 //
-//func (dataOp *dataSQLite) SetDetails(item *records.Item) error {
+//func (dataOp *recordsSQLite) SetDetails(item *records.Item) error {
 //	if item == nil {
 //		return errors.New(onDetails + "nil item")
 //	}
@@ -358,9 +353,9 @@ func (dataOp *dataSQLite) Close() error {
 //	return nil
 //}
 //
-//const onExport = "on dataSQLite.Export()"
+//const onExport = "on recordsSQLite.Export()"
 //
-//func (dataOp *dataSQLite) Export(afterIDStr string, options *crud.Options) ([]records.Item, error) {
+//func (dataOp *recordsSQLite) Export(afterIDStr string, options *crud.Options) ([]records.Item, error) {
 //	// TODO: remove limits
 //	// if options != nil {
 //	//	options.Limits = nil

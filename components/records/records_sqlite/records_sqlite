@@ -1,0 +1,24 @@
+2021-02-11T12:12:59.416+0200	[34mINFO[0m	starter/run.go:46	preparing component: connect_sqlite
+2021-02-11T12:12:59.416+0200	[34mINFO[0m	starter/run.go:46	preparing component: records_sqlite
+2021-02-11T12:12:59.416+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined logger
+2021-02-11T12:12:59.416+0200	[34mINFO[0m	starter/run.go:64	running component: connect_sqlite
+2021-02-11T12:12:59.417+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined connect_sqlite
+2021-02-11T12:12:59.417+0200	[34mINFO[0m	starter/run.go:64	running component: records_sqlite
+2021-02-11T12:14:20.209+0200	[34mINFO[0m	starter/run.go:46	preparing component: connect_sqlite
+2021-02-11T12:14:20.210+0200	[34mINFO[0m	starter/run.go:46	preparing component: records_sqlite
+2021-02-11T12:14:20.210+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined logger
+2021-02-11T12:14:20.210+0200	[34mINFO[0m	starter/run.go:64	running component: connect_sqlite
+2021-02-11T12:14:20.210+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined connect_sqlite
+2021-02-11T12:14:20.210+0200	[34mINFO[0m	starter/run.go:64	running component: records_sqlite
+2021-02-11T12:14:20.210+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined records
+2021-02-11T12:14:20.210+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined records_cleaner
+2021-02-11T12:14:20.210+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-11T14:55:55.376+0200	[34mINFO[0m	starter/run.go:46	preparing component: connect_sqlite
+2021-02-11T14:55:55.376+0200	[34mINFO[0m	starter/run.go:46	preparing component: records_sqlite
+2021-02-11T14:55:55.376+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined logger
+2021-02-11T14:55:55.376+0200	[34mINFO[0m	starter/run.go:64	running component: connect_sqlite
+2021-02-11T14:55:55.376+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined connect_sqlite
+2021-02-11T14:55:55.376+0200	[34mINFO[0m	starter/run.go:64	running component: records_sqlite
+2021-02-11T14:55:55.376+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined records
+2021-02-11T14:55:55.376+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined records_cleaner
+2021-02-11T14:55:55.376+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test

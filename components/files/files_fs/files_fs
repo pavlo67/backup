@@ -1,0 +1,18 @@
+2021-02-11T12:12:59.180+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-11T12:12:59.180+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined logger
+2021-02-11T12:12:59.180+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-11T12:12:59.180+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined files
+2021-02-11T12:12:59.180+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined files_cleaner
+2021-02-11T12:12:59.180+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-11T12:14:19.909+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-11T12:14:19.909+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined logger
+2021-02-11T12:14:19.909+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-11T12:14:19.910+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined files
+2021-02-11T12:14:19.910+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined files_cleaner
+2021-02-11T12:14:19.910+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-11T14:55:55.104+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-11T14:55:55.104+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined logger
+2021-02-11T14:55:55.104+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-11T14:55:55.104+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined files
+2021-02-11T14:55:55.104+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined files_cleaner
+2021-02-11T14:55:55.104+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test

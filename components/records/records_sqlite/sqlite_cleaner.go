@@ -7,11 +7,11 @@ import (
 	"github.com/pavlo67/common/common/sqllib"
 )
 
-var _ crud.Cleaner = &dataSQLite{}
+var _ crud.Cleaner = &recordsSQLite{}
 
-const onClean = "on dataSQLite.Clean(): "
+const onClean = "on recordsSQLite.Clean(): "
 
-func (dataOp *dataSQLite) Clean(_ *crud.Options) error {
+func (dataOp *recordsSQLite) Clean(_ *crud.Options) error {
 	if _, err := dataOp.stmClean.Exec(); err != nil {
 		return errors.Wrapf(err, onClean+sqllib.CantExec, dataOp.sqlClean, nil)
 	}
@@ -47,9 +47,9 @@ func (dataOp *dataSQLite) Clean(_ *crud.Options) error {
 
 }
 
-//const onIDs = "on dataSQLite.IDs()"
+//const onIDs = "on recordsSQLite.IDs()"
 //
-//func (dataOp *dataSQLite) ids(condition string, values []interface{}) ([]interface{}, error) {
+//func (dataOp *recordsSQLite) ids(condition string, values []interface{}) ([]interface{}, error) {
 //	if strings.TrimSpace(condition) != "" {
 //		condition = " WHERE " + condition
 //	}
