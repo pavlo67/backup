@@ -5,3 +5,5 @@ import "github.com/pavlo67/common/common/joiner"
 const InterfaceKey joiner.InterfaceKey = "notebook"
 
 const IntefaceKeyRoot joiner.InterfaceKey = "notebook_root"
+const IntefaceKeyView joiner.InterfaceKey = "notebook_view"
+const IntefaceKeyEdit joiner.InterfaceKey = "notebook_edit"

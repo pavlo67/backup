@@ -3,6 +3,9 @@ package notebook_server_http
 import (
 	"fmt"
 
+	"github.com/pavlo67/tools/components/formatter"
+	"github.com/pavlo67/tools/components/records/formatter_records_html"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
@@ -23,8 +26,9 @@ func Starter() starter.Operator {
 var _ starter.Operator = &notebookServerHTTPStarter{}
 
 type notebookServerHTTPStarter struct {
-	filesKey   joiner.InterfaceKey
-	recordsKey joiner.InterfaceKey
+	filesKey            joiner.InterfaceKey
+	recordsKey          joiner.InterfaceKey
+	formatterRecordsKey joiner.InterfaceKey
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -34,6 +38,7 @@ type notebookServerHTTPStarter struct {
 var l logger.Operator
 var recordsOp records.Operator
 var filesOp files.Operator
+var formatterRecordsOp formatter.Operator
 
 func (nshs *notebookServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
@@ -42,6 +47,7 @@ func (nshs *notebookServerHTTPStarter) Name() string {
 func (nshs *notebookServerHTTPStarter) Prepare(_ *config.Config, options common.Map) error {
 	nshs.filesKey = joiner.InterfaceKey(options.StringDefault("files_key", string(files.InterfaceKey)))
 	nshs.recordsKey = joiner.InterfaceKey(options.StringDefault("records_key", string(records.InterfaceKey)))
+	nshs.formatterRecordsKey = joiner.InterfaceKey(options.StringDefault("formatter_records_key", string(formatter_records_html.InterfaceKey)))
 
 	nshs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
@@ -63,7 +69,9 @@ func (nshs *notebookServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no records.Operator with key %s", nshs.recordsKey)
 	}
 
-	l.Infof("111111111 %#v", Endpoints)
+	if formatterRecordsOp, _ = joinerOp.Interface(nshs.formatterRecordsKey).(formatter.Operator); formatterRecordsOp == nil {
+		return fmt.Errorf("no formatter.Operator with key %s", nshs.formatterRecordsKey)
+	}
 
 	return server_http.JoinEndpoints(joinerOp, Endpoints)
 }

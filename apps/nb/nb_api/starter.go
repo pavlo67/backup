@@ -66,7 +66,7 @@ func (ns *nbStarter) Run(joinerOp joiner.Operator) error {
 
 	if err := pagesConfig.CompleteWithJoiner(joinerOp, "", srvPort, ns.prefixPages); err != nil {
 		return err
-	} else if err = InitPages(srvOp, pagesConfig, l); err != nil {
+	} else if err = server_http.InitPages(srvOp, pagesConfig, l); err != nil {
 		return err
 	}
 
