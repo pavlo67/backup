@@ -7,6 +7,7 @@ type Key string
 const Full Key = "full"
 const Brief Key = "brief"
 const Edit Key = "edit"
+const Tag Key = "tag"
 
 type Operator interface {
 	// should be thread-safe

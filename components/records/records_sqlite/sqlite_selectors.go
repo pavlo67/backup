@@ -21,7 +21,6 @@ func (recordsOp *recordsSQLite) HasTag(tag string) (selectors.Term, error) {
 const onAddParent = "on recordsSQLite.AddParent()"
 
 func (recordsOp *recordsSQLite) AddParent(tags []string, id records.ID) ([]string, error) {
-
 	if id = records.ID(strings.TrimSpace(string(id))); id == "" {
 		return nil, errors.New(onAddParent + ": no id to add parent record")
 	}
@@ -32,7 +31,6 @@ func (recordsOp *recordsSQLite) AddParent(tags []string, id records.ID) ([]strin
 const onHasParent = "on recordsSQLite.HasParent()"
 
 func (recordsOp *recordsSQLite) HasParent(id records.ID) (selectors.Term, error) {
-
 	if id = records.ID(strings.TrimSpace(string(id))); id == "" {
 		return nil, errors.New(onHasParent + ": no id to select child records")
 	}

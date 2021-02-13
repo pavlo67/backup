@@ -287,30 +287,90 @@ func (recordsOp *recordsSQLite) List(options *crud.Options) ([]records.Item, err
 	return items, nil
 }
 
-const onCount = "on recordsSQLite.Count(): "
+const onTags = "on recordsSQLite.Tags()"
 
-func (recordsOp *recordsSQLite) Stat(*crud.Options) (common.Map, error) {
-	//condition, values, err := selectors_sql.Use(term)
-	//if err != nil {
-	//	termStr, _ := json.Marshal(term)
-	//	return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
-	//}
-	//
-	//query := sqllib.SQLCount(recordsOp.table, condition, options)
-	//stm, err := recordsOp.db.Prepare(query)
-	//if err != nil {
-	//	return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)
-	//}
-	//
-	//var num uint64
-	//
-	//err = stm.QueryRow(values...).Scan(&num)
-	//if err != nil {
-	//	return 0, errors.Wrapf(err, onCount+sqllib.CantScanQueryRow, query, values)
-	//}
+func (recordsOp *recordsSQLite) Tags(options *crud.Options) (records.TagsStat, error) {
 
-	return nil, common.ErrNotImplemented
+	var termSQL selectors.TermSQL
+
+	if selector := options.GetSelector(); selector != nil {
+		var ok bool
+		if termSQL, ok = selector.(selectors.TermSQL); !ok {
+			return nil, fmt.Errorf(onTags+": wrong selector: %#v", selector)
+		}
+	}
+
+	query := sqllib.SQLList(recordsOp.table, "tags", termSQL.Condition, options)
+	stm, err := recordsOp.db.Prepare(query)
+	if err != nil {
+		return nil, errors.Wrapf(err, onTags+": can't db.Prepare(%s)", query)
+	}
+
+	rows, err := stm.Query(termSQL.Values...)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, errors.Wrapf(err, onTags+": "+sqllib.CantQuery, query, termSQL.Values)
+	}
+	defer rows.Close()
+
+	var tagsStat records.TagsStat
+
+	for rows.Next() {
+		var tagsBytes []byte
+
+		if err := rows.Scan(&tagsBytes); err != nil {
+			return tagsStat, errors.Wrapf(err, onTags+": "+sqllib.CantScanQueryRow, query, termSQL.Values)
+		}
+
+		if len(tagsBytes) > 0 {
+			var tags []string
+			if err = json.Unmarshal(tagsBytes, &tags); err != nil {
+				// TODO!!! collect errors
+				l.Errorf(onTags+": can't unmarshal tags (%s): %s", tagsBytes, err)
+				continue
+			}
+
+			for _, tag := range tags {
+				tag = strings.TrimSpace(tag)
+				tagsStat[tag] = tagsStat[tag] + 1
+			}
+		}
+
+	}
+
+	if err = rows.Err(); err != nil {
+		return tagsStat, errors.Wrapf(err, onTags+": "+sqllib.RowsError, query, termSQL.Values)
+	}
+
+	return tagsStat, nil
 }
+
+//
+//const onStat = "on recordsSQLite.Stat(): "
+//
+//func (recordsOp *recordsSQLite) Stat(*crud.Options) (common.Map, error) {
+//	//condition, values, err := selectors_sql.Use(term)
+//	//if err != nil {
+//	//	termStr, _ := json.Marshal(term)
+//	//	return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
+//	//}
+//	//
+//	//query := sqllib.SQLCount(recordsOp.table, condition, options)
+//	//stm, err := recordsOp.db.Prepare(query)
+//	//if err != nil {
+//	//	return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)
+//	//}
+//	//
+//	//var num uint64
+//	//
+//	//err = stm.QueryRow(values...).Scan(&num)
+//	//if err != nil {
+//	//	return 0, errors.Wrapf(err, onCount+sqllib.CantScanQueryRow, query, values)
+//	//}
+//
+//	return nil, common.ErrNotImplemented
+//}
 
 func (recordsOp *recordsSQLite) Close() error {
 	return errors.Wrap(recordsOp.db.Close(), "on recordsSQLite.Close()")
