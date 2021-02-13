@@ -5,11 +5,12 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/sqllib/sqllib_sqlite"
 	"github.com/pavlo67/common/common/starter"
+
 	"github.com/pavlo67/tools/components/connect"
 )
 
@@ -50,11 +51,11 @@ func (css *connectSQLiteStarter) Run(joinerOp joiner.Operator) error {
 
 	db, err := sqllib_sqlite.Connect(css.cfgSQLite)
 	if err != nil || db == nil {
-		return errata.CommonError(err, fmt.Sprintf(onRun+": got %#v", db))
+		return errors.CommonError(err, fmt.Sprintf(onRun+": got %#v", db))
 	}
 
 	if err = joinerOp.Join(db, css.interfaceKey); err != nil {
-		return errata.CommonError(err, fmt.Sprintf("can't join *sql.DB with key '%s'", css.interfaceKey))
+		return errors.CommonError(err, fmt.Sprintf("can't join *sql.DB with key '%s'", css.interfaceKey))
 	}
 
 	return nil

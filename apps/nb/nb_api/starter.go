@@ -5,7 +5,7 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
@@ -35,7 +35,7 @@ func (ns *nbStarter) Name() string {
 func (ns *nbStarter) Prepare(cfg *config.Config, options common.Map) error {
 	var cfgStorage common.Map
 	if err := cfg.Value("nb_api", &cfgStorage); err != nil {
-		return errata.CommonError(err, fmt.Sprintf("in config: %#v", cfg))
+		return errors.CommonError(err, fmt.Sprintf("in config: %#v", cfg))
 	}
 
 	ns.prefixREST = cfgStorage.StringDefault("prefix_rest", "")

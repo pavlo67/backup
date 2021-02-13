@@ -18,7 +18,7 @@ var restConfig = server_http.Config{
 	Title:   "Notebook REST API",
 	Version: "0.0.1",
 	EndpointsSettled: map[joiner.InterfaceKey]server_http.EndpointSettled{
-		auth.IntefaceKeyAuthenticate: {Path: "/auth", Tags: []string{"unauthorized"}, Endpoint: server_http.Endpoint{InternalKey: auth.IntefaceKeyAuthenticate}},
+		auth.IntefaceKeyAuthenticate: {Path: "/auth", Tags: []string{"unauthorized"}},
 	},
 }
 
@@ -26,8 +26,8 @@ var pagesConfig = server_http.Config{
 	Title:   "Notebook pages",
 	Version: "0.0.1",
 	EndpointsSettled: map[joiner.InterfaceKey]server_http.EndpointSettled{
-		notebook.IntefaceKeyRoot: {Path: "", Tags: []string{"unauthorized"}, Endpoint: server_http.Endpoint{InternalKey: notebook.IntefaceKeyRoot}},
-		notebook.IntefaceKeyEdit: {Path: "/view", Tags: []string{"unauthorized"}, Endpoint: server_http.Endpoint{InternalKey: notebook.IntefaceKeyEdit}},
-		notebook.IntefaceKeyView: {Path: "/edit", Tags: []string{"unauthorized"}, Endpoint: server_http.Endpoint{InternalKey: notebook.IntefaceKeyView}},
+		notebook.IntefaceKeyRoot: {Path: "", Tags: []string{"unauthorized"}},
+		notebook.IntefaceKeyEdit: {Path: "/view", Tags: []string{"unauthorized"}},
+		notebook.IntefaceKeyView: {Path: "/edit", Tags: []string{"unauthorized"}},
 	},
 }

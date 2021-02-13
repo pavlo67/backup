@@ -3,9 +3,8 @@ package formatter_records_html
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/common/common"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/tools/components/formatter"
 	"github.com/pavlo67/tools/components/records"

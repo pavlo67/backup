@@ -1,9 +1,8 @@
 package files_http
 
 import (
+	"errors"
 	"fmt"
-
-	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"

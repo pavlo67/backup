@@ -12,6 +12,8 @@ const authID1 = auth.ID("1")
 const authID2 = auth.ID("2")
 const authID3 = auth.ID("3")
 
+const testNewTag = "testNewTag"
+
 var embedded = []Content{
 	{
 		Title:    "56567",

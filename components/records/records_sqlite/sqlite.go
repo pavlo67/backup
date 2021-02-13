@@ -5,16 +5,15 @@ package records_sqlite
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/errata"
-	"github.com/pavlo67/common/common/selectors/selectors_sql"
+	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/selectors"
 	"github.com/pavlo67/common/common/sqllib"
 	"github.com/pavlo67/common/common/strlib"
 
@@ -81,10 +80,10 @@ func New(db *sql.DB, table string) (records.Operator, crud.Cleaner, error) {
 
 const onSave = "on recordsSQLite.Save(): "
 
-func (dataOp *recordsSQLite) Save(item records.Item, options *crud.Options) (*records.Item, error) {
+func (recordsOp *recordsSQLite) Save(item records.Item, options *crud.Options) (*records.Item, error) {
 
 	if options == nil || options.Identity == nil {
-		return nil, errata.CommonError(errata.NoRightsKey)
+		return nil, errors.CommonError(common.NoRightsKey)
 	}
 
 	// TODO!!! rbac check
@@ -128,21 +127,21 @@ func (dataOp *recordsSQLite) Save(item records.Item, options *crud.Options) (*re
 
 	if item.ID == "" {
 
-		res, err := dataOp.stmInsert.Exec(values...)
+		res, err := recordsOp.stmInsert.Exec(values...)
 		if err != nil {
-			return nil, errors.Wrapf(err, onSave+sqllib.CantExec, dataOp.sqlInsert, strlib.Stringify(values))
+			return nil, errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlInsert, strlib.Stringify(values))
 		}
 
 		idSQLite, err := res.LastInsertId()
 		if err != nil {
-			return nil, errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, dataOp.sqlInsert, strlib.Stringify(values))
+			return nil, errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, recordsOp.sqlInsert, strlib.Stringify(values))
 		}
 		item.ID = records.ID(strconv.FormatInt(idSQLite, 10))
 
 	} else {
 		values = append(values, time.Now().Format(time.RFC3339), item.ID)
-		if _, err := dataOp.stmUpdate.Exec(values...); err != nil {
-			return nil, errors.Wrapf(err, onSave+sqllib.CantExec, dataOp.sqlUpdate, strlib.Stringify(values))
+		if _, err := recordsOp.stmUpdate.Exec(values...); err != nil {
+			return nil, errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlUpdate, strlib.Stringify(values))
 		}
 
 	}
@@ -152,7 +151,7 @@ func (dataOp *recordsSQLite) Save(item records.Item, options *crud.Options) (*re
 
 const onRead = "on recordsSQLite.Read(): "
 
-func (dataOp *recordsSQLite) Read(id records.ID, options *crud.Options) (*records.Item, error) {
+func (recordsOp *recordsSQLite) Read(id records.ID, options *crud.Options) (*records.Item, error) {
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
 		return nil, errors.Errorf(onRead+"wrong id (%s)", id)
@@ -165,12 +164,12 @@ func (dataOp *recordsSQLite) Read(id records.ID, options *crud.Options) (*record
 	// "title", "summary", "type_key", "data", "embedded", "tags",
 	// "issued_id", "owner_id", "viewer_id", "history", "updated_at", "created_at"
 
-	if err = dataOp.stmRead.QueryRow(idNum).Scan(
+	if err = recordsOp.stmRead.QueryRow(idNum).Scan(
 		&item.Content.Title, &item.Content.Summary, &item.Content.TypeKey, &item.Content.Data, &embeddedBytes, &tagsBytes,
 		&item.IssuedID, &item.OwnerID, &item.ViewerID, &historyBytes, &item.UpdatedAt, &item.CreatedAt); err == sql.ErrNoRows {
-		return nil, errata.NotFound
+		return nil, common.ErrNotFound
 	} else if err != nil {
-		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, dataOp.sqlRead, idNum)
+		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, recordsOp.sqlRead, idNum)
 	}
 
 	if len(embeddedBytes) > 0 {
@@ -196,7 +195,7 @@ func (dataOp *recordsSQLite) Read(id records.ID, options *crud.Options) (*record
 
 const onRemove = "on recordsSQLite.Remove()"
 
-func (dataOp *recordsSQLite) Remove(id records.ID, options *crud.Options) error {
+func (recordsOp *recordsSQLite) Remove(id records.ID, options *crud.Options) error {
 
 	// TODO!!! rbac check
 
@@ -205,8 +204,8 @@ func (dataOp *recordsSQLite) Remove(id records.ID, options *crud.Options) error 
 		return errors.Errorf(onRemove+"wrong id (%s)", id)
 	}
 
-	if _, err = dataOp.stmRemove.Exec(idNum); err != nil {
-		return errors.Wrapf(err, onRemove+sqllib.CantExec, dataOp.sqlRemove, idNum)
+	if _, err = recordsOp.stmRemove.Exec(idNum); err != nil {
+		return errors.Wrapf(err, onRemove+sqllib.CantExec, recordsOp.sqlRemove, idNum)
 	}
 
 	return nil
@@ -214,26 +213,30 @@ func (dataOp *recordsSQLite) Remove(id records.ID, options *crud.Options) error 
 
 const onList = "on recordsSQLite.List()"
 
-func (dataOp *recordsSQLite) List(options *crud.Options) ([]records.Item, error) {
-	selector := options.GetSelector()
-	condition, values, err := selectors_sql.Use(selector)
-	if err != nil {
-		return nil, errors.Errorf(onList+"wrong selector (%#v): %s", selector, err)
+func (recordsOp *recordsSQLite) List(options *crud.Options) ([]records.Item, error) {
+
+	var termSQL selectors.TermSQL
+
+	if selector := options.GetSelector(); selector != nil {
+		var ok bool
+		if termSQL, ok = selector.(selectors.TermSQL); !ok {
+			return nil, fmt.Errorf(onList+": wrong selector: %#v", selector)
+		}
 	}
 
-	query := sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options)
-	stm, err := dataOp.db.Prepare(query)
+	query := sqllib.SQLList(recordsOp.table, fieldsToListStr, termSQL.Condition, options)
+	stm, err := recordsOp.db.Prepare(query)
 	if err != nil {
 		return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
 	}
 
 	//l.Infof("%s / %#v\n%s", condition, values, query)
 
-	rows, err := stm.Query(values...)
+	rows, err := stm.Query(termSQL.Values...)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
-		return nil, errors.Wrapf(err, onList+sqllib.CantQuery, query, values)
+		return nil, errors.Wrapf(err, onList+": "+sqllib.CantQuery, query, termSQL.Values)
 	}
 	defer rows.Close()
 
@@ -252,24 +255,24 @@ func (dataOp *recordsSQLite) List(options *crud.Options) ([]records.Item, error)
 			&item.Content.Title, &item.Content.Summary, &item.Content.TypeKey, &item.Content.Data, &embeddedBytes, &tagsBytes,
 			&item.IssuedID, &item.OwnerID, &item.ViewerID, &historyBytes, &item.UpdatedAt, &item.CreatedAt,
 			&idNum); err != nil {
-			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
+			return items, errors.Wrapf(err, onList+": "+sqllib.CantScanQueryRow, query, termSQL.Values)
 		}
 
 		if len(embeddedBytes) > 0 {
 			if err = json.Unmarshal(embeddedBytes, &item.Content.Embedded); err != nil {
-				return items, errors.Wrapf(err, onRead+"can't unmarshal .Embedded (%s)", embeddedBytes)
+				return items, errors.Wrapf(err, onList+": can't unmarshal .Embedded (%s)", embeddedBytes)
 			}
 		}
 
 		if len(tagsBytes) > 0 {
 			if err = json.Unmarshal(tagsBytes, &item.Content.Tags); err != nil {
-				return items, errors.Wrapf(err, onRead+"can't unmarshal .Tags (%s)", tagsBytes)
+				return items, errors.Wrapf(err, onList+": can't unmarshal .Tags (%s)", tagsBytes)
 			}
 		}
 
 		if len(historyBytes) > 0 {
 			if err = json.Unmarshal(historyBytes, &item.History); err != nil {
-				return items, errors.Wrapf(err, onRead+"can't unmarshal .History (%s)", historyBytes)
+				return items, errors.Wrapf(err, onList+": can't unmarshal .History (%s)", historyBytes)
 			}
 		}
 
@@ -278,7 +281,7 @@ func (dataOp *recordsSQLite) List(options *crud.Options) ([]records.Item, error)
 	}
 
 	if err = rows.Err(); err != nil {
-		return items, errors.Wrapf(err, onList+": "+sqllib.RowsError, query, values)
+		return items, errors.Wrapf(err, onList+": "+sqllib.RowsError, query, termSQL.Values)
 	}
 
 	return items, nil
@@ -286,15 +289,15 @@ func (dataOp *recordsSQLite) List(options *crud.Options) ([]records.Item, error)
 
 const onCount = "on recordsSQLite.Count(): "
 
-func (dataOp *recordsSQLite) Stat(*crud.Options) (common.Map, error) {
+func (recordsOp *recordsSQLite) Stat(*crud.Options) (common.Map, error) {
 	//condition, values, err := selectors_sql.Use(term)
 	//if err != nil {
 	//	termStr, _ := json.Marshal(term)
 	//	return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
 	//}
 	//
-	//query := sqllib.SQLCount(dataOp.table, condition, options)
-	//stm, err := dataOp.db.Prepare(query)
+	//query := sqllib.SQLCount(recordsOp.table, condition, options)
+	//stm, err := recordsOp.db.Prepare(query)
 	//if err != nil {
 	//	return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)
 	//}
@@ -306,83 +309,9 @@ func (dataOp *recordsSQLite) Stat(*crud.Options) (common.Map, error) {
 	//	return 0, errors.Wrapf(err, onCount+sqllib.CantScanQueryRow, query, values)
 	//}
 
-	return nil, errata.NotImplemented
+	return nil, common.ErrNotImplemented
 }
 
-func (dataOp *recordsSQLite) Close() error {
-	return errors.Wrap(dataOp.db.Close(), "on recordsSQLite.Close()")
+func (recordsOp *recordsSQLite) Close() error {
+	return errors.Wrap(recordsOp.db.Close(), "on recordsSQLite.Close()")
 }
-
-//
-//const onDetails = "on recordsSQLite.Details(): "
-//
-//func (dataOp *recordsSQLite) SetDetails(item *records.Item) error {
-//	if item == nil {
-//		return errors.New(onDetails + "nil item")
-//	}
-//
-//	// l.Infof("11111111111 %s %s %t", item.DetailsRaw, item.TypeKey, item.TypeKey == records.TypeKeyTest)
-//
-//	if len(item.DetailsRaw) < 1 {
-//		item.Details = nil
-//		return nil
-//	}
-//
-//	switch item.TypeKey {
-//	case types.KeyString:
-//		item.Details = string(item.DetailsRaw)
-//
-//	case records.TypeKeyTest:
-//		item.Details = &records.Test{}
-//		err := json.Unmarshal(item.DetailsRaw, item.Details)
-//		if err != nil {
-//			return errors.Wrapf(err, onDetails+"can't .Unmarshal(%#v)", item.DetailsRaw)
-//		}
-//
-//	default:
-//
-//		// TODO: remove the kostyl
-//		item.Details = string(item.DetailsRaw)
-//
-//		// return errors.Errorf(onDetails+"unknown item.TypeKey(%s) for item.DetailsRaw(%s)", item.TypeKey, item.DetailsRaw)
-//
-//	}
-//
-//	// l.Infof("11111111111 %#v", item.Details)
-//
-//	return nil
-//}
-//
-//const onExport = "on recordsSQLite.Export()"
-//
-//func (dataOp *recordsSQLite) Export(afterIDStr string, options *crud.Options) ([]records.Item, error) {
-//	// TODO: remove limits
-//	// if options != nil {
-//	//	options.Limits = nil
-//	// }
-//
-//	afterIDStr = strings.TrimSpace(afterIDStr)
-//
-//	var term *selectors.Term
-//
-//	var afterID int
-//	if afterIDStr != "" {
-//		var err error
-//		afterID, err = strconv.Atoi(afterIDStr)
-//		if err != nil {
-//			return nil, errors.Errorf("can't strconv.Atoi(%s) for after_id parameter: %s", afterIDStr, err)
-//		}
-//
-//		// TODO!!! term with some item's autoincrement if original .Key isn't it (using .Key to find corresponding autoincrement value)
-//		term = selectors.Binary(selectors.Gt, "id", selectors.Value{afterID})
-//	}
-//
-//	// TODO!!! order by some item's autoincrement if original .Key isn't it
-//	if options == nil {
-//		options = &crud.Options{OrderBy: []string{"id"}}
-//	} else {
-//		options.OrderBy = []string{"id"}
-//	}
-//
-//	return dataOp.List(term, options)
-//}

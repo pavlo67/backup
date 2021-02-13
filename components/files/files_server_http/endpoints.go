@@ -5,10 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
 
@@ -25,7 +23,7 @@ var saveEndpoint = server_http.Endpoint{
 
 		data, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.CommonError(err, "reading body"), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.CommonError(err, "reading body"), req)
 		}
 
 		pathCorrected, err := filesOp.Save(bucketID, path, newFilePattern, data, options)

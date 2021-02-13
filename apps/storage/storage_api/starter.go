@@ -3,7 +3,7 @@ package storage_api
 import (
 	"fmt"
 
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
@@ -36,7 +36,7 @@ func (ss *storageStarter) Name() string {
 func (ss *storageStarter) Prepare(cfg *config.Config, options common.Map) error {
 	var cfgStorage common.Map
 	if err := cfg.Value("storage_api", &cfgStorage); err != nil {
-		return errata.CommonError(err, fmt.Sprintf("in config: %#v", cfg))
+		return errors.CommonError(err, fmt.Sprintf("in config: %#v", cfg))
 	}
 
 	ss.prefix = cfgStorage.StringDefault("prefix", "")

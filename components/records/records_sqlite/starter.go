@@ -4,11 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
@@ -61,15 +59,15 @@ func (rss *recordsSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	}
 	recordsOp, recordsCleanerOp, err := New(db, rss.table)
 	if err != nil {
-		return errata.CommonError(err, "can't init records.Operator")
+		return errors.CommonError(err, "can't init records.Operator")
 	}
 
 	if err = joinerOp.Join(recordsOp, rss.interfaceKey); err != nil {
-		return errata.CommonError(err, fmt.Sprintf("can't join *recordsSQLite as records.Operator with key '%s'", rss.interfaceKey))
+		return errors.CommonError(err, fmt.Sprintf("can't join *recordsSQLite as records.Operator with key '%s'", rss.interfaceKey))
 	}
 
 	if err = joinerOp.Join(recordsCleanerOp, rss.cleanerKey); err != nil {
-		return errata.CommonError(err, fmt.Sprintf("can't join *recordsSQLite as crud.Cleaner with key '%s'", rss.cleanerKey))
+		return errors.CommonError(err, fmt.Sprintf("can't join *recordsSQLite as crud.Cleaner with key '%s'", rss.cleanerKey))
 	}
 
 	return nil

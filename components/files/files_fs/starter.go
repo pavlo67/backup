@@ -45,7 +45,7 @@ func (ffs *filesFSStarter) Prepare(cfg *config.Config, options common.Map) error
 	//if err := cfg.Value(configKey, &ffs.buckets); err != nil {
 	//	l.Errorf("1111111111 in config: %#v", cfg)
 	//
-	//	return nil, errata.CommonError(err, fmt.Sprintf("in config: %#v", cfg))
+	//	return nil, errors.CommonError(err, fmt.Sprintf("in config: %#v", cfg))
 	//}
 
 	ffs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(files.InterfaceKey)))

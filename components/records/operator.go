@@ -3,6 +3,8 @@ package records
 import (
 	"time"
 
+	"github.com/pavlo67/common/common/selectors"
+
 	"github.com/pavlo67/tools/components/ns"
 
 	"github.com/pavlo67/common/common"
@@ -40,4 +42,8 @@ type Operator interface {
 	Read(ID, *crud.Options) (*Item, error)
 	List(*crud.Options) ([]Item, error)     // in particular: selected owned, tagged, untagged, containing string, etc.
 	Stat(*crud.Options) (common.Map, error) // in particular: selected, grouped, etc.
+
+	HasTag(tag string) (selectors.Term, error)
+	AddParent(tags []string, id ID) ([]string, error)
+	HasParent(id ID) (selectors.Term, error)
 }

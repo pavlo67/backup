@@ -29,6 +29,9 @@ dist
 coverage
 *.test
 
+# Data files
+*.sqlite
+
 
 # Log files & reports
 *.xls

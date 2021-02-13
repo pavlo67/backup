@@ -5,7 +5,7 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
@@ -41,11 +41,11 @@ func (frhs *formatterRecordsHTMLStarter) Run(joinerOp joiner.Operator) error {
 
 	formatterRecordsOp, err := New()
 	if err != nil {
-		return errata.CommonError(err, "can't init *formatterRecordsHTML as formatter.Operator")
+		return errors.CommonError(err, "can't init *formatterRecordsHTML as formatter.Operator")
 	}
 
 	if err = joinerOp.Join(formatterRecordsOp, frhs.interfaceKey); err != nil {
-		return errata.CommonError(err, fmt.Sprintf("can't join *formatterRecordsHTML as formatter.Operator with key '%s'", frhs.interfaceKey))
+		return errors.CommonError(err, fmt.Sprintf("can't join *formatterRecordsHTML as formatter.Operator with key '%s'", frhs.interfaceKey))
 	}
 
 	return nil

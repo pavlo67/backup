@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	BuildDate   = "unknown"
-	BuildTag    = "unknown"
-	BuildCommit = "unknown"
+	BuildDate   = ""
+	BuildTag    = ""
+	BuildCommit = ""
 )
 
 const serviceName = "demo"
@@ -21,9 +21,7 @@ func main() {
 		return
 	}
 
-	// running starters
-
-	label := "NB/REST BUILD"
+	label := "NB/HTML/REST BUILD"
 	joinerOp, err := starter.Run(nb_api.Components(true), cfgService, label, l)
 	if err != nil {
 		l.Fatal(err)

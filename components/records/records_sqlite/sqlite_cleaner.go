@@ -1,9 +1,8 @@
 package records_sqlite
 
 import (
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/sqllib"
 )
 
@@ -11,9 +10,9 @@ var _ crud.Cleaner = &recordsSQLite{}
 
 const onClean = "on recordsSQLite.Clean(): "
 
-func (dataOp *recordsSQLite) Clean(_ *crud.Options) error {
-	if _, err := dataOp.stmClean.Exec(); err != nil {
-		return errors.Wrapf(err, onClean+sqllib.CantExec, dataOp.sqlClean, nil)
+func (recordsOp *recordsSQLite) Clean(_ *crud.Options) error {
+	if _, err := recordsOp.stmClean.Exec(); err != nil {
+		return errors.Wrapf(err, onClean+sqllib.CantExec, recordsOp.sqlClean, nil)
 	}
 	return nil
 
@@ -25,21 +24,21 @@ func (dataOp *recordsSQLite) Clean(_ *crud.Options) error {
 	//}
 
 	//if strings.TrimSpace(condition) != "" {
-	//	ids, err := dataOp.ids(condition, values)
+	//	ids, err := recordsOp.ids(condition, values)
 	//	if err != nil {
-	//		return errors.Wrap(err, onClean+"can't dataOp.ids(condition, values)")
+	//		return errors.Wrap(err, onClean+"can't recordsOp.ids(condition, values)")
 	//	}
-	//	termTags = logic.AND(selectors.In("key", dataOp.interfaceKey), selectors.In("id", ids...))
+	//	termTags = logic.AND(selectors.In("key", recordsOp.interfaceKey), selectors.In("id", ids...))
 	//
 	//	query += " WHERE " + condition
 	//
 	//} else {
-	//	termTags = selectors.In("key", dataOp.interfaceKey) // TODO!!! correct field key
+	//	termTags = selectors.In("key", recordsOp.interfaceKey) // TODO!!! correct field key
 	//
 	//}
 
-	//if dataOp.taggerCleaner != nil {
-	//	err = dataOp.taggerCleaner.Clean(termTags, nil)
+	//if recordsOp.taggerCleaner != nil {
+	//	err = recordsOp.taggerCleaner.Clean(termTags, nil)
 	//	if err != nil {
 	//		return errors.Wrap(err, onClean)
 	//	}
