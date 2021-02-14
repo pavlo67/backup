@@ -18,6 +18,7 @@ import (
 	"github.com/pavlo67/common/common/strlib"
 
 	"github.com/pavlo67/tools/components/records"
+	"github.com/pavlo67/tools/components/tags"
 )
 
 var fieldsToInsert = []string{"title", "summary", "type_key", "data", "embedded", "tags", "issued_id", "owner_id", "viewer_id", "history"}
@@ -154,7 +155,7 @@ const onRead = "on recordsSQLite.Read(): "
 func (recordsOp *recordsSQLite) Read(id records.ID, options *crud.Options) (*records.Item, error) {
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return nil, errors.Errorf(onRead+"wrong id (%s)", id)
+		return nil, fmt.Errorf(onRead+"wrong id (%s)", id)
 	}
 
 	item := records.Item{ID: id}
@@ -201,7 +202,7 @@ func (recordsOp *recordsSQLite) Remove(id records.ID, options *crud.Options) err
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onRemove+"wrong id (%s)", id)
+		return fmt.Errorf(onRemove+"wrong id (%s)", id)
 	}
 
 	if _, err = recordsOp.stmRemove.Exec(idNum); err != nil {
@@ -289,7 +290,7 @@ func (recordsOp *recordsSQLite) List(options *crud.Options) ([]records.Item, err
 
 const onTags = "on recordsSQLite.Tags()"
 
-func (recordsOp *recordsSQLite) Tags(options *crud.Options) (records.TagsStat, error) {
+func (recordsOp *recordsSQLite) Tags(options *crud.Options) (tags.StatMap, error) {
 
 	var termSQL selectors.TermSQL
 
@@ -314,7 +315,7 @@ func (recordsOp *recordsSQLite) Tags(options *crud.Options) (records.TagsStat, e
 	}
 	defer rows.Close()
 
-	var tagsStat records.TagsStat
+	var tagsStat tags.StatMap
 
 	for rows.Next() {
 		var tagsBytes []byte
@@ -324,15 +325,14 @@ func (recordsOp *recordsSQLite) Tags(options *crud.Options) (records.TagsStat, e
 		}
 
 		if len(tagsBytes) > 0 {
-			var tags []string
-			if err = json.Unmarshal(tagsBytes, &tags); err != nil {
+			var ts []tags.Item
+			if err = json.Unmarshal(tagsBytes, &ts); err != nil {
 				// TODO!!! collect errors
-				l.Errorf(onTags+": can't unmarshal tags (%s): %s", tagsBytes, err)
+				l.Errorf(onTags+": can't unmarshal ts (%s): %s", tagsBytes, err)
 				continue
 			}
 
-			for _, tag := range tags {
-				tag = strings.TrimSpace(tag)
+			for _, tag := range ts {
 				tagsStat[tag] = tagsStat[tag] + 1
 			}
 		}
@@ -346,32 +346,31 @@ func (recordsOp *recordsSQLite) Tags(options *crud.Options) (records.TagsStat, e
 	return tagsStat, nil
 }
 
-//
-//const onStat = "on recordsSQLite.Stat(): "
-//
-//func (recordsOp *recordsSQLite) Stat(*crud.Options) (common.Map, error) {
-//	//condition, values, err := selectors_sql.Use(term)
-//	//if err != nil {
-//	//	termStr, _ := json.Marshal(term)
-//	//	return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
-//	//}
-//	//
-//	//query := sqllib.SQLCount(recordsOp.table, condition, options)
-//	//stm, err := recordsOp.db.Prepare(query)
-//	//if err != nil {
-//	//	return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)
-//	//}
-//	//
-//	//var num uint64
-//	//
-//	//err = stm.QueryRow(values...).Scan(&num)
-//	//if err != nil {
-//	//	return 0, errors.Wrapf(err, onCount+sqllib.CantScanQueryRow, query, values)
-//	//}
-//
-//	return nil, common.ErrNotImplemented
-//}
-
 func (recordsOp *recordsSQLite) Close() error {
 	return errors.Wrap(recordsOp.db.Close(), "on recordsSQLite.Close()")
 }
+
+//const onStat = "on recordsSQLite.StatMap(): "
+//
+//func (recordsOp *recordsSQLite) StatMap(*crud.Options) (common.Map, error) {
+//	condition, values, err := selectors_sql.Use(term)
+//	if err != nil {
+//		termStr, _ := json.Marshal(term)
+//		return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
+//	}
+//
+//	query := sqllib.SQLCount(recordsOp.table, condition, options)
+//	stm, err := recordsOp.db.Prepare(query)
+//	if err != nil {
+//		return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)
+//	}
+//
+//	var num uint64
+//
+//	err = stm.QueryRow(values...).Scan(&num)
+//	if err != nil {
+//		return 0, errors.Wrapf(err, onCount+sqllib.CantScanQueryRow, query, values)
+//	}
+//
+//	return nil, common.ErrNotImplemented
+//}

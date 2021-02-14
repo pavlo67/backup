@@ -20,8 +20,8 @@ func Starter() starter.Operator {
 var _ starter.Operator = &nbStarter{}
 
 type nbStarter struct {
-	prefixREST  string
-	prefixPages string
+	restPrefix  string
+	pagesPrefix string
 }
 
 // --------------------------------------------------------------------------
@@ -38,8 +38,8 @@ func (ns *nbStarter) Prepare(cfg *config.Config, options common.Map) error {
 		return errors.CommonError(err, fmt.Sprintf("in config: %#v", cfg))
 	}
 
-	ns.prefixREST = cfgStorage.StringDefault("prefix_rest", "")
-	ns.prefixPages = cfgStorage.StringDefault("prefix_pages", "")
+	ns.restPrefix = options.StringDefault("rest_prefix", "")
+	ns.pagesPrefix = options.StringDefault("pages_prefix", "")
 
 	return nil
 }
@@ -58,13 +58,13 @@ func (ns *nbStarter) Run(joinerOp joiner.Operator) error {
 	swaggerPath := filelib.CurrentPath() + "api-docs/"
 	swaggerSubpath := "api-docs"
 
-	if err := restConfig.CompleteWithJoiner(joinerOp, "", srvPort, ns.prefixREST); err != nil {
+	if err := restConfig.CompleteWithJoiner(joinerOp, "", srvPort, ns.restPrefix); err != nil {
 		return err
 	} else if err = server_http.InitEndpointsWithSwaggerV2(srvOp, restConfig, !isHTTPS, swaggerPath, swaggerSubpath, l); err != nil {
 		return err
 	}
 
-	if err := pagesConfig.CompleteWithJoiner(joinerOp, "", srvPort, ns.prefixPages); err != nil {
+	if err := pagesConfig.CompleteWithJoiner(joinerOp, "", srvPort, ns.pagesPrefix); err != nil {
 		return err
 	} else if err = server_http.InitPages(srvOp, pagesConfig, l); err != nil {
 		return err

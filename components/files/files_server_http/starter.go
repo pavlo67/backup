@@ -5,7 +5,7 @@ import (
 
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/tools/components/files"
-	"github.com/pkg/errors"
+	""
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/joiner"
@@ -50,7 +50,7 @@ func (mshs *managementServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	if filesOp, _ = joinerOp.Interface(mshs.filesKey).(files.Operator); filesOp == nil {
-		return errors.Errorf(onRun+": no files.Operator with key %s", mshs.filesKey)
+		return fmt.Errorf(onRun+": no files.Operator with key %s", mshs.filesKey)
 	}
 
 	if err := joinerOp.Join(&readEndpoint, files.HandlerRead); err != nil {

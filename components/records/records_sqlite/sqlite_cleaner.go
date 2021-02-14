@@ -20,7 +20,7 @@ func (recordsOp *recordsSQLite) Clean(_ *crud.Options) error {
 	//
 	//condition, values, err := selectors_sql.Use(nil)
 	//if err != nil {
-	//	return errors.Errorf(onClean+"wrong selector: %s", err)
+	//	return fmt.Errorf(onClean+"wrong selector: %s", err)
 	//}
 
 	//if strings.TrimSpace(condition) != "" {

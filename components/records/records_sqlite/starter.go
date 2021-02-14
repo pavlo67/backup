@@ -55,7 +55,7 @@ func (rss *recordsSQLiteStarter) Run(joinerOp joiner.Operator) error {
 
 	db, _ := joinerOp.Interface(rss.connectKey).(*sql.DB)
 	if db == nil {
-		return errors.Errorf("no *sql.DB with key %s", rss.connectKey)
+		return fmt.Errorf("no *sql.DB with key %s", rss.connectKey)
 	}
 	recordsOp, recordsCleanerOp, err := New(db, rss.table)
 	if err != nil {

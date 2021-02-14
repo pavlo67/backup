@@ -3,6 +3,8 @@ package records
 import (
 	"testing"
 
+	"github.com/pavlo67/tools/components/tags"
+
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
 	"github.com/stretchr/testify/require"
@@ -21,7 +23,7 @@ var embedded = []Content{
 		TypeKey:  "test...",
 		Data:     "wqerwer",
 		Embedded: []Content{{Data: "werwe"}},
-		Tags:     []string{"1", "332343"},
+		Tags:     []tags.Item{"1", "332343"},
 	},
 }
 
@@ -32,7 +34,7 @@ var item11 = Item{
 		TypeKey:  "test",
 		Embedded: embedded,
 		Data:     `{"AAA": "aaa", "BBB": 222}`,
-		Tags:     []string{"1", "333"},
+		Tags:     []tags.Item{"1", "333"},
 	},
 }
 
@@ -42,7 +44,7 @@ var item12 = Item{
 		Summary: "6578eegj",
 		TypeKey: "test1",
 		Data:    `{"AAA": "awraa", "BBB": 22552}`,
-		Tags:    []string{"1", "333"},
+		Tags:    []tags.Item{"1", "333"},
 	},
 }
 
@@ -53,7 +55,7 @@ var item22 = Item{
 		TypeKey:  "test2",
 		Data:     `wqerwer`,
 		Embedded: append(embedded, embedded...),
-		Tags:     []string{"qw1", "333"},
+		Tags:     []tags.Item{"qw1", "333"},
 	},
 }
 

@@ -1,4 +1,4 @@
-package formatter_records_html
+package records_html
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"github.com/pavlo67/tools/components/records"
 )
 
-func Edit(item *records.Item) string {
+func HTMLEdit(item *records.Item) string {
 	bytes, _ := json.Marshal(item)
 
 	return string(bytes)

@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pkg/errors"
+	"github.com/pavlo67/common/common/errors"
 )
 
 var _ crud.Cleaner = &filesFS{}

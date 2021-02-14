@@ -3,9 +3,6 @@ package notebook_server_http
 import (
 	"fmt"
 
-	"github.com/pavlo67/tools/components/formatter"
-	"github.com/pavlo67/tools/components/records/formatter_records_html"
-
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
@@ -15,6 +12,8 @@ import (
 
 	"github.com/pavlo67/tools/components/files"
 	"github.com/pavlo67/tools/components/records"
+	"github.com/pavlo67/tools/components/records/records_html"
+	"github.com/pavlo67/tools/components/tags/tags_html"
 )
 
 const InterfaceKey joiner.InterfaceKey = "notebook_server_http"
@@ -26,9 +25,10 @@ func Starter() starter.Operator {
 var _ starter.Operator = &notebookServerHTTPStarter{}
 
 type notebookServerHTTPStarter struct {
-	filesKey            joiner.InterfaceKey
-	recordsKey          joiner.InterfaceKey
-	formatterRecordsKey joiner.InterfaceKey
+	filesKey       joiner.InterfaceKey
+	recordsKey     joiner.InterfaceKey
+	recordsHTMLKey joiner.InterfaceKey
+	tagsHTMLKey    joiner.InterfaceKey
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -38,7 +38,8 @@ type notebookServerHTTPStarter struct {
 var l logger.Operator
 var recordsOp records.Operator
 var filesOp files.Operator
-var formatterRecordsOp formatter.Operator
+var recordsHTMLOp records_html.Operator
+var tagsHTMLOp tags_html.Operator
 
 func (nshs *notebookServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
@@ -47,7 +48,8 @@ func (nshs *notebookServerHTTPStarter) Name() string {
 func (nshs *notebookServerHTTPStarter) Prepare(_ *config.Config, options common.Map) error {
 	nshs.filesKey = joiner.InterfaceKey(options.StringDefault("files_key", string(files.InterfaceKey)))
 	nshs.recordsKey = joiner.InterfaceKey(options.StringDefault("records_key", string(records.InterfaceKey)))
-	nshs.formatterRecordsKey = joiner.InterfaceKey(options.StringDefault("formatter_records_key", string(formatter_records_html.InterfaceKey)))
+	nshs.recordsHTMLKey = joiner.InterfaceKey(options.StringDefault("records_html_key", string(records_html.InterfaceKey)))
+	nshs.tagsHTMLKey = joiner.InterfaceKey(options.StringDefault("tags_html_key", string(tags_html.InterfaceKey)))
 
 	nshs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
@@ -59,8 +61,6 @@ func (nshs *notebookServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
-	// endpoints --------------------------------------------------------
-
 	if filesOp, _ = joinerOp.Interface(nshs.filesKey).(files.Operator); filesOp == nil {
 		return fmt.Errorf("no files.Operator with key %s", nshs.filesKey)
 	}
@@ -69,8 +69,11 @@ func (nshs *notebookServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no records.Operator with key %s", nshs.recordsKey)
 	}
 
-	if formatterRecordsOp, _ = joinerOp.Interface(nshs.formatterRecordsKey).(formatter.Operator); formatterRecordsOp == nil {
-		return fmt.Errorf("no formatter.Operator with key %s", nshs.formatterRecordsKey)
+	if recordsHTMLOp, _ = joinerOp.Interface(nshs.recordsHTMLKey).(records_html.Operator); recordsHTMLOp == nil {
+		return fmt.Errorf("no records_html.Operator with key %s", nshs.recordsHTMLKey)
+	}
+	if tagsHTMLOp, _ = joinerOp.Interface(nshs.tagsHTMLKey).(tags_html.Operator); tagsHTMLOp == nil {
+		return fmt.Errorf("no tags_html.Operator with key %s", nshs.tagsHTMLKey)
 	}
 
 	return server_http.JoinEndpoints(joinerOp, Endpoints)

@@ -25,7 +25,7 @@ func (fis FilesInfo) Append(basePath string, info os.FileInfo) (FilesInfo, error
 	path := info.Name()
 
 	//if len(path) <= len(basePath) {
-	//	return nil, errors.Errorf("wrong path (%s) on basePath = '%s'", path, basePath)
+	//	return nil, fmt.Errorf("wrong path (%s) on basePath = '%s'", path, basePath)
 	//}
 
 	if info.IsDir() {

@@ -5,11 +5,11 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
 	"github.com/pavlo67/tools/components/files"
-	"github.com/pkg/errors"
 )
 
 func Starter() starter.Operator {
@@ -35,12 +35,12 @@ func (ffs *filesFSStarter) Prepare(cfg *config.Config, options common.Map) error
 
 	ffs.buckets, _ = options["buckets"].(files.Buckets)
 	if ffs.buckets == nil {
-		return errors.Errorf("no 'buckets' in options: %#v", options)
+		return fmt.Errorf("no 'buckets' in options: %#v", options)
 	}
 
 	//configKey := strings.TrimSpace(options.StringDefault("config_key", "buckets"))
 	//if configKey == "" {
-	//	return nil, errors.Errorf("no 'config_key' in options (%#v)", options)
+	//	return nil, fmt.Errorf("no 'config_key' in options (%#v)", options)
 	//}
 	//if err := cfg.Value(configKey, &ffs.buckets); err != nil {
 	//	l.Errorf("1111111111 in config: %#v", cfg)
@@ -50,12 +50,12 @@ func (ffs *filesFSStarter) Prepare(cfg *config.Config, options common.Map) error
 
 	ffs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(files.InterfaceKey)))
 	if ffs.interfaceKey == "" {
-		return errors.Errorf("no 'interface_key' in options (%#v)", options)
+		return fmt.Errorf("no 'interface_key' in options (%#v)", options)
 	}
 
 	ffs.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(files.InterfaceKeyCleaner)))
 	if ffs.cleanerKey == "" {
-		return errors.Errorf("no 'cleaner_key' in options (%#v)", options)
+		return fmt.Errorf("no 'cleaner_key' in options (%#v)", options)
 	}
 
 	return nil
