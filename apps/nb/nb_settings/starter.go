@@ -1,12 +1,13 @@
-package nb_api
+package nb_settings
 
 import (
 	"fmt"
 
+	"github.com/pavlo67/common/common/filelib"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/errors"
-	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server/server_http"
@@ -54,20 +55,32 @@ func (ns *nbStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no server_http.Operator with key %s", server_http.InterfaceKey)
 	}
 
-	srvPort, isHTTPS := srvOp.Addr()
-	swaggerPath := filelib.CurrentPath() + "api-docs/"
-	swaggerSubpath := "api-docs"
+	srvPort, isHTTPS := srvOp.Addr() // isHTTPS
 
 	if err := restConfig.CompleteWithJoiner(joinerOp, "", srvPort, ns.restPrefix); err != nil {
 		return err
-	} else if err = server_http.InitEndpointsWithSwaggerV2(srvOp, restConfig, !isHTTPS, swaggerPath, swaggerSubpath, l); err != nil {
+	}
+	//if err := server_http.InitPages(srvOp, restConfig, l); err != nil {
+	//	return err
+	//}
+	swaggerStaticPath := filelib.CurrentPath() + "../nb_rest_static/api-docs/"
+	swaggerServerSubpath := "api-docs"
+	if err := server_http.InitEndpointsWithSwaggerV2(srvOp, restConfig, !isHTTPS, swaggerStaticPath, swaggerServerSubpath, l); err != nil {
 		return err
 	}
 
 	if err := pagesConfig.CompleteWithJoiner(joinerOp, "", srvPort, ns.pagesPrefix); err != nil {
 		return err
-	} else if err = server_http.InitPages(srvOp, pagesConfig, l); err != nil {
+	}
+	if err := server_http.InitPages(srvOp, pagesConfig, l); err != nil {
 		return err
+	}
+	pagesStaticPath := filelib.CurrentPath() + "../nb_pages_static/"
+	pagesStaticServerSubpath := "/static"
+	if pagesStaticPath != "" {
+		if err := srvOp.HandleFiles("js", ns.pagesPrefix+pagesStaticServerSubpath+"/*filepath", server_http.StaticPath{LocalPath: pagesStaticPath}); err != nil {
+			return err
+		}
 	}
 
 	WG.Add(1)

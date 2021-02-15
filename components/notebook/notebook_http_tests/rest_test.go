@@ -8,8 +8,7 @@ import (
 	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/starter"
-
-	"github.com/pavlo67/tools/apps/nb/nb_api"
+	"github.com/pavlo67/tools/apps/nb/nb_settings"
 )
 
 func TestNotebookREST(t *testing.T) {
@@ -20,7 +19,7 @@ func TestNotebookREST(t *testing.T) {
 	err := cfgService.Value("files_fs", &cfg)
 	require.NoErrorf(t, err, "%#v", cfgService)
 
-	components, err := nb_api.ClientComponents()
+	components, err := nb_settings.ClientComponents()
 	require.NoError(t, err)
 
 	joinerOp, err := starter.Run(components, cfgService, "HTTP/CLI BUILD FOR TESTS", l)

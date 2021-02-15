@@ -1,4 +1,4 @@
-package storage_api
+package storage_settings
 
 import (
 	"github.com/pavlo67/common/common"

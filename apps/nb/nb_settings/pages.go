@@ -1,4 +1,4 @@
-package nb_api
+package nb_settings
 
 import (
 	"github.com/pavlo67/common/common/auth"

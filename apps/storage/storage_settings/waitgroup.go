@@ -1,4 +1,4 @@
-package nb_api
+package storage_settings
 
 import "sync"
 

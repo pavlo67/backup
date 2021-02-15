@@ -3,8 +3,7 @@ package main
 import (
 	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/starter"
-
-	"github.com/pavlo67/tools/apps/storage/storage_api"
+	"github.com/pavlo67/tools/apps/storage/storage_settings"
 )
 
 var (
@@ -24,11 +23,11 @@ func main() {
 	// running starters
 
 	label := "BACKUP/SQLITE/REST BUILD"
-	joinerOp, err := starter.Run(storage_api.Components(envPath, true, false), cfgService, label, l)
+	joinerOp, err := starter.Run(storage_settings.Components(envPath, true, false), cfgService, label, l)
 	if err != nil {
 		l.Fatal(err)
 	}
 	defer joinerOp.CloseAll()
 
-	storage_api.WG.Wait()
+	storage_settings.WG.Wait()
 }

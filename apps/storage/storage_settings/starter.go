@@ -1,4 +1,4 @@
-package storage_api
+package storage_settings
 
 import (
 	"fmt"

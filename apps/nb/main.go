@@ -3,8 +3,7 @@ package main
 import (
 	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/starter"
-
-	"github.com/pavlo67/tools/apps/nb/nb_api"
+	"github.com/pavlo67/tools/apps/nb/nb_settings"
 )
 
 var (
@@ -21,7 +20,7 @@ func main() {
 		return
 	}
 
-	starters, err := nb_api.ServerComponents()
+	starters, err := nb_settings.ServerComponents()
 	if err != nil {
 		l.Fatal(err)
 	}
@@ -33,5 +32,5 @@ func main() {
 	}
 	defer joinerOp.CloseAll()
 
-	nb_api.WG.Wait()
+	nb_settings.WG.Wait()
 }

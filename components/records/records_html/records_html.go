@@ -10,7 +10,6 @@ import (
 	"github.com/pavlo67/common/common/server/server_http"
 	server_http2 "github.com/pavlo67/tools/common/server/server_http"
 
-	"github.com/pavlo67/tools/components/formatter"
 	"github.com/pavlo67/tools/components/notebook"
 	"github.com/pavlo67/tools/components/records"
 )
@@ -55,7 +54,7 @@ func New(pagesConfig, restConfig server_http.Config) (Operator, error) {
 
 const onPrepare = "on recordsHTML.Prepare(): "
 
-func (htmlOp *recordsHTML) Prepare(key formatter.Key, template string, params common.Map) error {
+func (htmlOp *recordsHTML) Prepare(key Key, template string, params common.Map) error {
 	return nil
 }
 
