@@ -39,7 +39,6 @@ func (frhs *recordsHTMLStarter) Prepare(cfg *config.Config, options common.Map) 
 	if frhs.pagesConfig, ok = options["pages_config"].(server_http.Config); !ok {
 		return fmt.Errorf(`no server_http.Config in options["pages_config"]`)
 	}
-
 	if frhs.restConfig, ok = options["rest_config"].(server_http.Config); !ok {
 		return fmt.Errorf(`no server_http.Config in options["rest_config"]`)
 	}

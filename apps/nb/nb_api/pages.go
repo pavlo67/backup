@@ -3,9 +3,9 @@ package nb_api
 import (
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/joiner"
-	"github.com/pavlo67/tools/components/notebook"
-
 	"github.com/pavlo67/common/common/server/server_http"
+
+	"github.com/pavlo67/tools/components/notebook"
 )
 
 // Swagger-UI sorts interface sections due to the first their path occurrences, so:

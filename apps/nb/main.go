@@ -21,7 +21,7 @@ func main() {
 		return
 	}
 
-	starters, err := nb_api.Components(true)
+	starters, err := nb_api.ServerComponents()
 	if err != nil {
 		l.Fatal(err)
 	}

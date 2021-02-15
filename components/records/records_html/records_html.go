@@ -55,13 +55,13 @@ func New(pagesConfig, restConfig server_http.Config) (Operator, error) {
 
 const onPrepare = "on recordsHTML.Prepare(): "
 
-func (formatterOp *recordsHTML) Prepare(key formatter.Key, template string, params common.Map) error {
+func (htmlOp *recordsHTML) Prepare(key formatter.Key, template string, params common.Map) error {
 	return nil
 }
 
 const onHTMLView = "on recordsHTML.HTMLView(): "
 
-func (formatterOp *recordsHTML) HTMLView(r *records.Item, children []records.Item) (string, error) {
+func (htmlOp *recordsHTML) HTMLView(r *records.Item, children []records.Item) (string, error) {
 	return fmt.Sprintf("%#v / %#v", r, children), nil
 	//htmlTags := "\n\n<ul>\n"
 	//
@@ -72,9 +72,9 @@ func (formatterOp *recordsHTML) HTMLView(r *records.Item, children []records.Ite
 	//		continue
 	//	}
 	//
-	//	method, urlStr, err := server_http2.EP(formatterOp.pagesConfig, notebook.IntefaceKeyHTMLTagged, []string{tag}, false)
+	//	method, urlStr, err := server_http2.EP(htmlOp.pagesConfig, notebook.IntefaceKeyHTMLTagged, []string{tag}, false)
 	//	if err != nil || urlStr == "" {
-	//		l.Errorf("can't server_http.EP(%#v, notebook.IntefaceKeyHTMLTags,nil,false), got %s, %s, %s", formatterOp.pagesConfig, method, urlStr, err)
+	//		l.Errorf("can't server_http.EP(%#v, notebook.IntefaceKeyHTMLTags,nil,false), got %s, %s, %s", htmlOp.pagesConfig, method, urlStr, err)
 	//		continue
 	//	}
 	//
@@ -86,7 +86,7 @@ func (formatterOp *recordsHTML) HTMLView(r *records.Item, children []records.Ite
 	//return htmlTags, nil
 }
 
-func (formatterOp *recordsHTML) HTMLTagged(tag tags.Item, tagged []records.Item) (string, error) {
+func (htmlOp *recordsHTML) HTMLTagged(tag tags.Item, tagged []records.Item) (string, error) {
 	return fmt.Sprintf("%s / %#v", tag, tagged), nil
 
 }

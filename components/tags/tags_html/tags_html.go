@@ -39,13 +39,13 @@ func New(pagesConfig, restConfig server_http.Config) (Operator, error) {
 
 const onPrepare = "on tagsHTML.Prepare(): "
 
-func (formatterOp *tagsHTML) Prepare(key formatter.Key, template string, params common.Map) error {
+func (htmlOp *tagsHTML) Prepare(key formatter.Key, template string, params common.Map) error {
 	return nil
 }
 
 const onHTMLTags = "on tagsHTML.HTMLTags(): "
 
-func (formatterOp *tagsHTML) HTMLTags(tss tags.Stats) (string, error) {
+func (htmlOp *tagsHTML) HTMLTags(tss tags.Stats) (string, error) {
 	htmlTags := "\n\n<ul>\n"
 
 	for i, ts := range tss {
@@ -55,9 +55,9 @@ func (formatterOp *tagsHTML) HTMLTags(tss tags.Stats) (string, error) {
 			continue
 		}
 
-		method, urlStr, err := server_http2.EP(formatterOp.pagesConfig, notebook.IntefaceKeyHTMLTagged, []string{tag}, false)
+		method, urlStr, err := server_http2.EP(htmlOp.pagesConfig, notebook.IntefaceKeyHTMLTagged, []string{tag}, false)
 		if err != nil || urlStr == "" {
-			l.Errorf("can't server_http.EP(%#v, notebook.IntefaceKeyHTMLTags,nil,false), got %s, %s, %s", formatterOp.pagesConfig, method, urlStr, err)
+			l.Errorf("can't server_http.EP(%#v, notebook.IntefaceKeyHTMLTags,nil,false), got %s, %s, %s", htmlOp.pagesConfig, method, urlStr, err)
 			continue
 		}
 

@@ -3,6 +3,10 @@ package nb_api
 import (
 	"fmt"
 
+	"github.com/pavlo67/common/common/auth/auth_http"
+	"github.com/pavlo67/tools/components/files/files_http"
+	"github.com/pavlo67/tools/components/records/records_http"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth/auth_jwt"
 	"github.com/pavlo67/common/common/auth/auth_persons"
@@ -21,27 +25,24 @@ import (
 	"github.com/pavlo67/tools/components/tags/tags_html"
 )
 
-func Components(startServer bool) ([]starter.Starter, error) {
+// TODO!!!
+var bucketsOptions = common.Map{
+	"buckets": files.Buckets{files.BucketID("1"): "../1"},
+}
 
-	// TODO!!!
-	bucketsOptions := common.Map{
-		"buckets": files.Buckets{files.BucketID("1"): "../1"},
-	}
+var pagesPrefix = ""
+var restPrefix = "/rest"
 
-	pagesPrefix := ""
-	restPrefix := "/rest"
+var prefixOptions = common.Map{
+	"pages_prefix": pagesPrefix,
+	"rest_prefix":  restPrefix,
+}
 
-	prefixOptions := common.Map{
-		"pages_prefix": pagesPrefix,
-		"rest_prefix":  restPrefix,
-	}
+func ServerComponents() ([]starter.Starter, error) {
 
 	if err := pagesConfig.CompleteDirectly(notebook_server_http.Endpoints, "", 0, pagesPrefix); err != nil {
 		return nil, fmt.Errorf(`on pagesConfig.CompleteDirectly() got %s`, err)
 	}
-	//if err := restConfig.CompleteDirectly(notebook_server_http.Endpoints, "", 0, restPrefix); err != nil {
-	//	return nil, fmt.Errorf(`on restConfig.CompleteDirectly() got %s`, err)
-	//}
 	if err := restConfig.CompleteDirectly(auth_server_http.Endpoints, "", 0, restPrefix); err != nil {
 		return nil, fmt.Errorf(`on restConfig.CompleteDirectly() got %s`, err)
 	}
@@ -68,21 +69,43 @@ func Components(startServer bool) ([]starter.Starter, error) {
 		{records_html.Starter(), endpointsOptions},
 		{tags_html.Starter(), endpointsOptions},
 		{notebook_server_http.Starter(), nil},
-	}
-
-	if !startServer {
-		return starters, nil
-	}
-
-	starters = append(
-		starters,
 
 		// action managers
-		starter.Starter{server_http_jschmhr.Starter(), nil},
+		{server_http_jschmhr.Starter(), nil},
 
 		// actions starter (connecting specific actions to the corresponding action managers)
-		starter.Starter{Starter(), prefixOptions},
-	)
+		{Starter(), prefixOptions},
+	}
+
+	return starters, nil
+}
+
+func ClientComponents() ([]starter.Starter, error) {
+
+	if err := pagesConfig.CompleteDirectly(notebook_server_http.Endpoints, "", 0, pagesPrefix); err != nil {
+		return nil, fmt.Errorf(`on pagesConfig.CompleteDirectly() got %s`, err)
+	}
+	if err := restConfig.CompleteDirectly(auth_server_http.Endpoints, "", 0, restPrefix); err != nil {
+		return nil, fmt.Errorf(`on restConfig.CompleteDirectly() got %s`, err)
+	}
+
+	endpointsOptions := common.Map{
+		"pages_config": pagesConfig,
+		"rest_config":  restConfig,
+	}
+
+	starters := []starter.Starter{
+		// general purposes components
+		{control.Starter(), nil},
+
+		// auth/persons components
+		{auth_jwt.Starter(), nil},
+		{auth_http.Starter(), nil}, // common.Map{"auth_jwt_key": ""}
+
+		// notebook components
+		{files_http.Starter(), endpointsOptions},
+		{records_http.Starter(), endpointsOptions},
+	}
 
 	return starters, nil
 }
