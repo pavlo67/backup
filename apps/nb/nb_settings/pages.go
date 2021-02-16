@@ -27,10 +27,10 @@ var RestConfig = server_http.Config{
 		//notebook.IntefaceKeyRESTRead:     {Path: "/read", Tags: []string{"unauthorized"}},
 		//notebook.IntefaceKeyRESTChildren: {Path: "/children", Tags: []string{"unauthorized"}},
 		//notebook.IntefaceKeyRESTTags:     {Path: "/tags", Tags: []string{"unauthorized"}},
-		//notebook.IntefaceKeyRESTTagged:   {Path: "/tagged", Tags: []string{"unauthorized"}},
+		//notebook.IntefaceKeyRESTList:   {Path: "/tagged", Tags: []string{"unauthorized"}},
 		//
 		//notebook.IntefaceKeyRESTSave:   {Path: "/save", Tags: []string{"authorized"}},
-		//notebook.IntefaceKeyRESTDelete: {Path: "/delete", Tags: []string{"authorized"}},
+		//notebook.IntefaceKeyRESTDele: {Path: "/delete", Tags: []string{"authorized"}},
 	},
 }
 
@@ -38,12 +38,12 @@ var PagesConfig = server_http.Config{
 	Title:   "Notebook pages",
 	Version: "0.0.1",
 	EndpointsSettled: map[joiner.InterfaceKey]server_http.EndpointSettled{
-		notebook.IntefaceKeyHTMLRoot:   {Path: "", Tags: []string{"unauthorized"}},
-		notebook.IntefaceKeyHTMLView:   {Path: "/view", Tags: []string{"unauthorized"}},
-		notebook.IntefaceKeyHTMLTags:   {Path: "/tags", Tags: []string{"unauthorized"}},
-		notebook.IntefaceKeyHTMLTagged: {Path: "/tagged", Tags: []string{"unauthorized"}},
-
-		notebook.IntefaceKeyHTMLEdit: {Path: "/edit", Tags: []string{"unauthorized"}},
+		notebook.IntefaceKeyHTMLRoot: {Path: ""},
+		notebook.IntefaceKeyHTMLView: {Path: "/view"},
+		notebook.IntefaceKeyHTMLTags: {Path: "/tags"},
+		notebook.IntefaceKeyHTMLList: {Path: "/list"},
+		notebook.IntefaceKeyHTMLEdit: {Path: "/edit"},
+		notebook.IntefaceKeyHTMLSave: {Path: "/save"},
 	},
 }
 

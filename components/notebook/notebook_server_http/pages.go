@@ -1,7 +1,9 @@
 package notebook_server_http
 
 import (
+	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
@@ -18,8 +20,9 @@ var Pages = server_http.Endpoints{
 	rootPage,
 	viewPage,
 	editPage,
+	savePage,
 	tagsPage,
-	taggedPage,
+	listPage,
 }
 
 var rootPage = server_http.Endpoint{
@@ -30,34 +33,35 @@ var rootPage = server_http.Endpoint{
 	},
 }
 
+func htmlView(id records.ID, options *crud.Options) (server.Response, error) {
+	errs := errors.CommonError()
+
+	r, err := recordsOp.Read(id, options)
+	errs = errs.Append(err)
+
+	var children []records.Item
+	selector, err := recordsOp.HasParent(id)
+	if err != nil {
+		errs = errs.Append(err)
+	} else {
+		options = options.WithSelector(selector)
+		children, err = recordsOp.List(options)
+		if err != nil {
+			l.Error(err)
+		}
+	}
+
+	message := notebookHTMLOp.HTMLMessage(errs)
+
+	return notebookHTMLOp.HTMLView(r, children, message)
+}
+
 var viewPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLView,
 	Method:      "GET",
 	PathParams:  []string{"record_id"},
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
-		id := records.ID(params["record_id"])
-
-		errs := errors.CommonError()
-
-		r, err := recordsOp.Read(id, options)
-		errs = errs.Append(err)
-
-		var children []records.Item
-
-		selector, err := recordsOp.HasParent(id)
-		if err != nil {
-			errs = errs.Append(err)
-		} else {
-			options = options.WithSelector(selector)
-			children, err = recordsOp.List(options)
-			if err != nil {
-				l.Error(err)
-			}
-		}
-
-		message := notebookHTMLOp.HTMLMessage(errs)
-
-		return notebookHTMLOp.HTMLView(r, children, message)
+		return htmlView(records.ID(params["record_id"]), options)
 	},
 }
 
@@ -73,13 +77,47 @@ var editPage = server_http.Endpoint{
 		r, err := recordsOp.Read(id, options)
 		errs = errs.Append(err)
 
-		title := "нотатник: " + r.Content.Title
-		htmlHeader := r.Content.Title
+		message := notebookHTMLOp.HTMLMessage(errs)
 
-		htmlStr, err := notebookHTMLOp.HTMLEdit(r, nil)
-		errs = errs.Append(err)
+		return notebookHTMLOp.HTMLEdit(r, nil, message)
+	},
+}
 
-		return notebook_html.HTMLPage(title, htmlHeader, "", htmlStr, errs.Error()), nil
+var savePage = server_http.Endpoint{
+	InternalKey: notebook.IntefaceKeyHTMLSave,
+	Method:      "POST",
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+
+		body, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			l.Error(err)
+		}
+
+		//var data common.Map
+		//if err = json.Unmarshal(dataBytes, &data); err != nil {
+		//	l.Error(err)
+		//}
+
+		data, err := url.ParseQuery(string(body))
+		if err != nil {
+			l.Error(err)
+		}
+
+		r := notebook_html.RecordFromData(data)
+		if r == nil {
+			l.Errorf("no data??? %s", body)
+			return notebook_html.HTMLPage("???", "??? no data", "", "ok!", ""), nil
+		}
+
+		l.Infof("$#v", r)
+
+		r, err = recordsOp.Save(*r, options)
+		if err != nil || r == nil {
+			l.Errorf("??? %#v, %s, %#v", r, err, err)
+			return notebook_html.HTMLPage("???", "???", "", "ok!", ""), nil
+		}
+
+		return htmlView(r.ID, options)
 	},
 }
 
@@ -105,8 +143,8 @@ var tagsPage = server_http.Endpoint{
 	},
 }
 
-var taggedPage = server_http.Endpoint{
-	InternalKey: notebook.IntefaceKeyHTMLTagged,
+var listPage = server_http.Endpoint{
+	InternalKey: notebook.IntefaceKeyHTMLList,
 	Method:      "GET",
 	PathParams:  []string{"tag"},
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
@@ -122,7 +160,7 @@ var taggedPage = server_http.Endpoint{
 		rs, err := recordsOp.List(optionsWithTag)
 		errs = errs.Append(err)
 
-		htmlStr, err := notebookHTMLOp.HTMLTagged(tag, rs)
+		htmlStr, err := notebookHTMLOp.HTMLList(tag, rs)
 		errs = errs.Append(err)
 
 		title := "нотатник: все з теґом '" + string(tag) + "'"

@@ -4,21 +4,23 @@ import (
 	"html"
 	"regexp"
 	"strings"
+
+	"github.com/pavlo67/common/common"
 )
 
 type Field struct {
-	Key    string
-	Label  string
-	Type   string
-	Format string
-	Class  string
+	Key        string
+	Label      string
+	Type       string
+	Options    common.Map
+	Attributes map[string]string
 }
 
 var ReDigitsOnly = regexp.MustCompile(`^\d+$`)
 
 type SelectString [][2]string
 
-func HTMLSelect(idDOMEscaped, class string, values SelectString, selected string) string {
+func HTMLSelect(general string, values SelectString, selected string) string {
 	body := ""
 	var option string
 	for i := 0; i < len(values); i++ {
@@ -34,26 +36,19 @@ func HTMLSelect(idDOMEscaped, class string, values SelectString, selected string
 		}
 		body += ">" + html.EscapeString(values[i][0]) + "</option>\n"
 	}
-	return `<select id="` + idDOMEscaped + `" ` + class + `>` + body + "</select>\n"
+	return `<select ` + general + `>` + body + "</select>\n"
 }
 
-func GeneralEditParts(formID, idDOM, class string) (string, string, string, string, string) {
-	idDOMNoFormEscaped := html.EscapeString(idDOM)
-	if formID != "" {
-		idDOM = formID + "_" + idDOM
+func GeneralEditPart(formID, fieldKey string, attributes map[string]string) string {
+	// idDOMEscaped := formID + html.EscapeString(fieldKey)
+	idDOM := formID + fieldKey
+
+	attributesHTML := " "
+	for k, v := range attributes {
+		attributesHTML += html.EscapeString(k) + `="` + html.EscapeString(v) + `" `
 	}
 
-	if class != "" {
-		class = ` class="` + html.EscapeString(class) + `"`
-	}
-
-	idDOMEscaped := html.EscapeString(idDOM)
-	var general = `id="` + idDOMEscaped + `"` + class
-
-	var generalNoForm = `id="` + idDOMNoFormEscaped + `"` + class
-	// to add listener by element.Id
-
-	return idDOM, idDOMEscaped, class, general, generalNoForm
+	return ` id="` + idDOM + `" name="` + fieldKey + `"` + attributesHTML
 
 }
 
@@ -63,23 +58,22 @@ func FieldEdit(formID string, field Field, data map[string]string, values map[st
 		return FieldView(field, data) // , frontOps
 	}
 
-	_, idDOMEscaped, class, general, generalNoForm := GeneralEditParts(formID, field.Key, field.Class)
+	general := GeneralEditPart(formID, field.Key, field.Attributes) // generalNoForm
 
-	var titleHTML = html.EscapeString(field.Label)
-	var resHTML string
+	var titleHTML, resHTML string
 
 	if field.Type == "password" {
 		resHTML = `<input style="width:100%" type="password" ` + general + ` />`
 	} else if field.Type == "select" {
-		resHTML = HTMLSelect(idDOMEscaped, class, values[field.Key], data[field.Key])
+		resHTML = HTMLSelect(general, values[field.Key], data[field.Key])
 	} else if field.Type == "text" {
-		resHTML = html.EscapeString(field.Format)
+		resHTML = html.EscapeString(field.Options.StringDefault("format", ""))
 	} else if field.Type == "checkbox" {
 		var checked string
 		if data[field.Key] != "" {
 			checked = " checked"
 		}
-		resHTML = `<input type="checkbox" ` + general + checked + `/>`
+		resHTML = `<input type="checkbox" ` + checked + general + `/>`
 		//} else if frontOp, ok := frontOps[field.Type]; ok {
 		//	params := map[string]string{
 		//		"form_id": formID,
@@ -87,19 +81,24 @@ func FieldEdit(formID string, field Field, data map[string]string, values map[st
 		//	}
 		//	resHTML = frontOp.HTMLToEdit(field, data[field.Key], values[field.Key], params)
 	} else {
+		var titleHTML = html.EscapeString(field.Label)
 		var value = html.EscapeString(data[field.Key])
-		if field.Type == "button" {
-			resHTML = `<input type="button" ` + generalNoForm + ` data-form_id="` + html.EscapeString(formID) + `" data-value="` + value + `" value="` + titleHTML + `" />`
+		if field.Type == "button" || field.Type == "submit" {
+			resHTML = `<input type="` + field.Type + `" value="` + titleHTML + `"` + general + ` />`
 			titleHTML = ""
 		} else if field.Type == "hidden" {
-			resHTML = `<input type="hidden" ` + general + ` value="` + value + `" /> `
+			resHTML = `<input type="hidden"  value="` + value + `"` + general + `/>`
 			titleHTML = ""
-		} else if ReDigitsOnly.MatchString(strings.TrimSpace(field.Format)) {
-			resHTML = `<textarea style="width:100%" ` + general + ` rows=` + field.Format + `>` + value + `</textarea>`
+		} else if format := strings.TrimSpace(field.Options.StringDefault("format", "")); ReDigitsOnly.MatchString(format) {
+			resHTML = `<textarea style="width:100%"  rows=` + format + general + `>` + value + `</textarea>`
 		} else if field.Type == "date" {
-			resHTML = `<input type="date" ` + general + ` value="` + value + `" />`
+			resHTML = `<input type="date" value="` + value + `"` + general + `/>`
 		} else {
-			resHTML = `<input type="` + field.Type + `"style="width:100%" ` + general + ` value="` + value + `" />`
+			var fieldType string
+			if field.Type != "" {
+				fieldType = ` type="` + field.Type + `"`
+			}
+			resHTML = `<input` + fieldType + ` style="width:100%"  value="` + value + `"` + general + ` />`
 		}
 	}
 	return titleHTML, resHTML
@@ -131,30 +130,30 @@ func FieldView(field Field, data map[string]string) (string, string) { // , fron
 		return "", ""
 	}
 
-	var class = field.Class
+	var class = field.Attributes["class"]
 	if class != "" {
-		class = " Class=\"" + html.EscapeString(class) + "\""
+		class = ` class="` + html.EscapeString(class) + `"`
 	}
 
 	var resHTML string
 
-	if field.Format == "datetime" {
+	if field.Options.StringDefault("format", "") == "datetime" {
 		resHTML = html.EscapeString(data[field.Key])
 
-	} else if field.Format == "url" {
+	} else if field.Options.StringDefault("format", "") == "url" {
 		var url = html.EscapeString(data[field.Key])
 		resHTML = `<a href="` + url + `" target=_blank>` + url + `</a>`
 
 	} else if field.Type == "text" {
-		resHTML = html.EscapeString(field.Format)
+		resHTML = html.EscapeString(field.Options.StringDefault("format", ""))
 
 	} else if field.Type == "checkbox" {
 		if data[field.Key] == "on" {
 			resHTML = "так"
-		} else if field.Class != "not_empty" {
+		} else if field.Attributes["class"] != "not_empty" {
 			resHTML = "ні"
 		}
-	} else if field.Class == "not_empty" && data[field.Key] == "0" {
+	} else if field.Attributes["class"] == "not_empty" && data[field.Key] == "0" {
 		// shows nothing
 	} else {
 		resHTML = html.EscapeString(data[field.Key])

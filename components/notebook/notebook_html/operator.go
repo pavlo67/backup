@@ -20,8 +20,8 @@ type Operator interface {
 	Prepare(key Key, template string, params common.Map) error
 
 	HTMLView(r *records.Item, children []records.Item, message string) (server.Response, error)
-	HTMLEdit(r *records.Item, children []records.Item) (string, error)
-	HTMLTagged(tag tags.Item, tagged []records.Item) (string, error)
+	HTMLEdit(r *records.Item, children []records.Item, message string) (server.Response, error)
+	HTMLList(tag tags.Item, tagged []records.Item) (string, error)
 	HTMLTags(rs tags.Stats) (string, error)
 
 	HTMLMessage(errs errors.Error) string

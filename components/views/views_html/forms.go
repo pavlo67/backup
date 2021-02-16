@@ -1,7 +1,5 @@
 package views_html
 
-import "html"
-
 func HTMLViewTable(fields []Field, data map[string]string, options map[string]SelectString) string { // , frontOps map[string]Operator
 	if data == nil {
 		data = map[string]string{}
@@ -25,7 +23,7 @@ func HTMLViewTable(fields []Field, data map[string]string, options map[string]Se
 	// +`<input id=links_list type=hidden value="` + html.EscapeString(data["tags"]) + `">` + "\n"
 }
 
-func HTMLEditTable(fields []Field, formID string, data map[string]string, values map[string]SelectString) string { // ,
+func HTMLEditTable(fields []Field, formID, url string, data map[string]string, values map[string]SelectString) string { // ,
 	// frontOps map[string]Operator, rView auth.ID, publicChanges bool
 	//if data == nil {
 	//	data = map[string]string{}
@@ -38,7 +36,7 @@ func HTMLEditTable(fields []Field, formID string, data map[string]string, values
 
 	var editHTML, titleHTML, resHTML string
 	for _, f := range fields {
-		titleHTML, resHTML = FieldEdit("edit_note_"+formID, f, data, values) // , frontOps
+		titleHTML, resHTML = FieldEdit(formID, f, data, values) // , frontOps
 
 		//if resHTML == "" && f.Params[NotEmptyKey] == true {
 		//	continue
@@ -47,9 +45,10 @@ func HTMLEditTable(fields []Field, formID string, data map[string]string, values
 		if titleHTML != "" {
 			titleHTML = "<small>" + titleHTML + ":</small> \n"
 		}
-		editHTML += `<tr id="div_` + html.EscapeString(formID+f.Key) + `"><td>` + "\n" + titleHTML + "</td><td>" + resHTML + "</td></tr>"
+		editHTML += `<tr><td>` + titleHTML + "</td><td>" + resHTML + "</td></tr>\n"
+		//  id="div_` + html.EscapeString(formID+f.Key) + `"
 
 	}
 
-	return `<table width="100%">` + editHTML + "</table>\n"
+	return `<table width="100%"><form action="` + url + `" method="POST">` + "\n" + editHTML + "\n</form>\n</table>\n"
 }

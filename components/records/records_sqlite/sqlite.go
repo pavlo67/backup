@@ -83,9 +83,9 @@ const onSave = "on recordsSQLite.Save(): "
 
 func (recordsOp *recordsSQLite) Save(item records.Item, options *crud.Options) (*records.Item, error) {
 
-	if options == nil || options.Identity == nil {
-		return nil, errors.CommonError(common.NoRightsKey)
-	}
+	//if options == nil || options.Identity == nil {
+	//	return nil, errors.CommonError(common.NoRightsKey)
+	//}
 
 	// TODO!!! rbac check
 

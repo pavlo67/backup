@@ -3,7 +3,11 @@ package notebook_html
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
+
+	"github.com/pavlo67/tools/components/ns"
 
 	"github.com/cbroglie/mustache"
 
@@ -42,11 +46,11 @@ func New(htmlTemplate string, pagesConfig, restConfig server_http.Config) (Opera
 		return nil, fmt.Errorf("wrong method on EP(%#v, notebook.IntefaceKeyHTMLView, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
 	}
 
-	method, urlStr, err = server_http2.EP(pagesConfig, notebook.IntefaceKeyHTMLTagged, []string{"id"}, false)
+	method, urlStr, err = server_http2.EP(pagesConfig, notebook.IntefaceKeyHTMLList, []string{"id"}, false)
 	if err != nil || urlStr == "" {
-		return nil, fmt.Errorf("can't EP(%#v, notebook.IntefaceKeyHTMLTagged, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
+		return nil, fmt.Errorf("can't EP(%#v, notebook.IntefaceKeyHTMLList, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
 	} else if strings.TrimSpace(strings.ToUpper(method)) != "GET" {
-		return nil, fmt.Errorf("wrong method on EP(%#v, notebook.IntefaceKeyHTMLTagged, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
+		return nil, fmt.Errorf("wrong method on EP(%#v, notebook.IntefaceKeyHTMLList, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
 	}
 
 	method, urlStr, err = server_http2.EP(pagesConfig, notebook.IntefaceKeyHTMLEdit, []string{"id"}, false)
@@ -70,25 +74,64 @@ func (htmlOp *notebookHTML) Prepare(key Key, template string, params common.Map)
 }
 
 var dataFields = []views_html.Field{
-	{"id", "", "hidden", "", ""},
-	{"issued_id", "", "hidden", "", ""},
-	{"data_type", "", "hidden", "", ""},
-	// {"visibility", "тип", "select", "", "ut"},
-	// {"history_key", "", "hidden", "", ""},
+	{"id", "", "hidden", nil, nil},
+	{"issued_id", "", "hidden", nil, nil},
+	{"data_type", "", "hidden", nil, nil},
+	// {"visibility", "тип", "select", nil, "ut"},
+	// {"history_key", "", "hidden", nil, nil},
 
-	{"title", "заголовок", "", "", ""},
-	{"summary", "коротко про", "", "", ""},
-	{"content_data", "опис", "", "35", ""},
-	{"tags", "теми, розділи", "tag-it", "", ""},
+	{"title", "заголовок", "", nil, nil},
+	{"summary", "коротко про", "", nil, nil},
+	{"content_data", "опис", "", common.Map{"format": "35"}, nil},
+	{"tags", "теми, розділи", "tag-it", nil, nil},
 	// {"data_subtype", "", "hidden", "", ""},
 	// {"embedded", "", "hidden", "", ""},
 	// {"files", "завантажити файл", "file", "", "ut"},
 
-	{"created_at", "створено", "view", "datetime", "not_empty"},
-	{"updated_at", "востаннє відредаґовано", "view", "datetime", "not_empty"},
+	{"created_at", "створено", "view", common.Map{"format": "datetime"}, map[string]string{"class": "not_empty"}},
+	{"updated_at", "востаннє відредаґовано", "view", common.Map{"format": "datetime"}, map[string]string{"class": "not_empty"}},
 }
 
-func data(r *records.Item) map[string]string {
+func value(data map[string][]string, key string) string {
+	v := data[key]
+	if len(v) == 1 {
+		return v[0]
+	} else if len(v) > 1 {
+		return strings.Join(v, " ")
+	}
+
+	return ""
+}
+
+func RecordFromData(data map[string][]string) *records.Item {
+	if data == nil {
+		return nil
+	}
+
+	var tagItems []tags.Item
+	for _, t := range strings.Split(value(data, "tags"), ";") {
+		tagItems = append(tagItems, tags.Item(strings.TrimSpace(t)))
+	}
+
+	r := records.Item{
+		ID:       records.ID(value(data, "id")),
+		IssuedID: ns.ID(value(data, "issued_id")),
+		Content: records.Content{
+			Title:   value(data, "title"),
+			Summary: value(data, "summary"),
+			// TypeKey:  "",
+			Data: value(data, "content_data"),
+			// Embedded: nil,
+			Tags: tagItems,
+		},
+		//OwnerID:   "",
+		//ViewerID:  "",
+	}
+
+	return &r
+}
+
+func DataFromRecord(r *records.Item) map[string]string {
 	if r == nil {
 		return nil
 	}
@@ -115,7 +158,7 @@ func data(r *records.Item) map[string]string {
 	//if err != nil {
 	//	return nil, nil, errors.Wrapf(err, "can't marshal object.tags: %#v for object.id: %s", r.Links, r.ID)
 	//}
-	//data["links"] = string(linksList)
+	//DataFromRecord["links"] = string(linksList)
 	//
 	//tags := ""
 	//filesList := []interfaces.Link{}
@@ -129,25 +172,24 @@ func data(r *records.Item) map[string]string {
 	//		filesList = append(filesList, l)
 	//	}
 	//}
-	//data["tags"] = tags
+	//DataFromRecord["tags"] = tags
 	//if len(filesList) > 0 {
 	//	files, err := json.Marshal(filesList)
 	//	if err != nil {
 	//		log.Println(err)
 	//	}
-	//	data["files"] = string(files)
+	//	DataFromRecord["files"] = string(files)
 	//}
 	//
 	//if r.UpdatedAt != nil {
-	//	data["updated_at"] = r.UpdatedAt.Format("02.01.2006 15:04:05")
+	//	DataFromRecord["updated_at"] = r.UpdatedAt.Format("02.01.2006 15:04:05")
 	//}
 
 	return data
 
 }
 
-var createFields = append(dataFields, views_html.Field{"create", "зберегти запис", "button", "", "ut"})
-var updateFields = append(dataFields, views_html.Field{"update", "зберегти зміни", "button", "", "ut"})
+var createFields = append(dataFields, views_html.Field{"create", "зберегти запис", "button", nil, map[string]string{"class": "ut"}})
 
 // TODO!!! look at https://github.com/kataras/blocks
 
@@ -158,12 +200,11 @@ func (htmlOp *notebookHTML) HTMLMessage(errs errors.Error) string {
 const onHTMLView = "on notebookHTML.HTMLView(): "
 
 func (htmlOp *notebookHTML) HTMLView(r *records.Item, children []records.Item, message string) (server.Response, error) {
-
 	context := map[string]string{
 		"title":   "нотатник: " + r.Content.Title,
 		"header":  r.Content.Title,
 		"message": message,
-		"content": views_html.HTMLViewTable(dataFields, data(r), nil),
+		"content": views_html.HTMLViewTable(dataFields, DataFromRecord(r), nil),
 	}
 
 	htmlPage, err := mustache.Render(htmlOp.htmlTemplate, context)
@@ -177,11 +218,45 @@ func (htmlOp *notebookHTML) HTMLView(r *records.Item, children []records.Item, m
 
 const onHTMLEdit = "on notebookHTML.HTMLEdit(): "
 
-func (htmlOp *notebookHTML) HTMLEdit(r *records.Item, children []records.Item) (string, error) {
-	return views_html.HTMLEditTable(dataFields, "nb_edit_", data(r), nil), nil
+func (htmlOp *notebookHTML) HTMLEdit(r *records.Item, children []records.Item, message string) (server.Response, error) {
+	formID := "nb_edit_" + strconv.FormatInt(time.Now().Unix(), 10) + "_"
+
+	updateFields := append(
+		dataFields,
+		views_html.Field{
+			"update",
+			"зберегти зміни",
+			"submit",
+			nil,
+			map[string]string{"class": "ut"},
+		},
+		//views_html.Field{
+		//	"update",
+		//	"зберегти зміни",
+		//	"button",
+		//	nil,
+		//	map[string]string{"class": "ut", "onclick": `getData("` + formID + `")`},
+		//},
+	)
+
+	context := map[string]string{
+		"title":   "редаґування нотатки: " + r.Content.Title,
+		"header":  "редаґування нотатки: " + r.Content.Title,
+		"message": message,
+		"content": views_html.HTMLEditTable(updateFields, formID, "/save", DataFromRecord(r), nil),
+	}
+
+	htmlPage, err := mustache.Render(htmlOp.htmlTemplate, context)
+
+	return server.Response{
+		Status:   http.StatusOK,
+		Data:     []byte(htmlPage),
+		MIMEType: "text/html; charset=utf-8",
+	}, err
+
 }
 
-func (htmlOp *notebookHTML) HTMLTagged(tag tags.Item, tagged []records.Item) (string, error) {
+func (htmlOp *notebookHTML) HTMLList(tag tags.Item, tagged []records.Item) (string, error) {
 	return fmt.Sprintf("%s / %#v", tag, tagged), nil
 
 }
@@ -198,7 +273,7 @@ func (htmlOp *notebookHTML) HTMLTags(tss tags.Stats) (string, error) {
 			continue
 		}
 
-		method, urlStr, err := server_http2.EP(htmlOp.pagesConfig, notebook.IntefaceKeyHTMLTagged, []string{tag}, false)
+		method, urlStr, err := server_http2.EP(htmlOp.pagesConfig, notebook.IntefaceKeyHTMLList, []string{tag}, false)
 		if err != nil || urlStr == "" {
 			l.Errorf("can't server_http.EP(%#v, notebook.IntefaceKeyHTMLTags,nil,false), got %s, %s, %s", htmlOp.pagesConfig, method, urlStr, err)
 			continue

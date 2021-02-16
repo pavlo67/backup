@@ -5,16 +5,16 @@ import "github.com/pavlo67/common/common/joiner"
 const InterfaceKey joiner.InterfaceKey = "notebook"
 
 const IntefaceKeyHTMLRoot joiner.InterfaceKey = "notebook_html_root"
-const IntefaceKeyHTMLTags joiner.InterfaceKey = "notebook_html_tags"
 
 const IntefaceKeyHTMLView joiner.InterfaceKey = "notebook_html_view"
 const IntefaceKeyHTMLEdit joiner.InterfaceKey = "notebook_html_edit"
-const IntefaceKeyHTMLTagged joiner.InterfaceKey = "notebook_html_tagged"
+const IntefaceKeyHTMLSave joiner.InterfaceKey = "notebook_html_save"
+const IntefaceKeyHTMLDele joiner.InterfaceKey = "notebook_html_dele"
+const IntefaceKeyHTMLTags joiner.InterfaceKey = "notebook_html_tags"
+const IntefaceKeyHTMLList joiner.InterfaceKey = "notebook_html_list"
 
-const IntefaceKeyRESTSave joiner.InterfaceKey = "notebook_rest_save"
 const IntefaceKeyRESTRead joiner.InterfaceKey = "notebook_rest_read"
-const IntefaceKeyRESTChildren joiner.InterfaceKey = "notebook_rest_children"
-const IntefaceKeyRESTDelete joiner.InterfaceKey = "notebook_rest_delete"
-
-const IntefaceKeyRESTTagged joiner.InterfaceKey = "notebook_rest_tagged"
+const IntefaceKeyRESTSave joiner.InterfaceKey = "notebook_rest_save"
+const IntefaceKeyRESTDele joiner.InterfaceKey = "notebook_rest_dele"
 const IntefaceKeyRESTTags joiner.InterfaceKey = "notebook_rest_tags"
+const IntefaceKeyRESTList joiner.InterfaceKey = "notebook_rest_list"
