@@ -1,8 +1,10 @@
-package viewshtml
+package views_html_old
 
 import "strconv"
 
 var num int
+
+var ImgMinus, ImgPlus string // TODO!!!
 
 func HTMLOpenClose(title, content string, visible bool) string {
 	num++

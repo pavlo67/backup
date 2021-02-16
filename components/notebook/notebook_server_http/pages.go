@@ -1,7 +1,6 @@
 package notebook_server_http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/pavlo67/common/common/crud"
@@ -12,17 +11,18 @@ import (
 	"github.com/pavlo67/tools/components/notebook"
 	"github.com/pavlo67/tools/components/records"
 	"github.com/pavlo67/tools/components/tags"
+	"github.com/pavlo67/tools/components/views/views_html"
 )
 
-var Endpoints = server_http.Endpoints{
-	rootEndpoint,
-	viewEndpoint,
-	editEndpoint,
-	tagsEndpoint,
-	taggedEndpoint,
+var Pages = server_http.Endpoints{
+	rootPage,
+	viewPage,
+	editPage,
+	tagsPage,
+	taggedPage,
 }
 
-var rootEndpoint = server_http.Endpoint{
+var rootPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLRoot,
 	Method:      "GET",
 	WorkerHTTP: func(_ server_http.Operator, _ *http.Request, _ server_http.Params, _ *crud.Options) (server.Response, error) {
@@ -30,7 +30,21 @@ var rootEndpoint = server_http.Endpoint{
 	},
 }
 
-var viewEndpoint = server_http.Endpoint{
+var dataFields = []views_html.Field{
+	{"visibility", "тип", "select", "", "ut"},
+	{"title", "заголовок", "", "", ""},
+	{"content", "опис", "", "35", ""},
+	{"tags", "теми, розділи", "tag-it", "", ""},
+	{"updated_at", "востаннє відредаґовано", "view", "datetime", "not_empty"},
+	{"files", "Завантажити файл", "file", "", "ut"},
+	{"id", "", "hidden", "", ""},
+	{"genus", "", "hidden", "", ""},
+}
+
+var createFields = append(dataFields, views_html.Field{"create", "Зберегти запис", "button", "", "ut"})
+var updateFields = append(dataFields, views_html.Field{"update", "Зберегти зміни", "button", "", "ut"})
+
+var viewPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLView,
 	Method:      "GET",
 	PathParams:  []string{"record_id"},
@@ -66,7 +80,7 @@ var viewEndpoint = server_http.Endpoint{
 	},
 }
 
-var editEndpoint = server_http.Endpoint{
+var editPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLEdit,
 	Method:      "GET",
 	PathParams:  []string{"record_id"},
@@ -81,12 +95,14 @@ var editEndpoint = server_http.Endpoint{
 		title := "нотатник: " + r.Content.Title
 		htmlHeader := r.Content.Title
 
-		htmlStr := fmt.Sprintf("edit form for %s --> %#v", id, r)
+		//htmlStr := fmt.Sprintf("edit form for %s --> %#v", id, r)
+		htmlStr := HTMLEditTable(dataFields, "nb_edit_", nil, nil)
+
 		return HTMLPage(title, htmlHeader, "", htmlStr, errs.Error()), nil
 	},
 }
 
-var tagsEndpoint = server_http.Endpoint{
+var tagsPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLTags,
 	Method:      "GET",
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
@@ -108,7 +124,7 @@ var tagsEndpoint = server_http.Endpoint{
 	},
 }
 
-var taggedEndpoint = server_http.Endpoint{
+var taggedPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLTagged,
 	Method:      "GET",
 	PathParams:  []string{"tag"},

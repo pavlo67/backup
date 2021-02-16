@@ -1,4 +1,4 @@
-package viewshtml
+package views_html_old
 
 func Table(labels []string, data [][]string) string {
 	var html string

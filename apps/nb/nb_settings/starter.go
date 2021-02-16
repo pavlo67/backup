@@ -2,6 +2,7 @@ package nb_settings
 
 import (
 	"fmt"
+	"io/ioutil"
 
 	"github.com/pavlo67/common/common/filelib"
 
@@ -60,12 +61,31 @@ func (ns *nbStarter) Run(joinerOp joiner.Operator) error {
 	if err := restConfig.CompleteWithJoiner(joinerOp, "", srvPort, ns.restPrefix); err != nil {
 		return err
 	}
-	//if err := server_http.InitPages(srvOp, restConfig, l); err != nil {
+
+	//if err := server_http.InitEndpointsWithSwaggerV2(srvOp, restConfig, !isHTTPS, restStaticPath, restServerSubpath, l); err != nil {
 	//	return err
 	//}
-	swaggerStaticPath := filelib.CurrentPath() + "../nb_rest_static/api-docs/"
-	swaggerServerSubpath := "api-docs"
-	if err := server_http.InitEndpointsWithSwaggerV2(srvOp, restConfig, !isHTTPS, swaggerStaticPath, swaggerServerSubpath, l); err != nil {
+
+	if err := server_http.InitPages(srvOp, restConfig, l); err != nil {
+		return err
+	}
+
+	restStaticPath := filelib.CurrentPath() + "../rest_static/"
+	restServerSubpath := "/*filepath"
+
+	swaggerStaticPath := restStaticPath + "api-docs/"
+	swaggerStaticFilePath := swaggerStaticPath + "swaggerJSON.json"
+
+	swaggerJSON, err := restConfig.SwaggerV2(isHTTPS)
+	if err != nil {
+		return err
+	}
+	if err = ioutil.WriteFile(swaggerStaticFilePath, swaggerJSON, 0644); err != nil {
+		return fmt.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerStaticFilePath, swaggerJSON, err)
+	}
+	l.Infof("%d bytes are written into %s", len(swaggerJSON), swaggerStaticFilePath)
+
+	if err := srvOp.HandleFiles("rest_static", ns.restPrefix+restServerSubpath, server_http.StaticPath{LocalPath: restStaticPath}); err != nil {
 		return err
 	}
 
@@ -75,10 +95,10 @@ func (ns *nbStarter) Run(joinerOp joiner.Operator) error {
 	if err := server_http.InitPages(srvOp, pagesConfig, l); err != nil {
 		return err
 	}
-	pagesStaticPath := filelib.CurrentPath() + "../nb_pages_static/"
+	pagesStaticPath := filelib.CurrentPath() + "../pages_static/"
 	pagesStaticServerSubpath := "/static"
 	if pagesStaticPath != "" {
-		if err := srvOp.HandleFiles("js", ns.pagesPrefix+pagesStaticServerSubpath+"/*filepath", server_http.StaticPath{LocalPath: pagesStaticPath}); err != nil {
+		if err := srvOp.HandleFiles("pages_static", ns.pagesPrefix+pagesStaticServerSubpath+"/*filepath", server_http.StaticPath{LocalPath: pagesStaticPath}); err != nil {
 			return err
 		}
 	}

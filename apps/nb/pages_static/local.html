@@ -11,10 +11,7 @@
 
     <script src="/js0/jquery.3.1.1.min.js" type="text/javascript"></script>
     <script src="/js0/jquery-ui.min.js" type="text/javascript"></script>
-    <script src="/js0/basis.js" type="text/javascript"></script>
     <script src="/js0/page.js" type="text/javascript"></script>
-    <script src="/js0/model.js" type="text/javascript"></script>
-    <script src="/js0/form.js" type="text/javascript"></script>
     {{{share_tags}}}
 </head>
 
@@ -23,7 +20,7 @@
 <table width=100% cellpadding=0 cellspacing=0>
     <tr>
         <td class="left_column">
-            <h1 class="ut0" title="Приватний нотатник і збирач даних. Публічна біліотека."><a href="/" style="color:#666666">Ruthenia.Info</a></h1>
+            <h1 class="ut0" title="Приватний нотатник"><a href="/" style="color:#666666">Нотатник</a></h1>
             <div class="left_div ut">
                 {{{user}}}
                 {{{left}}}
@@ -31,19 +28,17 @@
         </td>
         <td class="main_column">
             <table class="border" style="padding:5px;margin: 15px 0 10px 10px;width:200px;" align=right>{{{index}}}</table>
-            <div class="ut1" style="min-height:92px;"><span style="font-size:16pt;">{{{caput}}}</span><br>{{{navigation}}}</div>
-            <span id="success_message" style="clear:both;">{{{message}}}</span>
-            <span id="error_message"   style="clear:both;" class="{{{show_warning}}}">{{{warning}}}</span>
+            <div class="ut1" style="min-height:71px;"><span style="font-size:16pt;">{{{caput}}}</span><br>{{{navigation}}}</div>
+            <span class="{{{show_warning}}}" role="alert" id="alarm_mes">{{{warning}}}</span>
+            <span role="alert" id="success_mes"></span>
+            <span role="alert" id="error_mes"></span>
             <div id="corpus">{{{corpus}}}</div>
         </td>
     </tr>
 <tr>
     <td class="left_column"></td>
     <td class="main_column" align=right>
-        &#9900; <a href=/view/1>про цей сервер</a><br>
-        &#9900; <a href=/view/2>правила публікацій</a>
-        <p><b><i><a href=/ target=_blank>dumaj.org.ua</a></i></b>
-        <br>Відкрито: 27.01.2017
+        <p><b><i><a href="http://dumaj.org.ua" target=_blank>dumaj.org.ua</a></i></b>
     </td>
 </tr>
 </table>

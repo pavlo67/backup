@@ -42,6 +42,8 @@ h3              { font-size:13pt; font-weight:normal; }
 ::-moz-placeholder {  /* Firefox 19+ */ text-align: center; }
 :-ms-input-placeholder { text-align: center; }
 
+.modal-lg { max-width: 80% !important; }
+
 .badge1 { position:relative; }
 
 .alert {

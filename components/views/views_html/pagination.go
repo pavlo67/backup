@@ -1,6 +1,6 @@
-package viewshtml
+package views_html
 
-//func Pagination(limits []uint64, sortBy []string, opt *httplib.ReadOptionsHTTP) string {
+//func HTMLPagination(opt *crud.ReadAllHTTPOptions) string {
 //	if opt == nil {
 //		return ""
 //	}
@@ -13,21 +13,21 @@ package viewshtml
 //
 //	paginationHTML := ""
 //
-//	var pageLength uint64
-//	if len(limits) > 1 {
-//		pageLength = limits[1]
-//	} else if len(limits) > 0 {
-//		pageLength = limits[0]
+//	maxCnt := uint64(0)
+//	pageLength := uint64(0)
+//	if len(opt.Limits) > 0 {
+//		maxCnt += opt.Limits[0]
+//		pageLength = opt.Limits[0]
+//		if len(opt.Limits) > 1 {
+//			maxCnt += opt.Limits[1]
+//			pageLength = opt.Limits[1]
+//		}
 //	}
 //
-//	pageNum := opt.PageNum
-//	if pageNum == 0 {
-//		pageNum = 1
-//	}
-//
-//	if pageLength > 0 && opt.AllCnt > pageLength {
+//	if maxCnt > 0 && opt.AllCnt > maxCnt {
 //		var showNextPrevPage = 2
-//		paginationHTML += "\n"
+//		paginationHTML += `
+//`
 //		pages := opt.AllCnt / pageLength
 //		if pages*pageLength < opt.AllCnt {
 //			pages++
@@ -36,7 +36,7 @@ package viewshtml
 //		for i := uint64(1); i <= pages; i++ {
 //			if pages > 5 {
 //				if i != 1 && i != pages {
-//					if int(math.Abs(float64(pageNum-i))) > showNextPrevPage {
+//					if int(math.Abs(float64(opt.PageNum-i+1))) > showNextPrevPage {
 //						if !threePoints {
 //							threePoints = true
 //							paginationHTML += `...
@@ -47,10 +47,8 @@ package viewshtml
 //					threePoints = false
 //				}
 //			}
-//			if i != pageNum {
-//				href := opt.WithParams + opt.CGIParams +
-//					"sort=" + strings.Join(sortBy, "+") +
-//					"&page=" + strconv.FormatUint(i, 10)
+//			if i-1 != opt.PageNum {
+//				href := opt.Path + opt.CGIParams + "sort=" + strings.Join(opt.SortBy, "+") + "&page=" + strconv.FormatUint(i-1, 10)
 //				paginationHTML += `
 //				[<a href="` + href + `">` + strconv.FormatUint(i, 10) + `</a>]
 //`

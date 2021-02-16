@@ -1,0 +1,32 @@
+{
+ "info": {
+  "title": "Notebook REST API",
+  "version": "0.0.1"
+ },
+ "paths": {
+  "/rest/auth": {
+   "post": {
+    "operationId": "auth_authenticate",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "body_item",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "unauthorized"
+    ]
+   }
+  }
+ },
+ "port": ":3002",
+ "schemes": [
+  "http"
+ ],
+ "swagger": "2.0"
+}

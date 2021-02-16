@@ -76,5 +76,5 @@ func (nshs *notebookServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no tags_html.Operator with key %s", nshs.tagsHTMLKey)
 	}
 
-	return server_http.JoinEndpoints(joinerOp, Endpoints)
+	return server_http.JoinEndpoints(joinerOp, Pages)
 }

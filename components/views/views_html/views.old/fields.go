@@ -1,9 +1,9 @@
-package viewshtml
+package views_html_old
 
 import (
 	"html"
 
-	"github.com/pavlo67/punctum/basis"
+	"github.com/pavlo67/common/common"
 )
 
 type Attributes map[string]string
@@ -14,38 +14,19 @@ type Field struct {
 	Type           string     `bson:"type,omitempty"            json:"type,omitempty"`
 	Format         string     `bson:"format,omitempty"          json:"format,omitempty"`
 	AttributesHTML string     `bson:"attributes_html,omitempty" json:"attributes_html,omitempty"`
-	Params         basis.Info `bson:"params,omitempty"          json:"params,omitempty"`
+	Params         common.Map `bson:"params,omitempty"          json:"params,omitempty"`
 }
 
 const NotEmptyKey = "not_empty"
 const NoEscapeKey = "no_escape"
-const ModelKey = "model"
-const AddBlankKey = "add_blank"
-const MultiplyKey = "multiply"
-const CreateNewKey = "create_new"
-const CreateNewTitleKey = "create_new_title"
-const GenusKey = "genus"
 
-var NotEmpty = basis.Info{NotEmptyKey: true}
-var NoEscape = basis.Info{NoEscapeKey: true}
+var NotEmpty = common.Map{NotEmptyKey: true}
+var NoEscape = common.Map{NoEscapeKey: true}
 
-func AttributesHTML(attributes Attributes) string {
-	var attributesHTML string
-	for k, v := range attributes {
-		attributesHTML += " " + html.EscapeString(k) + `="` + html.EscapeString(v) + `"`
-	}
-
-	return attributesHTML
-}
-
-func AttributeHTML(key, value string) string {
-	return key + `="` + html.EscapeString(value) + `"`
-}
-
-func FieldEdit(formID string, field Field, data map[string]string, options map[string]SelectString, frontOps map[string]Operator) (string, string) {
+func FieldEdit(formID string, field Field, data map[string]string, options map[string]SelectString) (string, string) {
 
 	if field.Type == "view" || field.Type == "text" {
-		return FieldView(field, data, options, frontOps)
+		return FieldView(field, data, options)
 
 	} else if field.Type == "button" {
 		attributes := AttributesHTML(
@@ -78,12 +59,12 @@ func FieldEdit(formID string, field Field, data map[string]string, options map[s
 			checked = " checked"
 		}
 		resHTML = `<input type="checkbox" ` + attributes + checked + `/>`
-	} else if frontOp, ok := frontOps[field.Type]; ok {
-		params := map[string]string{
-			"form_id": formID,
-			"style":   "width:100%",
-		}
-		resHTML = frontOp.HTMLToEdit(field, data[field.Key], options[field.Key], params)
+		//} else if frontOp, ok := frontOps[field.Type]; ok {
+		//	params := map[string]string{
+		//		"form_id": formID,
+		//		"style":   "width:100%",
+		//	}
+		//	resHTML = frontOp.HTMLToEdit(field, data[field.Key], options[field.Key], params)
 	} else {
 		var value = html.EscapeString(data[field.Key])
 		if field.Type == "hidden" {
@@ -116,7 +97,7 @@ func FieldEdit(formID string, field Field, data map[string]string, options map[s
 // view - not editable data field
 // text - text label only (no data field linked to!)
 
-func FieldView(field Field, data map[string]string, options map[string]SelectString, frontOps map[string]Operator) (string, string) {
+func FieldView(field Field, data map[string]string, options map[string]SelectString) (string, string) {
 
 	var types = []string{"password", "button", "hidden"}
 	for _, v := range types {

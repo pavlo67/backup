@@ -40,7 +40,7 @@ var prefixOptions = common.Map{
 
 func ServerComponents() ([]starter.Starter, error) {
 
-	if err := pagesConfig.CompleteDirectly(notebook_server_http.Endpoints, "", 0, pagesPrefix); err != nil {
+	if err := pagesConfig.CompleteDirectly(notebook_server_http.Pages, "", 0, pagesPrefix); err != nil {
 		return nil, fmt.Errorf(`on pagesConfig.CompleteDirectly() got %s`, err)
 	}
 	if err := restConfig.CompleteDirectly(auth_server_http.Endpoints, "", 0, restPrefix); err != nil {
@@ -82,7 +82,7 @@ func ServerComponents() ([]starter.Starter, error) {
 
 func ClientComponents() ([]starter.Starter, error) {
 
-	if err := pagesConfig.CompleteDirectly(notebook_server_http.Endpoints, "", 0, pagesPrefix); err != nil {
+	if err := pagesConfig.CompleteDirectly(notebook_server_http.Pages, "", 0, pagesPrefix); err != nil {
 		return nil, fmt.Errorf(`on pagesConfig.CompleteDirectly() got %s`, err)
 	}
 	if err := restConfig.CompleteDirectly(auth_server_http.Endpoints, "", 0, restPrefix); err != nil {
