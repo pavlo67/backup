@@ -1,8 +1,6 @@
 package nb_settings
 
 import (
-	"fmt"
-
 	"github.com/pavlo67/common/common/auth/auth_http"
 	"github.com/pavlo67/tools/components/files/files_http"
 	"github.com/pavlo67/tools/components/records/records_http"
@@ -19,10 +17,9 @@ import (
 	"github.com/pavlo67/tools/components/connect/connect_sqlite"
 	"github.com/pavlo67/tools/components/files"
 	"github.com/pavlo67/tools/components/files/files_fs"
+	"github.com/pavlo67/tools/components/notebook/notebook_html"
 	"github.com/pavlo67/tools/components/notebook/notebook_server_http"
-	"github.com/pavlo67/tools/components/records/records_html"
 	"github.com/pavlo67/tools/components/records/records_sqlite"
-	"github.com/pavlo67/tools/components/tags/tags_html"
 )
 
 // TODO!!!
@@ -30,26 +27,16 @@ var bucketsOptions = common.Map{
 	"buckets": files.Buckets{files.BucketID("1"): "../1"},
 }
 
-var pagesPrefix = ""
-var restPrefix = "/rest"
-
-var prefixOptions = common.Map{
-	"pages_prefix": pagesPrefix,
-	"rest_prefix":  restPrefix,
-}
-
 func ServerComponents() ([]starter.Starter, error) {
-
-	if err := pagesConfig.CompleteDirectly(notebook_server_http.Pages, "", 0, pagesPrefix); err != nil {
-		return nil, fmt.Errorf(`on pagesConfig.CompleteDirectly() got %s`, err)
-	}
-	if err := restConfig.CompleteDirectly(auth_server_http.Endpoints, "", 0, restPrefix); err != nil {
-		return nil, fmt.Errorf(`on restConfig.CompleteDirectly() got %s`, err)
+	htmlTemplate, pagesConfig, restConfig, err := CompleteServerConfigs()
+	if err != nil {
+		return nil, err
 	}
 
-	endpointsOptions := common.Map{
-		"pages_config": pagesConfig,
-		"rest_config":  restConfig,
+	renderOptions := common.Map{
+		"html_template": htmlTemplate,
+		"pages_config":  pagesConfig,
+		"rest_config":   restConfig,
 	}
 
 	starters := []starter.Starter{
@@ -66,27 +53,23 @@ func ServerComponents() ([]starter.Starter, error) {
 		// notebook components
 		{files_fs.Starter(), bucketsOptions},
 		{records_sqlite.Starter(), nil},
-		{records_html.Starter(), endpointsOptions},
-		{tags_html.Starter(), endpointsOptions},
+		{notebook_html.Starter(), renderOptions},
 		{notebook_server_http.Starter(), nil},
 
 		// action managers
 		{server_http_jschmhr.Starter(), nil},
 
 		// actions starter (connecting specific actions to the corresponding action managers)
-		{Starter(), prefixOptions},
+		{Starter(), nil},
 	}
 
 	return starters, nil
 }
 
 func ClientComponents() ([]starter.Starter, error) {
-
-	if err := pagesConfig.CompleteDirectly(notebook_server_http.Pages, "", 0, pagesPrefix); err != nil {
-		return nil, fmt.Errorf(`on pagesConfig.CompleteDirectly() got %s`, err)
-	}
-	if err := restConfig.CompleteDirectly(auth_server_http.Endpoints, "", 0, restPrefix); err != nil {
-		return nil, fmt.Errorf(`on restConfig.CompleteDirectly() got %s`, err)
+	_, pagesConfig, restConfig, err := CompleteServerConfigs()
+	if err != nil {
+		return nil, err
 	}
 
 	endpointsOptions := common.Map{

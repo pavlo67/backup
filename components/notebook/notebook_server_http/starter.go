@@ -11,9 +11,8 @@ import (
 	"github.com/pavlo67/common/common/starter"
 
 	"github.com/pavlo67/tools/components/files"
+	"github.com/pavlo67/tools/components/notebook/notebook_html"
 	"github.com/pavlo67/tools/components/records"
-	"github.com/pavlo67/tools/components/records/records_html"
-	"github.com/pavlo67/tools/components/tags/tags_html"
 )
 
 const InterfaceKey joiner.InterfaceKey = "notebook_server_http"
@@ -38,8 +37,7 @@ type notebookServerHTTPStarter struct {
 var l logger.Operator
 var recordsOp records.Operator
 var filesOp files.Operator
-var recordsHTMLOp records_html.Operator
-var tagsHTMLOp tags_html.Operator
+var notebookHTMLOp notebook_html.Operator
 
 func (nshs *notebookServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
@@ -48,8 +46,7 @@ func (nshs *notebookServerHTTPStarter) Name() string {
 func (nshs *notebookServerHTTPStarter) Prepare(_ *config.Config, options common.Map) error {
 	nshs.filesKey = joiner.InterfaceKey(options.StringDefault("files_key", string(files.InterfaceKey)))
 	nshs.recordsKey = joiner.InterfaceKey(options.StringDefault("records_key", string(records.InterfaceKey)))
-	nshs.recordsHTMLKey = joiner.InterfaceKey(options.StringDefault("records_html_key", string(records_html.InterfaceKey)))
-	nshs.tagsHTMLKey = joiner.InterfaceKey(options.StringDefault("tags_html_key", string(tags_html.InterfaceKey)))
+	nshs.recordsHTMLKey = joiner.InterfaceKey(options.StringDefault("notebook_html_key", string(notebook_html.InterfaceKey)))
 
 	nshs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
@@ -69,11 +66,8 @@ func (nshs *notebookServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no records.Operator with key %s", nshs.recordsKey)
 	}
 
-	if recordsHTMLOp, _ = joinerOp.Interface(nshs.recordsHTMLKey).(records_html.Operator); recordsHTMLOp == nil {
-		return fmt.Errorf("no records_html.Operator with key %s", nshs.recordsHTMLKey)
-	}
-	if tagsHTMLOp, _ = joinerOp.Interface(nshs.tagsHTMLKey).(tags_html.Operator); tagsHTMLOp == nil {
-		return fmt.Errorf("no tags_html.Operator with key %s", nshs.tagsHTMLKey)
+	if notebookHTMLOp, _ = joinerOp.Interface(nshs.recordsHTMLKey).(notebook_html.Operator); notebookHTMLOp == nil {
+		return fmt.Errorf("no notebook_html.Operator with key %s", nshs.recordsHTMLKey)
 	}
 
 	return server_http.JoinEndpoints(joinerOp, Pages)

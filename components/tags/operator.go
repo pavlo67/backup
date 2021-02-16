@@ -1,8 +1,19 @@
 package tags
 
-import "sort"
+import (
+	"sort"
+)
 
-type Item string
+// TODO!!!
+type Item = string
+
+//type Tags []Item
+//func (tags Tags) String() string {
+//	//var tagsStr []string
+//	//for _, tag := range tags {
+//	//
+//	//}
+//}
 
 type StatMap map[Item]int64
 type Stat struct {

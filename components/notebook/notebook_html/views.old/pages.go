@@ -46,28 +46,6 @@ package notebook_vews_old
 //	// +`<input id=links_list type=hidden value="` + html.EscapeString(data["tags"]) + `">` + "\n"
 //}
 //
-//func HTMLViewTable(fields []viewshtml.Field, data map[string]string, options map[string]viewshtml.SelectString, frontOps map[string]viewshtml.Operator) string {
-//	if data == nil {
-//		data = map[string]string{}
-//	}
-//	var viewHTML, titleHTML, resHTML string
-//	for _, f := range fields {
-//		titleHTML, resHTML = viewshtml.FieldView(f, data, options, frontOps)
-//		if resHTML == "" && ((f.Params[viewshtml.NotEmptyKey] == true) || (titleHTML == "")) {
-//			continue
-//		}
-//
-//		if titleHTML != "" {
-//			titleHTML = "<small>" + titleHTML + ":</small>\n"
-//		}
-//		viewHTML += "<tr><td>\n" + titleHTML + "</td><td>&nbsp;</td><td>" + resHTML + "\n</td></tr>\n"
-//	}
-//
-//	return `<table cellspacing=0 style="padding-top:5px;">` +
-//		viewHTML + "</table>"
-//	// +`<input id=links_list type=hidden value="` + html.EscapeString(data["tags"]) + `">` + "\n"
-//}
-//
 ////htmlEdit := "\n<form enctype=\"multipart/form-data\">\n"
 ////</form>
 //
