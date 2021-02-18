@@ -1,7 +1,8 @@
-package storage_settings
+package st_settings
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/pavlo67/common/common/errors"
 
@@ -23,7 +24,6 @@ var l logger.Operator
 var _ starter.Operator = &storageStarter{}
 
 type storageStarter struct {
-	prefix string
 	// baseDir string
 
 	// skipAbsentEndpoints bool
@@ -33,13 +33,13 @@ func (ss *storageStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
+const prefix = "/backend"
+
 func (ss *storageStarter) Prepare(cfg *config.Config, options common.Map) error {
 	var cfgStorage common.Map
 	if err := cfg.Value("storage_api", &cfgStorage); err != nil {
 		return errors.CommonError(err, fmt.Sprintf("in config: %#v", cfg))
 	}
-
-	ss.prefix = cfgStorage.StringDefault("prefix", "")
 
 	return nil
 }
@@ -64,15 +64,17 @@ func (ss *storageStarter) Run(joinerOp joiner.Operator) error {
 
 	srvPort, isHTTPS := srvOp.Addr()
 
-	if err := serverConfig.CompleteWithJoiner(joinerOp, "", srvPort, ss.prefix); err != nil {
+	if err := serverConfig.CompleteWithJoiner(joinerOp, "", srvPort, prefix); err != nil {
 		return err
 	}
-
-	if err := server_http.InitEndpointsWithSwaggerV2(
-		srvOp, serverConfig, !isHTTPS,
-		filelib.CurrentPath()+"api-docs/", "api-docs",
-		l,
-	); err != nil {
+	if err := serverConfig.HandlePages(srvOp, l); err != nil {
+		return err
+	}
+	restStaticPath := filelib.CurrentPath() + "../rest_static/"
+	if err := serverConfig.InitSwagger(isHTTPS, restStaticPath+"api-docs/swaggerJSON.json", l); err != nil {
+		return err
+	}
+	if err := srvOp.HandleFiles("rest_static", prefix+"/*filepath", server_http.StaticPath{LocalPath: restStaticPath}); err != nil {
 		return err
 	}
 
@@ -92,3 +94,5 @@ func (ss *storageStarter) Run(joinerOp joiner.Operator) error {
 
 	return nil
 }
+
+var WG sync.WaitGroup

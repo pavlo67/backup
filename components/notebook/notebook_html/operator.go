@@ -1,7 +1,6 @@
 package notebook_html
 
 import (
-	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/tools/components/records"
@@ -17,7 +16,12 @@ const Tag Key = "tag"
 
 // should be thread-safe
 type Operator interface {
-	Prepare(key Key, template string, params common.Map) error
+	// DEPRECATED
+	HTMLPage(title, htmlHeader, htmlIndex, htmlContent, htmlMessage string) server.Response
+
+	HTMLError(httpStatus int, htmlError string) (server.Response, error)
+
+	HTMLRoot(htmlHello, htmlTags string) (server.Response, error)
 
 	HTMLView(r *records.Item, children []records.Item, message string) (server.Response, error)
 	HTMLEdit(r *records.Item, children []records.Item, message string) (server.Response, error)
@@ -26,3 +30,5 @@ type Operator interface {
 
 	HTMLMessage(errs errors.Error) string
 }
+
+// Prepare(key Key, template string, params common.Map) error

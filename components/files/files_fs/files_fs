@@ -64,3 +64,69 @@
 2021-02-13T14:27:38.074+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
 2021-02-13T14:27:38.074+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
 2021-02-13T14:27:38.074+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:14:29.835+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:14:29.836+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:14:29.836+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:14:29.836+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:14:29.836+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:14:29.836+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:15:12.877+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:15:12.877+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:15:12.877+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:15:12.877+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:15:12.877+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:15:12.878+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:15:36.772+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:15:36.772+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:15:36.772+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:15:36.772+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:15:36.772+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:15:36.772+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:19:09.681+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:19:09.682+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:19:09.682+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:19:09.682+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:19:09.682+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:19:09.682+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:21:24.663+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:21:24.663+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:21:24.663+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:21:24.663+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:21:24.663+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:21:24.663+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:21:43.251+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:21:43.251+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:21:43.251+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:21:43.251+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:21:43.251+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:21:43.251+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:22:03.720+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:22:03.720+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:22:03.720+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:22:03.720+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:22:03.720+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:22:03.720+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:24:36.852+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:24:36.852+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:24:36.852+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:24:36.852+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:24:36.852+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:24:36.852+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:25:13.005+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:25:13.005+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:25:13.005+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:25:13.006+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:25:13.006+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:25:13.006+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:25:48.281+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:25:48.281+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:25:48.281+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:25:48.281+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:25:48.281+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:25:48.281+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-18T14:26:32.643+0200	[34mINFO[0m	starter/run.go:46	preparing component: files_fs
+2021-02-18T14:26:32.643+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-18T14:26:32.643+0200	[34mINFO[0m	starter/run.go:64	running component: files_fs
+2021-02-18T14:26:32.643+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files
+2021-02-18T14:26:32.643+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*files_fs.filesFS) as files_cleaner
+2021-02-18T14:26:32.643+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test

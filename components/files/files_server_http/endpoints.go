@@ -26,7 +26,7 @@ var saveEndpoint = server_http.Endpoint{
 			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.CommonError(err, "reading body"), req)
 		}
 
-		pathCorrected, err := filesOp.Save(bucketID, path, newFilePattern, data, options)
+		pathCorrected, err := filesOp.Save(bucketID, path, newFilePattern, data)
 		if err != nil {
 			return serverOp.ResponseRESTError(0, err, req)
 		}
@@ -42,7 +42,7 @@ var readEndpoint = server_http.Endpoint{
 		bucketID := files.BucketID(params["bucket_id"])
 		path := params["path"]
 
-		data, err := filesOp.Read(bucketID, path, options)
+		data, err := filesOp.Read(bucketID, path)
 		if err != nil || data == nil {
 			return serverOp.ResponseRESTError(0, err, req)
 		}
@@ -58,7 +58,7 @@ var removeEndpoint = server_http.Endpoint{
 		bucketID := files.BucketID(params["bucket_id"])
 		path := params["path"]
 
-		if err := filesOp.Remove(bucketID, path, options); err != nil {
+		if err := filesOp.Remove(bucketID, path); err != nil {
 			return serverOp.ResponseRESTError(0, err, req)
 		}
 
@@ -77,7 +77,7 @@ var listEndpoint = server_http.Endpoint{
 			return serverOp.ResponseRESTError(0, errors.Wrapf(err, "can't read depth (%s)", params["depth"]), req)
 		}
 
-		filesInfo, err := filesOp.List(bucketID, path, depth, options)
+		filesInfo, err := filesOp.List(bucketID, path, depth)
 		if err != nil {
 			return serverOp.ResponseRESTError(0, err, req)
 		}
@@ -97,7 +97,7 @@ var statEndpoint = server_http.Endpoint{
 			return serverOp.ResponseRESTError(0, errors.Wrapf(err, "can't read depth (%s)", params["depth"]), req)
 		}
 
-		fileInfo, err := filesOp.Stat(bucketID, path, depth, options)
+		fileInfo, err := filesOp.Stat(bucketID, path, depth)
 		if err != nil {
 			return serverOp.ResponseRESTError(0, err, req)
 		}

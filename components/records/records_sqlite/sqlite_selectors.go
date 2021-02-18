@@ -21,6 +21,12 @@ func (recordsOp *recordsSQLite) HasTag(tag tags.Item) (selectors.Term, error) {
 	return selectors.TermSQL{Condition: `tags LIKE ?`, Values: []interface{}{`%"` + tagStr + `"%`}}, nil
 }
 
+const onHasNoTag = "on recordsSQLite.HasNoTag()"
+
+func (recordsOp *recordsSQLite) HasNoTag() (selectors.Term, error) {
+	return selectors.TermSQL{Condition: `tags IN ('', '{}')`, Values: nil}, nil
+}
+
 const onAddParent = "on recordsSQLite.AddParent()"
 
 func (recordsOp *recordsSQLite) AddParent(ts []tags.Item, id records.ID) ([]tags.Item, error) {

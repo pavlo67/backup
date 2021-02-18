@@ -3,7 +3,8 @@ package main
 import (
 	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/starter"
-	"github.com/pavlo67/tools/apps/nb/nb_settings"
+
+	"github.com/pavlo67/tools/apps/nb_www/nb_settings"
 )
 
 var (

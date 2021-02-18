@@ -1,4 +1,4 @@
-package storage_settings
+package st_settings
 
 import (
 	"github.com/pavlo67/common/common"
@@ -8,8 +8,6 @@ import (
 	"github.com/pavlo67/common/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/common/common/starter"
 )
-
-const prefix = "/backend"
 
 func Components(envPath string, startREST, logRequests bool) []starter.Starter {
 
@@ -33,7 +31,7 @@ func Components(envPath string, startREST, logRequests bool) []starter.Starter {
 		starter.Starter{server_http_jschmhr.Starter(), nil},
 
 		// actions starter (connecting specific actions to the corresponding action managers)
-		starter.Starter{Starter(), common.Map{"prefix": prefix}},
+		starter.Starter{Starter(), nil},
 	)
 
 	return starters

@@ -42,7 +42,7 @@ func saveTest(t *testing.T, filesOp Operator, bucketID BucketID, path string, da
 
 	// check original path info ---------------------------------------------
 
-	fi, err := filesOp.Stat(bucketID, filepath.Dir(path), -1, nil)
+	fi, err := filesOp.Stat(bucketID, filepath.Dir(path), -1)
 
 	var size0 int64
 	//if err == nil {
@@ -65,17 +65,17 @@ func saveTest(t *testing.T, filesOp Operator, bucketID BucketID, path string, da
 
 	// save file ------------------------------------------------------------
 
-	pathSaved, err := filesOp.Save(bucketID, path, "", data, nil)
+	pathSaved, err := filesOp.Save(bucketID, path, "", data)
 	require.NoError(t, err)
 	require.NotEmpty(t, pathSaved)
 
-	// check .Read(), .List(), .Stat() --------------------------------------
+	// check .Read(), .Items(), .Stat() --------------------------------------
 
-	dataReaded, err := filesOp.Read(bucketID, pathSaved, nil)
+	dataReaded, err := filesOp.Read(bucketID, pathSaved)
 	require.NoError(t, err)
 	require.Equal(t, data, dataReaded)
 
-	fis, err := filesOp.List(bucketID, filepath.Dir(pathSaved), 0, nil)
+	fis, err := filesOp.List(bucketID, filepath.Dir(pathSaved), 0)
 	require.NoError(t, err)
 
 	// require.FailNowf(t, "%s --> %#v", filepath.Dir(pathSaved), fis)
@@ -89,7 +89,7 @@ func saveTest(t *testing.T, filesOp Operator, bucketID BucketID, path string, da
 	}
 	require.Truef(t, found, "%s / %#v", pathSaved, fis)
 
-	fi, err = filesOp.Stat(bucketID, filepath.Dir(pathSaved), -1, nil)
+	fi, err = filesOp.Stat(bucketID, filepath.Dir(pathSaved), -1)
 	require.NoError(t, err)
 	require.NotNil(t, fi)
 	require.True(t, fi.IsDir)
@@ -97,16 +97,16 @@ func saveTest(t *testing.T, filesOp Operator, bucketID BucketID, path string, da
 
 	// remove file ----------------------------------------------------------
 
-	err = filesOp.Remove(bucketID, pathSaved, nil)
+	err = filesOp.Remove(bucketID, pathSaved)
 	require.NoError(t, err)
 
-	// check .Read(), .List(), .Stat() --------------------------------------
+	// check .Read(), .Items(), .Stat() --------------------------------------
 
-	dataReaded, err = filesOp.Read(bucketID, pathSaved, nil)
+	dataReaded, err = filesOp.Read(bucketID, pathSaved)
 	require.Error(t, err)
 	require.Nil(t, dataReaded)
 
-	fis, err = filesOp.List(bucketID, filepath.Dir(pathSaved), 0, nil)
+	fis, err = filesOp.List(bucketID, filepath.Dir(pathSaved), 0)
 	require.NoError(t, err)
 
 	found = false
@@ -117,7 +117,7 @@ func saveTest(t *testing.T, filesOp Operator, bucketID BucketID, path string, da
 		}
 	}
 
-	fi, err = filesOp.Stat(bucketID, filepath.Dir(pathSaved), -1, nil)
+	fi, err = filesOp.Stat(bucketID, filepath.Dir(pathSaved), -1)
 	require.NoError(t, err)
 	require.NotNil(t, fi)
 	require.True(t, fi.IsDir)

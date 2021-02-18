@@ -315,7 +315,7 @@ func (recordsOp *recordsSQLite) Tags(options *crud.Options) (tags.StatMap, error
 	}
 	defer rows.Close()
 
-	var tagsStat tags.StatMap
+	tagsStat := tags.StatMap{}
 
 	for rows.Next() {
 		var tagsBytes []byte
@@ -333,6 +333,9 @@ func (recordsOp *recordsSQLite) Tags(options *crud.Options) (tags.StatMap, error
 			}
 
 			for _, tag := range ts {
+				// l.Info(tag, tagsStat[tag])
+
+				// ts := tagsStat[tag]
 				tagsStat[tag] = tagsStat[tag] + 1
 			}
 		}

@@ -69,6 +69,10 @@ func (recordsOp *recordsHTTP) HasTag(tag tags.Item) (selectors.Term, error) {
 	return nil, common.ErrNotImplemented
 }
 
+func (recordsOp *recordsHTTP) HasNoTag() (selectors.Term, error) {
+	return nil, common.ErrNotImplemented
+}
+
 func (recordsOp *recordsHTTP) AddParent(tags []tags.Item, id records.ID) ([]tags.Item, error) {
 	return nil, common.ErrNotImplemented
 }

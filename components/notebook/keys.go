@@ -10,8 +10,9 @@ const IntefaceKeyHTMLView joiner.InterfaceKey = "notebook_html_view"
 const IntefaceKeyHTMLEdit joiner.InterfaceKey = "notebook_html_edit"
 const IntefaceKeyHTMLSave joiner.InterfaceKey = "notebook_html_save"
 const IntefaceKeyHTMLDele joiner.InterfaceKey = "notebook_html_dele"
+
 const IntefaceKeyHTMLTags joiner.InterfaceKey = "notebook_html_tags"
-const IntefaceKeyHTMLList joiner.InterfaceKey = "notebook_html_list"
+const IntefaceKeyHTMLTagged joiner.InterfaceKey = "notebook_html_tagged"
 
 const IntefaceKeyRESTRead joiner.InterfaceKey = "notebook_rest_read"
 const IntefaceKeyRESTSave joiner.InterfaceKey = "notebook_rest_save"

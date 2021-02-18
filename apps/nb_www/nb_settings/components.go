@@ -83,7 +83,7 @@ func ClientComponents() ([]starter.Starter, error) {
 
 		// auth/persons components
 		{auth_jwt.Starter(), nil},
-		{auth_http.Starter(), nil}, // common.Map{"auth_jwt_key": ""}
+		{auth_http.Starter(), common.Map{"server_config": *restConfig}}, // common.Map{"auth_jwt_key": ""}
 
 		// notebook components
 		{files_http.Starter(), endpointsOptions},

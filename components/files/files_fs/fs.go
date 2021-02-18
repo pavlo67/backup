@@ -43,7 +43,7 @@ func New(buckets files.Buckets) (files.Operator, crud.Cleaner, error) {
 
 const onSave = "on filesFS.Save()"
 
-func (filesOp *filesFS) Save(bucketID files.BucketID, path, newFilePattern string, data []byte, options *crud.Options) (string, error) {
+func (filesOp *filesFS) Save(bucketID files.BucketID, path, newFilePattern string, data []byte) (string, error) {
 	basePath := filesOp.buckets[bucketID]
 	if basePath == "" {
 		return "", fmt.Errorf(onSave+": wrong bucket (%s)", bucketID)
@@ -94,7 +94,7 @@ func (filesOp *filesFS) Save(bucketID files.BucketID, path, newFilePattern strin
 
 const onRead = "on filesFS.Read()"
 
-func (filesOp *filesFS) Read(bucketID files.BucketID, path string, options *crud.Options) ([]byte, error) {
+func (filesOp *filesFS) Read(bucketID files.BucketID, path string) ([]byte, error) {
 	basePath := filesOp.buckets[bucketID]
 	if basePath == "" {
 		return nil, fmt.Errorf(onRead+": wrong bucket (%s)", bucketID)
@@ -111,7 +111,7 @@ func (filesOp *filesFS) Read(bucketID files.BucketID, path string, options *crud
 
 const onRemove = "on filesFS.Remove()"
 
-func (filesOp *filesFS) Remove(bucketID files.BucketID, path string, options *crud.Options) error {
+func (filesOp *filesFS) Remove(bucketID files.BucketID, path string) error {
 	basePath := filesOp.buckets[bucketID]
 	if basePath == "" {
 		return fmt.Errorf(onRemove+": wrong bucket (%s)", bucketID)
@@ -125,16 +125,16 @@ func (filesOp *filesFS) Remove(bucketID files.BucketID, path string, options *cr
 	return nil
 }
 
-const onList = "on filesFS.List()"
+const onList = "on filesFS.Items()"
 
-func (filesOp *filesFS) List(bucketID files.BucketID, path string, depth int, options *crud.Options) (files.FilesInfo, error) {
+func (filesOp *filesFS) List(bucketID files.BucketID, path string, depth int) (files.Items, error) {
 	basePath := filesOp.buckets[bucketID]
 	if basePath == "" {
 		return nil, fmt.Errorf(onRead+": wrong bucket (%s)", bucketID)
 	}
 	filePath := basePath + path
 
-	var filesInfo files.FilesInfo
+	var filesInfo files.Items
 
 	if depth == 0 {
 		fis, err := ioutil.ReadDir(filePath)
@@ -172,7 +172,7 @@ func (filesOp *filesFS) List(bucketID files.BucketID, path string, depth int, op
 
 const onStat = "on filesFS.Stat()"
 
-func (filesOp *filesFS) Stat(bucketID files.BucketID, path string, depth int, options *crud.Options) (*files.FileInfo, error) {
+func (filesOp *filesFS) Stat(bucketID files.BucketID, path string, depth int) (*files.Item, error) {
 	basePath := filesOp.buckets[bucketID]
 	if basePath == "" {
 		return nil, fmt.Errorf(onStat+": wrong bucket (%s)", bucketID)
@@ -187,7 +187,7 @@ func (filesOp *filesFS) Stat(bucketID files.BucketID, path string, depth int, op
 		return nil, errors.Wrapf(err, onStat+": can't  os.Stat(%s)", filePath)
 	}
 
-	filesInfo, err := files.FilesInfo{}.Append("", fi) // basePath
+	filesInfo, err := files.Items{}.Append("", fi) // basePath
 	if err != nil || len(filesInfo) != 1 {
 		return nil, fmt.Errorf(onStat+": got %#v / %s", filesInfo, err)
 	}

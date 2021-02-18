@@ -45,6 +45,7 @@ type Operator interface {
 	// StatMap(*crud.Options) (common.Map, error) // in particular: selected, grouped, etc.
 
 	HasTag(tag tags.Item) (selectors.Term, error)
+	HasNoTag() (selectors.Term, error)
 	AddParent(tags []tags.Item, id ID) ([]tags.Item, error)
 	HasParent(id ID) (selectors.Term, error)
 }

@@ -40,10 +40,11 @@ var PagesConfig = server_http.Config{
 	EndpointsSettled: map[joiner.InterfaceKey]server_http.EndpointSettled{
 		notebook.IntefaceKeyHTMLRoot: {Path: ""},
 		notebook.IntefaceKeyHTMLView: {Path: "/view"},
-		notebook.IntefaceKeyHTMLTags: {Path: "/tags"},
-		notebook.IntefaceKeyHTMLList: {Path: "/list"},
-		notebook.IntefaceKeyHTMLEdit: {Path: "/edit"},
-		notebook.IntefaceKeyHTMLSave: {Path: "/save"},
+		// notebook.IntefaceKeyHTMLList: {Path: "/list"},
+		notebook.IntefaceKeyHTMLEdit:   {Path: "/edit"},
+		notebook.IntefaceKeyHTMLSave:   {Path: "/save"},
+		notebook.IntefaceKeyHTMLTags:   {Path: "/tags"},
+		notebook.IntefaceKeyHTMLTagged: {Path: "/tagged"},
 	},
 }
 
@@ -72,43 +73,33 @@ func HandlePages(joinerOp joiner.Operator, srvOp server_http.Operator) error {
 
 	srvPort, isHTTPS := srvOp.Addr() // isHTTPS
 
+	// REST -----------------------------------------------------------
+
 	if err := RestConfig.CompleteWithJoiner(joinerOp, "", srvPort, restPrefix); err != nil {
 		return err
 	}
-	if err := server_http.InitPages(srvOp, RestConfig, l); err != nil {
+	if err := RestConfig.HandlePages(srvOp, l); err != nil {
 		return err
 	}
+	restStaticPath := filelib.CurrentPath() + "../rest_static/"
+	if err := RestConfig.InitSwagger(isHTTPS, restStaticPath+"api-docs/swaggerJSON.json", l); err != nil {
+		return err
+	}
+	if err := srvOp.HandleFiles("rest_static", restPrefix+"/*filepath", server_http.StaticPath{LocalPath: restStaticPath}); err != nil {
+		return err
+	}
+
+	// static pages ---------------------------------------------------
+
 	if err := PagesConfig.CompleteWithJoiner(joinerOp, "", srvPort, pagesPrefix); err != nil {
 		return err
 	}
-	if err := server_http.InitPages(srvOp, PagesConfig, l); err != nil {
+	if err := PagesConfig.HandlePages(srvOp, l); err != nil {
 		return err
 	}
-
-	restStaticPath := filelib.CurrentPath() + "../rest_static/"
-	restServerPath := restPrefix + "/*filepath"
-
-	swaggerStaticPath := restStaticPath + "api-docs/"
-	swaggerStaticFilePath := swaggerStaticPath + "swaggerJSON.json"
-	swaggerJSON, err := RestConfig.SwaggerV2(isHTTPS)
-	if err != nil {
-		return err
-	}
-	if err = ioutil.WriteFile(swaggerStaticFilePath, swaggerJSON, 0644); err != nil {
-		return fmt.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerStaticFilePath, swaggerJSON, err)
-	}
-	l.Infof("%d bytes are written into %s", len(swaggerJSON), swaggerStaticFilePath)
-
-	if err := srvOp.HandleFiles("rest_static", restServerPath, server_http.StaticPath{LocalPath: restStaticPath}); err != nil {
-		return err
-	}
-
 	pagesStaticPath := filelib.CurrentPath() + "../pages_static/"
-	pagesStaticServerPath := pagesPrefix + "/static/*filepath"
-	if pagesStaticPath != "" {
-		if err := srvOp.HandleFiles("pages_static", pagesStaticServerPath, server_http.StaticPath{LocalPath: pagesStaticPath}); err != nil {
-			return err
-		}
+	if err := srvOp.HandleFiles("pages_static", pagesPrefix+"/static/*filepath", server_http.StaticPath{LocalPath: pagesStaticPath}); err != nil {
+		return err
 	}
 
 	return nil

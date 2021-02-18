@@ -8,7 +8,7 @@ CREATE TABLE records (
   type_key     TEXT       NOT NULL,
   data         TEXT       NOT NULL,
   embedded     TEXT               ,
-  tags         TEXT               ,
+  tags         TEXT       NOT NULL,
 
   owner_id     TEXT       NOT NULL,
   viewer_id    TEXT       NOT NULL,

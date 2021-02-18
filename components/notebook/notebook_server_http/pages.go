@@ -21,15 +21,31 @@ var Pages = server_http.Endpoints{
 	viewPage,
 	editPage,
 	savePage,
+	//listPage,
+
 	tagsPage,
-	listPage,
+	taggedPage,
 }
 
 var rootPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLRoot,
 	Method:      "GET",
-	WorkerHTTP: func(_ server_http.Operator, _ *http.Request, _ server_http.Params, _ *crud.Options) (server.Response, error) {
-		return notebook_html.HTMLPage("нотатник", "Нотатник", "", "!!!", ""), nil
+	WorkerHTTP: func(_ server_http.Operator, _ *http.Request, _ server_http.Params, options *crud.Options) (server.Response, error) {
+		tagsStat, err := recordsOp.Tags(options)
+		if err != nil {
+			l.Error(err)
+			return notebookHTMLOp.HTMLError(0, "На жаль, виникла помилка (при recordsOp.Tags(options))")
+		}
+
+		tagsStats := tagsStat.List(true)
+
+		htmlTags, err := notebookHTMLOp.HTMLTags(tagsStats)
+		if err != nil {
+			l.Error(err)
+			return notebookHTMLOp.HTMLError(0, "На жаль, виникла помилка (при notebookHTMLOp.HTMLTags(tagsStats))")
+		}
+
+		return notebookHTMLOp.HTMLRoot("Hello, World!", htmlTags)
 	},
 }
 
@@ -106,7 +122,7 @@ var savePage = server_http.Endpoint{
 		r := notebook_html.RecordFromData(data)
 		if r == nil {
 			l.Errorf("no data??? %s", body)
-			return notebook_html.HTMLPage("???", "??? no data", "", "ok!", ""), nil
+			return notebookHTMLOp.HTMLPage("???", "??? no data", "", "ok!", ""), nil
 		}
 
 		l.Infof("$#v", r)
@@ -114,7 +130,7 @@ var savePage = server_http.Endpoint{
 		r, err = recordsOp.Save(*r, options)
 		if err != nil || r == nil {
 			l.Errorf("??? %#v, %s, %#v", r, err, err)
-			return notebook_html.HTMLPage("???", "???", "", "ok!", ""), nil
+			return notebookHTMLOp.HTMLPage("???", "???", "", "ok!", ""), nil
 		}
 
 		return htmlView(r.ID, options)
@@ -139,12 +155,12 @@ var tagsPage = server_http.Endpoint{
 		title := "нотатник: теґи"
 		htmlHeader := "Теґи"
 
-		return notebook_html.HTMLPage(title, htmlHeader, "", htmlTags, errs.Error()), nil
+		return notebookHTMLOp.HTMLPage(title, htmlHeader, "", htmlTags, errs.Error()), nil
 	},
 }
 
-var listPage = server_http.Endpoint{
-	InternalKey: notebook.IntefaceKeyHTMLList,
+var taggedPage = server_http.Endpoint{
+	InternalKey: notebook.IntefaceKeyHTMLTagged,
 	Method:      "GET",
 	PathParams:  []string{"tag"},
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
@@ -166,6 +182,21 @@ var listPage = server_http.Endpoint{
 		title := "нотатник: все з теґом '" + string(tag) + "'"
 		htmlHeader := "Нотатник: все з теґом '" + string(tag) + "'"
 
-		return notebook_html.HTMLPage(title, htmlHeader, "", htmlStr, errs.Error()), nil
+		return notebookHTMLOp.HTMLPage(title, htmlHeader, "", htmlStr, errs.Error()), nil
 	},
 }
+
+//selectorNoTag, err := recordsOp.HasNoTag()
+//if err != nil {
+//	l.Error(err)
+//	return notebookHTMLOp.HTMLError(0, "На жаль, виникла помилка (при recordsOp.HasNoTag())")
+//}
+//
+//optionsWithNoTag := options.WithSelector(selectorNoTag)
+//
+//rs, err := recordsOp.List(optionsWithNoTag)
+//if err != nil {
+//	l.Error(err)
+//	return notebookHTMLOp.HTMLError(0, "На жаль, виникла помилка (при recordsOp.List(optionsWithNoTag))")
+//}
+//
