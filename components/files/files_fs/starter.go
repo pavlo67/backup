@@ -49,14 +49,7 @@ func (ffs *filesFSStarter) Prepare(cfg *config.Config, options common.Map) error
 	//}
 
 	ffs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(files.InterfaceKey)))
-	if ffs.interfaceKey == "" {
-		return fmt.Errorf("no 'interface_key' in options (%#v)", options)
-	}
-
 	ffs.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(files.InterfaceKeyCleaner)))
-	if ffs.cleanerKey == "" {
-		return fmt.Errorf("no 'cleaner_key' in options (%#v)", options)
-	}
 
 	return nil
 }

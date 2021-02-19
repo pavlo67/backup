@@ -7,12 +7,12 @@ CREATE TABLE records (
   summary      TEXT       NOT NULL,
   type_key     TEXT       NOT NULL,
   data         TEXT       NOT NULL,
-  embedded     TEXT               ,
+  embedded     TEXT       NOT NULL,
   tags         TEXT       NOT NULL,
 
   owner_id     TEXT       NOT NULL,
   viewer_id    TEXT       NOT NULL,
-  history      TEXT               ,
+  history      TEXT       NOT NULL,
   created_at   TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP
 );

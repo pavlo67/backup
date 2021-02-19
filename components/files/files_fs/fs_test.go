@@ -14,7 +14,7 @@ import (
 )
 
 func TestFilesFS(t *testing.T) {
-	_, cfgService, l := apps.PrepareTests(t, "test_service", "../../../apps/", "test", "files_fs")
+	_, cfgService, l := apps.PrepareTests(t, "test_service", "../../../apps/", "test", "files_fs.log")
 	require.NotNil(t, cfgService)
 
 	var cfg config.Access

@@ -1,7 +1,5 @@
 package records_sqlite
 
-// TODO!!! fix according to new data structures
-
 import (
 	"database/sql"
 	"encoding/json"
@@ -96,14 +94,14 @@ func (recordsOp *recordsSQLite) Save(item records.Item, options *crud.Options) (
 
 	var err error
 
-	var embeddedBytes []byte
+	embeddedBytes := []byte{} // to satisfy NOT NULL constraint
 	if len(item.Content.Embedded) > 0 {
 		if embeddedBytes, err = json.Marshal(item.Content.Embedded); err != nil {
 			return nil, errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item.Content.Embedded)
 		}
 	}
 
-	var tagsBytes []byte
+	tagsBytes := []byte{} // to to satisfy NOT NULL constraint
 	if len(item.Content.Tags) > 0 {
 		if tagsBytes, err = json.Marshal(item.Content.Tags); err != nil {
 			return nil, errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item.Content.Tags)
@@ -112,7 +110,7 @@ func (recordsOp *recordsSQLite) Save(item records.Item, options *crud.Options) (
 
 	// TODO!!! append to .History
 
-	var historyBytes []byte
+	historyBytes := []byte{} // to satisfy NOT NULL constraint
 	if len(item.History) > 0 {
 		historyBytes, err = json.Marshal(item.History)
 		if err != nil {
@@ -127,7 +125,6 @@ func (recordsOp *recordsSQLite) Save(item records.Item, options *crud.Options) (
 		item.IssuedID, item.OwnerID, item.ViewerID, historyBytes}
 
 	if item.ID == "" {
-
 		res, err := recordsOp.stmInsert.Exec(values...)
 		if err != nil {
 			return nil, errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlInsert, strlib.Stringify(values))
