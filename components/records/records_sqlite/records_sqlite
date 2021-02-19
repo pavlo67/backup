@@ -205,3 +205,21 @@
 2021-02-19T12:27:21.045+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*records_sqlite.recordsSQLite) as records
 2021-02-19T12:27:21.045+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*records_sqlite.recordsSQLite) as records_cleaner
 2021-02-19T12:27:21.045+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-19T13:11:06.102+0200	[34mINFO[0m	starter/run.go:46	preparing component: connect_sqlite
+2021-02-19T13:11:06.102+0200	[34mINFO[0m	starter/run.go:46	preparing component: records_sqlite
+2021-02-19T13:11:06.102+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-19T13:11:06.102+0200	[34mINFO[0m	starter/run.go:64	running component: connect_sqlite
+2021-02-19T13:11:06.102+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*sql.DB) as connect_sqlite
+2021-02-19T13:11:06.102+0200	[34mINFO[0m	starter/run.go:64	running component: records_sqlite
+2021-02-19T13:11:06.103+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*records_sqlite.recordsSQLite) as records
+2021-02-19T13:11:06.103+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*records_sqlite.recordsSQLite) as records_cleaner
+2021-02-19T13:11:06.103+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test
+2021-02-19T17:29:03.397+0200	[34mINFO[0m	starter/run.go:46	preparing component: connect_sqlite
+2021-02-19T17:29:03.397+0200	[34mINFO[0m	starter/run.go:46	preparing component: records_sqlite
+2021-02-19T17:29:03.397+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*zap.SugaredLogger) as logger
+2021-02-19T17:29:03.397+0200	[34mINFO[0m	starter/run.go:64	running component: connect_sqlite
+2021-02-19T17:29:03.397+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*sql.DB) as connect_sqlite
+2021-02-19T17:29:03.397+0200	[34mINFO[0m	starter/run.go:64	running component: records_sqlite
+2021-02-19T17:29:03.397+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*records_sqlite.recordsSQLite) as records
+2021-02-19T17:29:03.397+0200	[34mINFO[0m	joiner_runtime/runtime.go:59	joined (*records_sqlite.recordsSQLite) as records_cleaner
+2021-02-19T17:29:03.397+0200	[34mINFO[0m	starter/run.go:74	CLI BUILD FOR TEST; environment = test

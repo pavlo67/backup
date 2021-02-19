@@ -1,8 +1,8 @@
-package views_html_old
+package views_html
 
 import "html"
 
-func AttributesHTML(attributes Attributes) string {
+func AttributesHTML(attributes map[string]string) string {
 	var attributesHTML string
 	for k, v := range attributes {
 		attributesHTML += " " + html.EscapeString(k) + `="` + html.EscapeString(v) + `"`

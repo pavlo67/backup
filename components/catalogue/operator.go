@@ -2,7 +2,8 @@ package catalogue
 
 import (
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/tools/components/ns"
+
+	"github.com/pavlo67/data_exchange/components/ns"
 
 	"github.com/pavlo67/tools/components/files"
 )

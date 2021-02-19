@@ -1,6 +1,10 @@
 package views_html
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/pavlo67/tools/components/notebook/notebook_html"
+)
 
 var num int
 
@@ -15,11 +19,11 @@ func HTMLOpenClose(title, content string, visible bool) string {
 
 	if visible {
 		htmlContent = `<a href=# onclick="openClose('` + imageID + `','` + contentID + `')">` +
-			`<img id="` + imageID + `" src="` + ImgMinus + `"></a> ` + title + "\n" +
+			`<img id="` + imageID + `" src="` + notebook_html.ImgMinus + `"></a> ` + title + "\n" +
 			`<br><div id="` + contentID + `">` + content + `</div>`
 	} else {
 		htmlContent = `<a href=# onclick="openClose('` + imageID + `','` + contentID + `')">` +
-			`<img id="` + imageID + `" src="` + ImgPlus + `"></a> ` + title + "\n" +
+			`<img id="` + imageID + `" src="` + notebook_html.ImgPlus + `"></a> ` + title + "\n" +
 			`<br><div id="` + contentID + `" style="visibility:hidden;position:absolute;">` + content + `</div>`
 
 	}

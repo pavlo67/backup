@@ -10,8 +10,8 @@ import (
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/selectors"
 
-	"github.com/pavlo67/tools/components/ns"
-	"github.com/pavlo67/tools/components/vcs"
+	"github.com/pavlo67/data_exchange/components/ns"
+	"github.com/pavlo67/data_exchange/components/vcs"
 )
 
 type ID common.IDStr
@@ -19,7 +19,7 @@ type ID common.IDStr
 type Content struct {
 	Title    string      `json:",omitempty" bson:",omitempty"`
 	Summary  string      `json:",omitempty" bson:",omitempty"`
-	TypeKey  TypeKey     `json:",omitempty" bson:",omitempty"`
+	TypeKey  string      `json:",omitempty" bson:",omitempty"`
 	Data     string      `json:",omitempty" bson:",omitempty"`
 	Embedded []Content   `json:",omitempty" bson:",omitempty"` // in particular: URLs, images, etc.
 	Tags     []tags.Item `json:",omitempty" bson:",omitempty"`

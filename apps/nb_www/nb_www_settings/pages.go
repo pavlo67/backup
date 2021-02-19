@@ -1,4 +1,4 @@
-package nb_settings
+package nb_www_settings
 
 import (
 	"fmt"
@@ -38,13 +38,15 @@ var PagesConfig = server_http.Config{
 	Title:   "Notebook pages",
 	Version: "0.0.1",
 	EndpointsSettled: map[joiner.InterfaceKey]server_http.EndpointSettled{
-		notebook.IntefaceKeyHTMLRoot: {Path: ""},
-		notebook.IntefaceKeyHTMLView: {Path: "/view"},
-		// notebook.IntefaceKeyHTMLList: {Path: "/list"},
+		notebook.IntefaceKeyHTMLRoot:   {Path: ""},
+		notebook.IntefaceKeyHTMLView:   {Path: "/view"},
+		notebook.IntefaceKeyHTMLCreate: {Path: "/create"},
 		notebook.IntefaceKeyHTMLEdit:   {Path: "/edit"},
 		notebook.IntefaceKeyHTMLSave:   {Path: "/save"},
+		notebook.IntefaceKeyHTMLDelete: {Path: "/delete"},
 		notebook.IntefaceKeyHTMLTags:   {Path: "/tags"},
 		notebook.IntefaceKeyHTMLTagged: {Path: "/tagged"},
+		// notebook.IntefaceKeyHTMLList: {Path: "/list"},
 	},
 }
 

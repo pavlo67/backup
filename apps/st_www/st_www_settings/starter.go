@@ -1,4 +1,4 @@
-package st_settings
+package st_www_settings
 
 import (
 	"fmt"

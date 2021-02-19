@@ -1,4 +1,4 @@
-package views_html
+package notebook_html
 
 const No = `<b style="size:18px;">»</b> `
 

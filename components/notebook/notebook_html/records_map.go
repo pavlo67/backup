@@ -4,11 +4,12 @@ import (
 	"strings"
 
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/tools/components/views/views_html"
 
-	"github.com/pavlo67/tools/components/ns"
+	"github.com/pavlo67/data_exchange/components/ns"
+
 	"github.com/pavlo67/tools/components/records"
 	"github.com/pavlo67/tools/components/tags"
+	"github.com/pavlo67/tools/components/views/views_html"
 )
 
 var dataFields = []views_html.Field{

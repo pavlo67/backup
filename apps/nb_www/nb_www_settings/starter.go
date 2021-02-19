@@ -1,4 +1,4 @@
-package nb_settings
+package nb_www_settings
 
 import (
 	"fmt"
