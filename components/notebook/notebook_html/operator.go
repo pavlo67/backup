@@ -1,31 +1,24 @@
 package notebook_html
 
 import (
-	"net/http"
-
-	"github.com/pavlo67/common/common/server"
+	"github.com/pavlo67/common/common/crud"
 
 	"github.com/pavlo67/tools/components/records"
 	"github.com/pavlo67/tools/components/tags"
 )
 
-//type Key string
-//
-//const Full Key = "full"
-//const Brief Key = "brief"
-//const Edit Key = "edit"
-//const Tag Key = "tag"
-
-// should be thread-safe
 type Operator interface {
-	HTMLRoot(htmlHello string, tagsStatMap tags.StatMap) (server.Response, error)
-	HTMLError(httpStatus int, err error, publicDetails string, req *http.Request) (server.Response, error)
 
-	HTMLView(r *records.Item, children []records.Item, message string) (server.Response, error)
-	HTMLEdit(r *records.Item, children []records.Item, message string) (server.Response, error)
+	// complete pages ------------------------------------------
 
-	HTMLTags(tsm tags.StatMap) (server.Response, error)
-	HTMLTagged(tag tags.Item, tagged []records.Item) (server.Response, error)
+	CommonPage(title, htmlHeader, htmlMessage, htmlError, htmlIndex, htmlContent string) (string, error)
+
+	View(r *records.Item, children []records.Item, message string, options *crud.Options) (string, error)
+	Edit(r *records.Item, children []records.Item, message string, options *crud.Options) (string, error)
+	ListTagged(tag tags.Item, tagged []records.Item, options *crud.Options) (string, error)
+
+	// page elements  ------------------------------------------
+
+	HTMLRecords(recordItems []records.Item, options *crud.Options) (string, error)
+	HTMLTags(tsm tags.StatMap, options *crud.Options) (string, error)
 }
-
-// Prepare(key Key, template string, params common.Map) error

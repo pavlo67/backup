@@ -137,7 +137,7 @@ const noteFormID = "note"
 //	return map[string]string{
 //		"caput":   "Нова нотатка",
 //		"titulus": "Нова нотатка",
-//		"corpus":  items.HTMLEdit(user, createFields, noteFormID, data, nil, frontOps, rView, false),
+//		"corpus":  items.Edit(user, createFields, noteFormID, data, nil, frontOps, rView, false),
 //	}
 //
 //}
@@ -181,7 +181,7 @@ const noteFormID = "note"
 //	}
 //
 //	publicChanges := o.Managers != nil && o.Managers[rights.Change] == o.RView
-//	responseData["corpus"] = items.HTMLEdit(user, updateFields, noteFormID, data, nil, frontOps, o.RView, publicChanges)
+//	responseData["corpus"] = items.Edit(user, updateFields, noteFormID, data, nil, frontOps, o.RView, publicChanges)
 //	return responseData
 //
 //}

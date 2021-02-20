@@ -3,15 +3,14 @@ package notebook_html
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/cbroglie/mustache"
 
+	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
-	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
 
 	"github.com/pavlo67/tools/components/notebook"
@@ -22,7 +21,6 @@ import (
 
 var _ Operator = &notebookHTML{}
 
-// should be thread-safe
 type notebookHTML struct {
 	htmlTemplate string
 	pagesConfig  server_http.Config
@@ -68,154 +66,97 @@ func New(htmlTemplate string, pagesConfig, restConfig server_http.Config) (Opera
 
 // TODO!!! look at https://github.com/kataras/blocks
 
-func pageError(err, errRender error, req *http.Request) error {
-	var errs []interface{}
+func (htmlOp *notebookHTML) CommonPage(title, htmlHeader, htmlMessage, htmlError, htmlIndex, htmlContent string) (string, error) {
 
-	if err != nil {
-		errs = []interface{}{err}
+	if htmlError = strings.TrimSpace(htmlError); htmlError != "" {
+		htmlError = "На жаль, виникла помилка:-(\n<p>" + htmlError
 	}
-	if errRender != nil {
-		errs = append(errs, errRender)
-	}
-
-	if len(errs) < 1 {
-		return nil
-	}
-
-	if req != nil {
-		return errors.CommonError(append([]interface{}{fmt.Errorf("on %s %s", req.Method, req.URL)}, errs...)...)
-	}
-
-	return errors.CommonError(errs...)
-}
-
-func (htmlOp *notebookHTML) HTMLError(httpStatus int, err error, publicDetails string, req *http.Request) (server.Response, error) {
-	context := map[string]string{
-		"title":   "нотатник: помилка",
-		"header":  "Помилка",
-		"content": "На жаль, виникла помилка (" + publicDetails + ")",
-	}
-
-	if httpStatus == 0 {
-		httpStatus = http.StatusInternalServerError
-	}
-
-	htmlPage, errRender := mustache.Render(htmlOp.htmlTemplate, context)
-
-	return server.Response{
-		Status:   httpStatus,
-		Data:     []byte(htmlPage),
-		MIMEType: "text/html; charset=utf-8",
-	}, pageError(err, errRender, req)
-}
-
-func (htmlOp *notebookHTML) HTMLRoot(htmlHello string, tagsStatMap tags.StatMap) (server.Response, error) {
 
 	context := map[string]string{
-		"title":   "нотатник: вхід",
-		"header":  "Вхід",
-		"content": htmlHello + "\n\n<p>" + htmlOp.htmlTags(tagsStatMap),
+		"title":   title,
+		"header":  htmlHeader,
+		"message": htmlMessage,
+		"error":   htmlError,
+		"index":   htmlIndex,
+		"content": htmlContent,
 	}
 
-	htmlPage, err := mustache.Render(htmlOp.htmlTemplate, context)
-
-	return server.Response{
-		Status:   http.StatusOK,
-		Data:     []byte(htmlPage),
-		MIMEType: "text/html; charset=utf-8",
-	}, pageError(err, errRender, req)
+	return mustache.Render(htmlOp.htmlTemplate, context)
 }
 
-const onHTMLView = "on notebookHTML.HTMLView(): "
-
-func (htmlOp *notebookHTML) HTMLView(r *records.Item, children []records.Item, message string) (server.Response, error) {
+func (htmlOp *notebookHTML) View(r *records.Item, children []records.Item, message string, options *crud.Options) (string, error) {
 	context := map[string]string{
-		"title":   "нотатник: " + r.Content.Title,
+		"title":   r.Content.Title,
 		"header":  r.Content.Title,
 		"message": message,
 		"content": views_html.HTMLViewTable(dataFields, DataFromRecord(r), nil),
 	}
 
-	htmlPage, err := mustache.Render(htmlOp.htmlTemplate, context)
-
-	return server.Response{
-		Status:   http.StatusOK,
-		Data:     []byte(htmlPage),
-		MIMEType: "text/html; charset=utf-8",
-	}, err
+	return mustache.Render(htmlOp.htmlTemplate, context)
 }
 
-const onHTMLEdit = "on notebookHTML.HTMLEdit(): "
+const onHTMLEdit = "on notebookHTML.Edit(): "
 
-func (htmlOp *notebookHTML) HTMLEdit(r *records.Item, children []records.Item, message string) (server.Response, error) {
+func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, message string, options *crud.Options) (string, error) {
 	formID := "nb_edit_" + strconv.FormatInt(time.Now().Unix(), 10) + "_"
+
+	var title, header, action string
+	var dataFromRecord map[string]string
+	if r == nil {
+		header = "Створення запису"
+		action = "зберегти запис"
+	} else {
+		header = "Редаґування: "
+		title = r.Content.Title
+		dataFromRecord = DataFromRecord(r)
+		action = "зберегти зміни"
+	}
 
 	updateFields := append(
 		dataFields,
 		views_html.Field{
 			"update",
-			"зберегти зміни",
+			action,
 			"submit",
 			nil,
 			map[string]string{"class": "ut"},
 		},
-		//views_html.Field{
-		//	"update",
-		//	"зберегти зміни",
-		//	"button",
-		//	nil,
-		//	map[string]string{"class": "ut", "onclick": `getData("` + formID + `")`},
-		//},
 	)
 
 	context := map[string]string{
-		"title":   "редаґування нотатки: " + r.Content.Title,
-		"header":  "редаґування нотатки: " + r.Content.Title,
+		"title":   title,
+		"header":  header + title,
 		"message": message,
-		"content": views_html.HTMLEditTable(updateFields, formID, "/save", DataFromRecord(r), nil),
+		"content": views_html.HTMLEditTable(updateFields, formID, "/save", dataFromRecord, nil),
 	}
 
-	htmlPage, err := mustache.Render(htmlOp.htmlTemplate, context)
-
-	return server.Response{
-		Status:   http.StatusOK,
-		Data:     []byte(htmlPage),
-		MIMEType: "text/html; charset=utf-8",
-	}, err
-
+	return mustache.Render(htmlOp.htmlTemplate, context)
 }
 
-func (htmlOp *notebookHTML) HTMLTagged(tag tags.Item, tagged []records.Item) (server.Response, error) {
-	htmlList, err := json.Marshal(tagged)
+func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, options *crud.Options) (string, error) {
+	htmlList, errRenderRecords := htmlOp.HTMLRecords(tagged, options)
+	if errRenderRecords != nil {
+		errorID := strconv.FormatInt(time.Now().UnixNano(), 10)
+		l.Error(errorID, " / ", errRenderRecords)
+		return htmlOp.CommonPage(
+			"помилка",
+			"",
+			"",
+			"при htmlOp.HTMLRecords() / "+errorID,
+			"",
+			"",
+		)
+	}
 
 	context := map[string]string{
-		"title":   "нотатник: все з теґом '" + tag + "'",
+		"title":   "все з теґом '" + tag + "'",
 		"header":  "Все з теґом '" + tag + "'",
-		"content": string(htmlList),
+		"content": htmlList,
 	}
-
-	htmlPage, err := mustache.Render(htmlOp.htmlTemplate, context)
-
-	return server.Response{
-		Status:   http.StatusOK,
-		Data:     []byte(htmlPage),
-		MIMEType: "text/html; charset=utf-8",
-	}, err
-
+	return mustache.Render(htmlOp.htmlTemplate, context)
 }
 
-const onHTMLTags = "on tagsHTML.HTMLTags(): "
-
-func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap) (server.Response, error) {
-
-	title := "нотатник: теґи"
-	htmlHeader := "Теґи"
-
-	return notebookHTMLOp.HTMLPage(title, htmlHeader, "", htmlTags, errs.Error()), nil
-
-}
-
-func (htmlOp *notebookHTML) htmlTags(tagsStatMap tags.StatMap) string {
+func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, options *crud.Options) (string, error) {
 
 	tss := tagsStatMap.List(true)
 
@@ -241,6 +182,14 @@ func (htmlOp *notebookHTML) htmlTags(tagsStatMap tags.StatMap) string {
 	}
 	htmlTags += "</ul>\n\n"
 
-	return htmlTags
+	return htmlTags, nil
+
+}
+
+func (htmlOp *notebookHTML) HTMLRecords(recordItems []records.Item, options *crud.Options) (string, error) {
+
+	jsonBytes, err := json.Marshal(recordItems)
+
+	return string(jsonBytes), err
 
 }

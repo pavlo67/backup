@@ -25,7 +25,7 @@ package notebook_vews_old
 //	return values, selected
 //}
 //
-//func HTMLView(fields []viewshtml.Field, data map[string]string, options map[string]viewshtml.SelectString, frontOps map[string]viewshtml.Operator) string {
+//func View(fields []viewshtml.Field, data map[string]string, options map[string]viewshtml.SelectString, frontOps map[string]viewshtml.Operator) string {
 //	if data == nil {
 //		data = map[string]string{}
 //	}
@@ -53,7 +53,7 @@ package notebook_vews_old
 //
 //const formNameBase = "editst_"
 //
-//func HTMLEdit(user *auth.User, fields []viewshtml.Field, data map[string]string, options map[string]viewshtml.SelectString, frontOps map[string]viewshtml.Operator, rView auth.ID, publicChanges bool) string {
+//func Edit(user *auth.User, fields []viewshtml.Field, data map[string]string, options map[string]viewshtml.SelectString, frontOps map[string]viewshtml.Operator, rView auth.ID, publicChanges bool) string {
 //	formNum++
 //	formID := formNameBase + strconv.Itoa(formNum) + "_"
 //
