@@ -1,17 +1,20 @@
 package notebook_html
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/pavlo67/common/common/auth"
 
 	"github.com/cbroglie/mustache"
 
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server/server_http"
+
+	server_http2 "github.com/pavlo67/tools/common/server/server_http"
 
 	"github.com/pavlo67/tools/components/notebook"
 	"github.com/pavlo67/tools/components/records"
@@ -23,8 +26,10 @@ var _ Operator = &notebookHTML{}
 
 type notebookHTML struct {
 	htmlTemplate string
-	pagesConfig  server_http.Config
-	restConfig   server_http.Config
+
+	epCreate string
+	epView   server_http2.Get1
+	epTagged server_http2.Get1
 }
 
 const onNew = "on notebookHTML.New(): "
@@ -34,33 +39,26 @@ func New(htmlTemplate string, pagesConfig, restConfig server_http.Config) (Opera
 		return nil, errors.New("no htmlTemplate to render pages")
 	}
 
-	// TODO!!! check by single call with required endpoints list
-
-	method, urlStr, err := pagesConfig.EP(notebook.IntefaceKeyHTMLView, []string{"id"}, false)
-	if err != nil || urlStr == "" {
-		return nil, fmt.Errorf("can't EP(%#v, notebook.IntefaceKeyHTMLView, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
-	} else if strings.TrimSpace(strings.ToUpper(method)) != "GET" {
-		return nil, fmt.Errorf("wrong method on EP(%#v, notebook.IntefaceKeyHTMLView, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
+	epCreate, err := server_http2.CheckGet0(pagesConfig, notebook.IntefaceKeyHTMLCreate, false)
+	if err != nil {
+		return nil, err
 	}
 
-	method, urlStr, err = pagesConfig.EP(notebook.IntefaceKeyHTMLTagged, []string{"id"}, false)
-	if err != nil || urlStr == "" {
-		return nil, fmt.Errorf("can't EP(%#v, notebook.IntefaceKeyHTMLList, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
-	} else if strings.TrimSpace(strings.ToUpper(method)) != "GET" {
-		return nil, fmt.Errorf("wrong method on EP(%#v, notebook.IntefaceKeyHTMLList, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
+	epView, err := server_http2.CheckGet1(pagesConfig, notebook.IntefaceKeyHTMLView, false)
+	if err != nil {
+		return nil, err
 	}
 
-	method, urlStr, err = pagesConfig.EP(notebook.IntefaceKeyHTMLEdit, []string{"id"}, false)
-	if err != nil || urlStr == "" {
-		return nil, fmt.Errorf("can't EP(%#v, notebook.IntefaceKeyHTMLEdit, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
-	} else if strings.TrimSpace(strings.ToUpper(method)) != "GET" {
-		return nil, fmt.Errorf("wrong method on EP(%#v, notebook.IntefaceKeyHTMLEdit, nil, false), got %s, %s, %s", pagesConfig, method, urlStr, err)
+	epTagged, err := server_http2.CheckGet1(pagesConfig, notebook.IntefaceKeyHTMLTagged, false)
+	if err != nil {
+		return nil, err
 	}
 
 	return &notebookHTML{
 		htmlTemplate: htmlTemplate,
-		pagesConfig:  pagesConfig,
-		restConfig:   restConfig,
+		epCreate:     epCreate,
+		epView:       epView,
+		epTagged:     epTagged,
 	}, nil
 }
 
@@ -134,19 +132,19 @@ func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, messa
 }
 
 func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, options *crud.Options) (string, error) {
-	htmlList, errRenderRecords := htmlOp.HTMLRecords(tagged, options)
-	if errRenderRecords != nil {
-		errorID := strconv.FormatInt(time.Now().UnixNano(), 10)
-		l.Error(errorID, " / ", errRenderRecords)
-		return htmlOp.CommonPage(
-			"помилка",
-			"",
-			"",
-			"при htmlOp.HTMLRecords() / "+errorID,
-			"",
-			"",
-		)
-	}
+	htmlList := htmlOp.HTMLRecords(tagged, options.GetIdentity())
+	//if errRenderRecords != nil {
+	//	errorID := strconv.FormatInt(time.Now().UnixNano(), 10)
+	//	l.Error(errorID, " / ", errRenderRecords)
+	//	return htmlOp.CommonPage(
+	//		"помилка",
+	//		"",
+	//		"",
+	//		"при htmlOp.HTMLRecords() / "+errorID,
+	//		"",
+	//		"",
+	//	)
+	//}
 
 	context := map[string]string{
 		"title":   "все з теґом '" + tag + "'",
@@ -156,7 +154,7 @@ func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, opt
 	return mustache.Render(htmlOp.htmlTemplate, context)
 }
 
-func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, options *crud.Options) (string, error) {
+func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, options *crud.Options) string {
 
 	tss := tagsStatMap.List(true)
 
@@ -169,12 +167,9 @@ func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, options *crud.Opt
 			continue
 		}
 
-		method, urlStr, err := htmlOp.pagesConfig.EP(notebook.IntefaceKeyHTMLTagged, []string{tag}, false)
-
-		l.Infof("%s %s", method, urlStr)
-
+		urlStr, err := htmlOp.epTagged(tag)
 		if err != nil || urlStr == "" {
-			l.Errorf("can't server_http.EP(%#v, notebook.InterfaceKeyHTMLTags,nil,false), got %s, %s, %s", htmlOp.pagesConfig, method, urlStr, err)
+			l.Errorf("can't htmlOp.epTagged(%s), got %s, %s", tag, urlStr, err)
 			continue
 		}
 
@@ -182,14 +177,55 @@ func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, options *crud.Opt
 	}
 	htmlTags += "</ul>\n\n"
 
-	return htmlTags, nil
+	return htmlTags
 
 }
 
-func (htmlOp *notebookHTML) HTMLRecords(recordItems []records.Item, options *crud.Options) (string, error) {
+func (htmlOp *notebookHTML) HTMLIndex(options *crud.Options) string {
+	htmlIndex := `<div style="padding:5px;margin: 15px 0 10px 10px;width:200px;float:right;">`
 
-	jsonBytes, err := json.Marshal(recordItems)
+	urlStr := htmlOp.epCreate
+	htmlIndex += fmt.Sprintf(`<li>[<a href="%s">новий запис</a>]</li>`, urlStr)
+	htmlIndex += "</div>\n\n"
 
-	return string(jsonBytes), err
+	return htmlIndex
 
+}
+
+func (htmlOp *notebookHTML) HTMLRecords(recordItems []records.Item, identity *auth.Identity) string {
+	if len(recordItems) < 1 {
+		return "нема записів"
+	}
+
+	var htmlRecords string
+
+	for _, r := range recordItems {
+		details := `<table class="border" style="padding:3px;margin: 0 0 10px 10px;width:150px;" align=right>` +
+			"<tr><td>" + HTMLAuthor(&r, identity) + "</td></tr>\n" +
+			"<tr><td>" + HTMLTags(r.Content.Tags, r.ViewerID, r.OwnerID, htmlOp.epTagged, "<br>- ") + "</td></tr>\n" +
+			`</table>` +
+			"<p>" + r.Content.Summary
+		// + HTMLFiles(r.Links, pxPreview)
+
+		name := strings.TrimSpace(r.Content.Title)
+		if name == "" {
+			name = "..."
+		}
+
+		urlStr, err := htmlOp.epView(string(r.ID))
+		if err != nil || urlStr == "" {
+			l.Errorf("can't htmlOp.epView(%s), got %s, %s", r.ID, urlStr, err)
+		}
+
+		htmlRecords += `<li><a href="` + urlStr + `">` + name + "</a></li>\n" +
+			"<br>" + details + // HTMLHidden(details) +
+			listDelimiter + "\n"
+	}
+
+	return htmlRecords
+
+}
+
+func HTMLHidden(html string) string {
+	return `<div style="position:absolute;visibility:hidden;">` + html + "</div>\n"
 }

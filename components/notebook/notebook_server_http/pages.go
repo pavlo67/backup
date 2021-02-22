@@ -76,15 +76,20 @@ var rootPage = server_http.Endpoint{
 			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Tags()", req)
 		}
 
-		htmlTags, err := notebookHTMLOp.HTMLTags(tagsStatMap, options)
-		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
-		}
+		htmlIndex := notebookHTMLOp.HTMLIndex(options)
+		//if err != nil {
+		//	return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLIndex()", req)
+		//}
+
+		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, options)
+		//if err != nil {
+		//	return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
+		//}
 
 		htmlPage, errRender := notebookHTMLOp.CommonPage(
 			"вхід",
 			"Вхід",
-			"", "", "",
+			"", "", htmlIndex,
 			"Розділи (теми) цієї бази даних: \n<p>"+htmlTags,
 		)
 		if errRender != nil {
@@ -151,7 +156,6 @@ var editPage = server_http.Endpoint{
 var createPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLCreate,
 	Method:      "GET",
-	PathParams:  []string{"record_id"},
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
 		htmlPage, err := notebookHTMLOp.Edit(nil, nil, "", options)
 		if err != nil {
@@ -248,10 +252,10 @@ var tagsPage = server_http.Endpoint{
 			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Tags()", req)
 		}
 
-		htmlTags, err := notebookHTMLOp.HTMLTags(tagsStatMap, options)
-		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
-		}
+		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, options)
+		//if err != nil {
+		//	return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
+		//}
 
 		htmlPage, errRender := notebookHTMLOp.CommonPage(
 			"теґи",

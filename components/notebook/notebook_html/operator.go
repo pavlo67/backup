@@ -1,6 +1,7 @@
 package notebook_html
 
 import (
+	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
 
 	"github.com/pavlo67/tools/components/records"
@@ -19,6 +20,7 @@ type Operator interface {
 
 	// page elements  ------------------------------------------
 
-	HTMLRecords(recordItems []records.Item, options *crud.Options) (string, error)
-	HTMLTags(tsm tags.StatMap, options *crud.Options) (string, error)
+	HTMLIndex(options *crud.Options) string
+	HTMLRecords(recordItems []records.Item, identity *auth.Identity) string
+	HTMLTags(tsm tags.StatMap, options *crud.Options) string
 }
