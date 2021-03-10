@@ -6,15 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/common/common/auth"
-
 	"github.com/cbroglie/mustache"
 
+	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server/server_http"
-
-	server_http2 "github.com/pavlo67/tools/common/server/server_http"
 
 	"github.com/pavlo67/tools/components/notebook"
 	"github.com/pavlo67/tools/components/records"
@@ -28,8 +25,8 @@ type notebookHTML struct {
 	htmlTemplate string
 
 	epCreate string
-	epView   server_http2.Get1
-	epTagged server_http2.Get1
+	epView   server_http.Get1
+	epTagged server_http.Get1
 }
 
 const onNew = "on notebookHTML.New(): "
@@ -39,17 +36,17 @@ func New(htmlTemplate string, pagesConfig, restConfig server_http.Config) (Opera
 		return nil, errors.New("no htmlTemplate to render pages")
 	}
 
-	epCreate, err := server_http2.CheckGet0(pagesConfig, notebook.IntefaceKeyHTMLCreate, false)
+	epCreate, err := server_http.CheckGet0(pagesConfig, notebook.IntefaceKeyHTMLCreate, false)
 	if err != nil {
 		return nil, err
 	}
 
-	epView, err := server_http2.CheckGet1(pagesConfig, notebook.IntefaceKeyHTMLView, false)
+	epView, err := server_http.CheckGet1(pagesConfig, notebook.IntefaceKeyHTMLView, false)
 	if err != nil {
 		return nil, err
 	}
 
-	epTagged, err := server_http2.CheckGet1(pagesConfig, notebook.IntefaceKeyHTMLTagged, false)
+	epTagged, err := server_http.CheckGet1(pagesConfig, notebook.IntefaceKeyHTMLTagged, false)
 	if err != nil {
 		return nil, err
 	}

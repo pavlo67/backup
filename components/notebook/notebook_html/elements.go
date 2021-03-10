@@ -2,7 +2,7 @@ package notebook_html
 
 import (
 	"github.com/pavlo67/common/common/auth"
-	server_http2 "github.com/pavlo67/tools/common/server/server_http"
+	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pavlo67/tools/components/records"
 	"github.com/pavlo67/tools/components/tags"
 )
@@ -77,7 +77,7 @@ func HTMLAuthor(r *records.Item, identity *auth.Identity) string {
 //	return "В розділах:" + htmlLinks
 //}
 
-func HTMLTags(tags []tags.Item, viewerID, ownerID auth.ID, epTagged server_http2.Get1, joiner string) string {
+func HTMLTags(tags []tags.Item, viewerID, ownerID auth.ID, epTagged server_http.Get1, joiner string) string {
 	var htmlTags string
 
 	for _, tag := range tags {
