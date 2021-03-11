@@ -31,7 +31,7 @@ var saveEndpoint = server_http.Endpoint{
 			return serverOp.ResponseRESTError(0, err, req)
 		}
 
-		return serverOp.ResponseRESTOk(0, pathCorrected)
+		return serverOp.ResponseRESTOk(0, pathCorrected, req)
 	},
 }
 
@@ -47,7 +47,7 @@ var readEndpoint = server_http.Endpoint{
 			return serverOp.ResponseRESTError(0, err, req)
 		}
 
-		return serverOp.ResponseRESTOk(0, data)
+		return serverOp.ResponseRESTOk(0, data, req)
 	},
 }
 
@@ -62,7 +62,7 @@ var removeEndpoint = server_http.Endpoint{
 			return serverOp.ResponseRESTError(0, err, req)
 		}
 
-		return serverOp.ResponseRESTOk(0, nil)
+		return serverOp.ResponseRESTOk(0, nil, req)
 	},
 }
 
@@ -82,7 +82,7 @@ var listEndpoint = server_http.Endpoint{
 			return serverOp.ResponseRESTError(0, err, req)
 		}
 
-		return serverOp.ResponseRESTOk(0, filesInfo)
+		return serverOp.ResponseRESTOk(0, filesInfo, req)
 	},
 }
 
@@ -102,6 +102,6 @@ var statEndpoint = server_http.Endpoint{
 			return serverOp.ResponseRESTError(0, err, req)
 		}
 
-		return serverOp.ResponseRESTOk(0, fileInfo)
+		return serverOp.ResponseRESTOk(0, fileInfo, req)
 	},
 }

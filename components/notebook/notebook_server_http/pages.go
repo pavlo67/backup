@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/pavlo67/common/common/selectors"
+
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server"
@@ -283,9 +285,9 @@ var taggedPage = server_http.Endpoint{
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
 		tag := tags.Item(params["tag"])
 
-		selectorTagged, err := recordsOp.HasTag(tag)
-		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при recordsOp.HasTag()", req)
+		selectorTagged := selectors.Term{
+			Key:    records.HasTag,
+			Values: []string{tag},
 		}
 
 		rs, err := recordsOp.List(options.WithSelector(selectorTagged))

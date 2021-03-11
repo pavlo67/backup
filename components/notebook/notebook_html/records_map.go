@@ -56,7 +56,7 @@ func RecordFromData(data map[string][]string) *records.Item {
 
 	r := records.Item{
 		ID:       records.ID(value(data, "id")),
-		IssuedID: ns.ID(value(data, "issued_id")),
+		IssuedID: ns.URN(value(data, "issued_id")),
 		Content: records.Content{
 			Title:   value(data, "title"),
 			Summary: value(data, "summary"),

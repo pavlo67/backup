@@ -3,18 +3,18 @@ package files_fs
 import (
 	"testing"
 
-	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/config"
 	"github.com/stretchr/testify/require"
 
+	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/apps"
+	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/starter"
 
 	"github.com/pavlo67/tools/components/files"
 )
 
 func TestFilesFS(t *testing.T) {
-	_, cfgService, l := apps.PrepareTests(t, "test_service", "../../../apps/", "test", "files_fs.log")
+	_, cfgService, l := apps.PrepareTests(t, "../../../apps/", "test", "files_fs.log")
 	require.NotNil(t, cfgService)
 
 	var cfg config.Access

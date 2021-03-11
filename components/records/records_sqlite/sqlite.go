@@ -11,7 +11,6 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
-	"github.com/pavlo67/common/common/selectors"
 	"github.com/pavlo67/common/common/sqllib"
 	"github.com/pavlo67/common/common/strlib"
 
@@ -213,16 +212,12 @@ const onList = "on recordsSQLite.List()"
 
 func (recordsOp *recordsSQLite) List(options *crud.Options) ([]records.Item, error) {
 
-	var termSQL selectors.TermSQL
-
-	if selector := options.GetSelector(); selector != nil {
-		var ok bool
-		if termSQL, ok = selector.(selectors.TermSQL); !ok {
-			return nil, fmt.Errorf(onList+": wrong selector: %#v", selector)
-		}
+	condition, values, err := Conditions(options)
+	if err != nil {
+		return nil, fmt.Errorf(onList+": wrong selector in options: %#v", options.GetSelector())
 	}
 
-	query := sqllib.SQLList(recordsOp.table, fieldsToListStr, termSQL.Condition, options)
+	query := sqllib.SQLList(recordsOp.table, fieldsToListStr, condition, options)
 	stm, err := recordsOp.db.Prepare(query)
 	if err != nil {
 		return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
@@ -230,11 +225,11 @@ func (recordsOp *recordsSQLite) List(options *crud.Options) ([]records.Item, err
 
 	//l.Infof("%s / %#v\n%s", condition, values, query)
 
-	rows, err := stm.Query(termSQL.Values...)
+	rows, err := stm.Query(values...)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
-		return nil, errors.Wrapf(err, onList+": "+sqllib.CantQuery, query, termSQL.Values)
+		return nil, errors.Wrapf(err, onList+": "+sqllib.CantQuery, query, values)
 	}
 	defer rows.Close()
 
@@ -253,7 +248,7 @@ func (recordsOp *recordsSQLite) List(options *crud.Options) ([]records.Item, err
 			&item.Content.Title, &item.Content.Summary, &item.Content.TypeKey, &item.Content.Data, &embeddedBytes, &tagsBytes,
 			&item.IssuedID, &item.OwnerID, &item.ViewerID, &historyBytes, &item.UpdatedAt, &item.CreatedAt,
 			&idNum); err != nil {
-			return items, errors.Wrapf(err, onList+": "+sqllib.CantScanQueryRow, query, termSQL.Values)
+			return items, errors.Wrapf(err, onList+": "+sqllib.CantScanQueryRow, query, values)
 		}
 
 		if len(embeddedBytes) > 0 {
@@ -279,7 +274,7 @@ func (recordsOp *recordsSQLite) List(options *crud.Options) ([]records.Item, err
 	}
 
 	if err = rows.Err(); err != nil {
-		return items, errors.Wrapf(err, onList+": "+sqllib.RowsError, query, termSQL.Values)
+		return items, errors.Wrapf(err, onList+": "+sqllib.RowsError, query, values)
 	}
 
 	return items, nil
@@ -289,26 +284,22 @@ const onTags = "on recordsSQLite.Tags()"
 
 func (recordsOp *recordsSQLite) Tags(options *crud.Options) (tags.StatMap, error) {
 
-	var termSQL selectors.TermSQL
-
-	if selector := options.GetSelector(); selector != nil {
-		var ok bool
-		if termSQL, ok = selector.(selectors.TermSQL); !ok {
-			return nil, fmt.Errorf(onTags+": wrong selector: %#v", selector)
-		}
+	condition, values, err := Conditions(options)
+	if err != nil {
+		return nil, fmt.Errorf(onList+": wrong selector in options: %#v", options.GetSelector())
 	}
 
-	query := sqllib.SQLList(recordsOp.table, "tags", termSQL.Condition, options)
+	query := sqllib.SQLList(recordsOp.table, "tags", condition, options)
 	stm, err := recordsOp.db.Prepare(query)
 	if err != nil {
 		return nil, errors.Wrapf(err, onTags+": can't db.Prepare(%s)", query)
 	}
 
-	rows, err := stm.Query(termSQL.Values...)
+	rows, err := stm.Query(values...)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
-		return nil, errors.Wrapf(err, onTags+": "+sqllib.CantQuery, query, termSQL.Values)
+		return nil, errors.Wrapf(err, onTags+": "+sqllib.CantQuery, query, values)
 	}
 	defer rows.Close()
 
@@ -318,7 +309,7 @@ func (recordsOp *recordsSQLite) Tags(options *crud.Options) (tags.StatMap, error
 		var tagsBytes []byte
 
 		if err := rows.Scan(&tagsBytes); err != nil {
-			return tagsStat, errors.Wrapf(err, onTags+": "+sqllib.CantScanQueryRow, query, termSQL.Values)
+			return tagsStat, errors.Wrapf(err, onTags+": "+sqllib.CantScanQueryRow, query, values)
 		}
 
 		if len(tagsBytes) > 0 {
@@ -340,7 +331,7 @@ func (recordsOp *recordsSQLite) Tags(options *crud.Options) (tags.StatMap, error
 	}
 
 	if err = rows.Err(); err != nil {
-		return tagsStat, errors.Wrapf(err, onTags+": "+sqllib.RowsError, query, termSQL.Values)
+		return tagsStat, errors.Wrapf(err, onTags+": "+sqllib.RowsError, query, values)
 	}
 
 	return tagsStat, nil

@@ -4,6 +4,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/pavlo67/common/common/selectors"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/auth"
@@ -73,8 +75,10 @@ func crudTestNoRBAC(t *testing.T, recordsOp Operator, itemToSave, itemToUpdate, 
 
 	// prepare selector tagged ----------------------------
 
-	selectorTagged, err := recordsOp.HasTag(testNewTag)
-	require.NoError(t, err)
+	selectorTagged := selectors.Term{
+		Key:    HasTag,
+		Values: []string{testNewTag},
+	}
 	optionsWithTag := options.WithSelector(selectorTagged)
 
 	// insert ---------------------------------------------
@@ -90,8 +94,10 @@ func crudTestNoRBAC(t *testing.T, recordsOp Operator, itemToSave, itemToUpdate, 
 
 	// prepare selector parent ----------------------------
 
-	selectorParent, err := recordsOp.HasParent(itemSaved1.ID)
-	require.NoError(t, err)
+	selectorParent := selectors.Term{
+		Key:    HasParent,
+		Values: []string{string(itemSaved1.ID)},
+	}
 	optionsWithParent := options.WithSelector(selectorParent)
 
 	// check inserted -------------------------------------

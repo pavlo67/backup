@@ -1,31 +1,15 @@
 package records_sqlite
 
 import (
-	"errors"
+	"fmt"
 	"strings"
 
-	"github.com/pavlo67/tools/components/tags"
+	"github.com/pavlo67/common/common/crud"
 
-	"github.com/pavlo67/common/common/selectors"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/tools/components/records"
+	"github.com/pavlo67/tools/components/tags"
 )
-
-const onHasTag = "on recordsSQLite.HasTag()"
-
-func (recordsOp *recordsSQLite) HasTag(tag tags.Item) (selectors.Term, error) {
-	tagStr := strings.TrimSpace(string(tag))
-	if tagStr == "" {
-		return nil, errors.New(onHasTag + ": no tagStr to select records")
-	}
-
-	return selectors.TermSQL{Condition: `tags LIKE ?`, Values: []interface{}{`%"` + tagStr + `"%`}}, nil
-}
-
-const onHasNoTag = "on recordsSQLite.HasNoTag()"
-
-func (recordsOp *recordsSQLite) HasNoTag() (selectors.Term, error) {
-	return selectors.TermSQL{Condition: `tags IN ('', '{}')`, Values: nil}, nil
-}
 
 const onAddParent = "on recordsSQLite.AddParent()"
 
@@ -38,12 +22,50 @@ func (recordsOp *recordsSQLite) AddParent(ts []tags.Item, id records.ID) ([]tags
 	return append(ts, tags.Item(idStr+":")), nil
 }
 
-const onHasParent = "on recordsSQLite.HasParent()"
+const onConditions = "on records_sqlite.Conditions()"
 
-func (recordsOp *recordsSQLite) HasParent(id records.ID) (selectors.Term, error) {
-	if id = records.ID(strings.TrimSpace(string(id))); id == "" {
-		return nil, errors.New(onHasParent + ": no id to select child records")
+func Conditions(options *crud.Options) (string, []interface{}, error) {
+	var condition string
+	var values []interface{}
+
+	if selector := options.GetSelector(); selector != nil {
+
+		valuesStr, ok := selector.Values.([]string)
+		if !ok {
+			return "", nil, fmt.Errorf(onConditions+": wrong selector values (should be []string): %#v / %#v", selector, selector.Values)
+		}
+
+		switch selector.Key {
+		case records.HasTag:
+			if len(valuesStr) != 1 {
+				return "", nil, fmt.Errorf(onConditions+": wrong values list in selector: %#v / %#v", selector, valuesStr)
+			}
+			tagStr := strings.TrimSpace(valuesStr[0])
+			if tagStr == "" {
+				return "", nil, errors.New(onConditions + ": no tag to select records")
+			}
+			condition = `tags LIKE ?`
+			values = []interface{}{`%"` + tagStr + `"%`}
+
+		case records.HasNoTag:
+			condition = `tags IN ('', '{}')`
+
+		case records.HasParent:
+			if len(valuesStr) != 1 {
+				return "", nil, fmt.Errorf(onConditions+": wrong values list in selector: %#v / %#v", selector, valuesStr)
+			}
+			idStr := strings.TrimSpace(valuesStr[0])
+			if idStr == "" {
+				return "", nil, errors.New(onConditions + ": no id to select records")
+			}
+			condition = `tags LIKE ?`
+			values = []interface{}{`%"` + idStr + `:%`}
+
+		default:
+			return "", nil, fmt.Errorf(onConditions+": wrong selector.Key: %#v", selector)
+		}
 	}
 
-	return selectors.TermSQL{Condition: `tags LIKE ?`, Values: []interface{}{`%"` + string(id) + `:%`}}, nil
+	return condition, values, nil
+
 }

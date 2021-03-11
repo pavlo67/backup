@@ -3,19 +3,18 @@ package records_sqlite
 import (
 	"testing"
 
-	"github.com/pavlo67/tools/components/connect/connect_sqlite"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/connect/connect_sqlite"
 	"github.com/pavlo67/common/common/starter"
 
 	"github.com/pavlo67/tools/components/records"
 )
 
 func TestCRUD(t *testing.T) {
-	_, cfgService, l := apps.PrepareTests(t, "test_service", "../../../apps/", "test", "records_sqlite")
+	_, cfgService, l := apps.PrepareTests(t, "../../../apps/", "test", "records_sqlite")
 	require.NotNil(t, cfgService)
 
 	var cfg config.Access

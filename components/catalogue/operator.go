@@ -9,7 +9,7 @@ import (
 )
 
 type Item struct {
-	IssuedID ns.ID
+	IssuedID ns.URN
 	File     files.Item
 }
 

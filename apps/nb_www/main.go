@@ -12,10 +12,8 @@ var (
 	BuildCommit = ""
 )
 
-const serviceName = "demo"
-
 func main() {
-	versionOnly, _, cfgService, l := apps.Prepare(BuildDate, BuildTag, BuildCommit, serviceName, apps.AppsSubpathDefault)
+	versionOnly, _, cfgService, l := apps.Prepare(BuildDate, BuildTag, BuildCommit, apps.AppsSubpathDefault)
 	if versionOnly {
 		return
 	}

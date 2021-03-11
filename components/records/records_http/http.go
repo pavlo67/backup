@@ -3,7 +3,6 @@ package records_http
 import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/selectors"
 	"github.com/pavlo67/common/common/server/server_http"
 
 	"github.com/pavlo67/tools/components/records"
@@ -65,18 +64,6 @@ func (recordsOp *recordsHTTP) Tags(*crud.Options) (tags.StatMap, error) {
 	return nil, common.ErrNotImplemented
 }
 
-func (recordsOp *recordsHTTP) HasTag(tag tags.Item) (selectors.Term, error) {
-	return nil, common.ErrNotImplemented
-}
-
-func (recordsOp *recordsHTTP) HasNoTag() (selectors.Term, error) {
-	return nil, common.ErrNotImplemented
-}
-
 func (recordsOp *recordsHTTP) AddParent(tags []tags.Item, id records.ID) ([]tags.Item, error) {
-	return nil, common.ErrNotImplemented
-}
-
-func (recordsOp *recordsHTTP) HasParent(id records.ID) (selectors.Term, error) {
 	return nil, common.ErrNotImplemented
 }
