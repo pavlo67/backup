@@ -18,7 +18,7 @@ import (
 	"github.com/pavlo67/tools/components/tags"
 )
 
-var fieldsToInsert = []string{"title", "summary", "type_key", "data", "embedded", "tags", "issued_id", "owner_id", "viewer_id", "history"}
+var fieldsToInsert = []string{"title", "summary", "type_key", "data", "embedded", "tags", "urn", "owner_id", "viewer_id", "history"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
 var fieldsToUpdate = append(fieldsToInsert, "updated_at")
@@ -118,7 +118,7 @@ func (recordsOp *recordsSQLite) Save(item records.Item, options *crud.Options) (
 	}
 
 	// "title", "summary", "type_key", "data", "embedded", "tags",
-	// "issued_id", "owner_id", "viewer_id", "history"
+	// "urn", "owner_id", "viewer_id", "history"
 	values := []interface{}{
 		item.Content.Title, item.Content.Summary, item.Content.TypeKey, item.Content.Data, embeddedBytes, tagsBytes,
 		item.IssuedID, item.OwnerID, item.ViewerID, historyBytes}
@@ -159,7 +159,7 @@ func (recordsOp *recordsSQLite) Read(id records.ID, options *crud.Options) (*rec
 	var embeddedBytes, tagsBytes, historyBytes []byte
 
 	// "title", "summary", "type_key", "data", "embedded", "tags",
-	// "issued_id", "owner_id", "viewer_id", "history", "updated_at", "created_at"
+	// "urn", "owner_id", "viewer_id", "history", "updated_at", "created_at"
 
 	if err = recordsOp.stmRead.QueryRow(idNum).Scan(
 		&item.Content.Title, &item.Content.Summary, &item.Content.TypeKey, &item.Content.Data, &embeddedBytes, &tagsBytes,
@@ -241,7 +241,7 @@ func (recordsOp *recordsSQLite) List(options *crud.Options) ([]records.Item, err
 		var embeddedBytes, tagsBytes, historyBytes []byte
 
 		// "title", "summary", "type_key", "data", "embedded", "tags",
-		// "issued_id", "owner_id", "viewer_id", "history", "updated_at", "created_at",
+		// "urn", "owner_id", "viewer_id", "history", "updated_at", "created_at",
 		// "id"
 
 		if err := rows.Scan(

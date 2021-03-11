@@ -14,7 +14,7 @@ import (
 
 var dataFields = []views_html.Field{
 	{"id", "", "hidden", nil, nil},
-	{"issued_id", "", "hidden", nil, nil},
+	{"urn", "", "hidden", nil, nil},
 	{"data_type", "", "hidden", nil, nil},
 	// {"visibility", "тип", "select", nil, "ut"},
 	// {"history_key", "", "hidden", nil, nil},
@@ -56,7 +56,7 @@ func RecordFromData(data map[string][]string) *records.Item {
 
 	r := records.Item{
 		ID:       records.ID(value(data, "id")),
-		IssuedID: ns.URN(value(data, "issued_id")),
+		IssuedID: ns.URN(value(data, "urn")),
 		Content: records.Content{
 			Title:   value(data, "title"),
 			Summary: value(data, "summary"),
@@ -84,7 +84,7 @@ func DataFromRecord(r *records.Item) map[string]string {
 
 	data := map[string]string{
 		"id":           string(r.ID),
-		"issued_id":    string(r.IssuedID),
+		"urn":          string(r.IssuedID),
 		"data_type":    "record", // TODO!!!
 		"title":        r.Content.Title,
 		"summary":      r.Content.Summary,
