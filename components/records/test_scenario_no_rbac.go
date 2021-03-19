@@ -4,14 +4,15 @@ import (
 	"os"
 	"testing"
 
-	"github.com/pavlo67/common/common/selectors"
+	"github.com/pavlo67/data_exchange/components/ns"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/db"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
+	"github.com/pavlo67/common/common/selectors"
 )
 
 // TODO: test .History
@@ -26,7 +27,7 @@ func OperatorTestScenarioNoRBAC(t *testing.T, joinerOp joiner.Operator, l logger
 	recordsOp, _ := joinerOp.Interface(InterfaceKey).(Operator)
 	require.NotNil(t, recordsOp)
 
-	cleanerOp, _ := joinerOp.Interface(InterfaceCleanerKey).(crud.Cleaner)
+	cleanerOp, _ := joinerOp.Interface(InterfaceCleanerKey).(db.Cleaner)
 	require.NotNil(t, cleanerOp)
 
 	// clear ------------------------------------------------------------------------------
@@ -36,9 +37,9 @@ func OperatorTestScenarioNoRBAC(t *testing.T, joinerOp joiner.Operator, l logger
 
 	// prepare records to test  -----------------------------------------------------------
 
-	// prepare records & crud.Options -----------------------------------------
+	// prepare records & auth.Identity -----------------------------------------
 
-	options := crud.Options{Identity: &auth.Identity{ID: authID1}}
+	identity := auth.Identity{ID: authID1}
 
 	//// save record without identity: error ------------------------------------
 	//
@@ -46,32 +47,35 @@ func OperatorTestScenarioNoRBAC(t *testing.T, joinerOp joiner.Operator, l logger
 	//require.Error(t, err)
 	//require.Empty(t, item01Saved)
 
-	// save record without ownerID: added automatically, ok -------------------
+	// save record without OwnerNSS: added automatically, ok -------------------
 
 	item01 := item11
-	item01.OwnerID = ""
-	item01Saved, err := recordsOp.Save(item01, &options)
+	item01.OwnerNSS = ""
+	item01SavedID, err := recordsOp.Save(item01, &identity)
 	require.NoError(t, err)
-	require.NotEmpty(t, item01Saved)
-	require.Equal(t, item01Saved.OwnerID, authID1) // options.Identity.ID
+	require.NotEmpty(t, item01SavedID)
+	require.Equal(t, item01SavedID, authID1)
 
-	readOkTest(t, recordsOp, *item01Saved, options)
+	item01Saved := item01
+	item01Saved.ID = item01SavedID
+
+	readOkTest(t, recordsOp, item01Saved, identity)
 
 	// ------------------------------------------------------------------------
 
-	item22Saved := crudTestNoRBAC(t, recordsOp, item11, item12, item22, options)
+	item22Saved := dbTestNoRBAC(t, recordsOp, item11, item12, item22, identity)
 
 	// check .Remove(), .Read(), .List(), -------------------------------------
 
-	err = recordsOp.Remove(item22Saved.ID, &options)
+	err = recordsOp.Remove(item22Saved.ID, &identity)
 	require.NoError(t, err)
 
-	readFailTest(t, recordsOp, item22Saved.ID, options)
-	readOkTest(t, recordsOp, *item01Saved, options)
+	readFailTest(t, recordsOp, item22Saved.ID, identity)
+	readOkTest(t, recordsOp, item01Saved, identity)
 
 }
 
-func crudTestNoRBAC(t *testing.T, recordsOp Operator, itemToSave, itemToUpdate, itemToUpdateAgain Item, options crud.Options) Item {
+func dbTestNoRBAC(t *testing.T, recordsOp Operator, itemToSave, itemToUpdate, itemToUpdateAgain Item, identity auth.Identity) Item {
 
 	// prepare selector tagged ----------------------------
 
@@ -79,59 +83,60 @@ func crudTestNoRBAC(t *testing.T, recordsOp Operator, itemToSave, itemToUpdate, 
 		Key:    HasTag,
 		Values: []string{testNewTag},
 	}
-	optionsWithTag := options.WithSelector(selectorTagged)
 
 	// insert ---------------------------------------------
 
-	itemToSave.OwnerID = authID1
+	itemToSave.OwnerNSS = ns.NSS(authID1)
 
-	itemSaved1, err := recordsOp.Save(itemToSave, &options)
+	itemSaved1ID, err := recordsOp.Save(itemToSave, &identity)
 	require.NoError(t, err)
-	require.NotEmpty(t, itemSaved1)
-	require.Equal(t, itemToSave.Content, itemSaved1.Content)
+	require.NotEmpty(t, itemSaved1ID)
 
-	itemToSave.ID = itemSaved1.ID
+	// TODO!!!
+	// require.Equal(t, itemToSave.Content, itemSaved1.Content)
+
+	itemToSave.ID = itemSaved1ID
 
 	// prepare selector parent ----------------------------
 
 	selectorParent := selectors.Term{
 		Key:    HasParent,
-		Values: []string{string(itemSaved1.ID)},
+		Values: []string{string(itemSaved1ID)},
 	}
-	optionsWithParent := options.WithSelector(selectorParent)
 
 	// check inserted -------------------------------------
 
-	readOkTest(t, recordsOp, itemToSave, options)
+	readOkTest(t, recordsOp, itemToSave, identity)
 
-	items, err := recordsOp.List(optionsWithTag)
+	items, err := recordsOp.List(&selectorTagged, &identity)
 	require.NoError(t, err)
 	require.Equal(t, 0, len(items))
 
-	items, err = recordsOp.List(optionsWithParent)
+	items, err = recordsOp.List(&selectorParent, &identity)
 	require.NoError(t, err)
 	require.Equal(t, 0, len(items))
 
 	// update ---------------------------------------------
 
 	itemToUpdate.ID = itemToSave.ID
-	itemToUpdate.Content.Tags, err = recordsOp.AddParent(append(itemToUpdate.Content.Tags, testNewTag), itemToSave.ID)
+	itemToUpdate.Tags, err = recordsOp.AddParent(append(itemToUpdate.Tags, testNewTag), itemToSave.ID)
 	require.NoError(t, err)
 
-	itemSaved2, err := recordsOp.Save(itemToUpdate, &options)
+	itemSaved2ID, err := recordsOp.Save(itemToUpdate, &identity)
 	require.NoError(t, err)
-	require.NotEmpty(t, itemSaved2)
-	require.Equal(t, itemToUpdate.ID, itemSaved2.ID)
-	require.Equal(t, itemToUpdate.Content, itemSaved2.Content)
+	require.Equal(t, itemToUpdate.ID, itemSaved2ID)
 
-	readOkTest(t, recordsOp, itemToUpdate, options)
+	// TODO!!!
+	// require.Equal(t, itemToUpdate.Content, itemSaved2.Content)
 
-	items, err = recordsOp.List(optionsWithTag)
+	readOkTest(t, recordsOp, itemToUpdate, identity)
+
+	items, err = recordsOp.List(&selectorTagged, &identity)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(items))
 	require.Equal(t, items[0].ID, itemToSave.ID)
 
-	items, err = recordsOp.List(optionsWithParent)
+	items, err = recordsOp.List(&selectorParent, &identity)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(items))
 	require.Equal(t, items[0].ID, itemToSave.ID)
@@ -140,13 +145,14 @@ func crudTestNoRBAC(t *testing.T, recordsOp Operator, itemToSave, itemToUpdate, 
 
 	itemToUpdateAgain.ID = itemToSave.ID
 
-	itemSaved3, err := recordsOp.Save(itemToUpdateAgain, &options)
+	itemSaved3ID, err := recordsOp.Save(itemToUpdateAgain, &identity)
 	require.NoError(t, err)
-	require.NotEmpty(t, itemSaved3)
-	require.Equal(t, itemToUpdateAgain.ID, itemSaved3.ID)
-	require.Equal(t, itemToUpdateAgain.Content, itemSaved3.Content)
+	require.Equal(t, itemToUpdateAgain.ID, itemSaved3ID)
 
-	readOkTest(t, recordsOp, itemToUpdateAgain, options)
+	// TODO!!!
+	//require.Equal(t, itemToUpdateAgain.Content, itemSaved3.Content)
+
+	readOkTest(t, recordsOp, itemToUpdateAgain, identity)
 
 	return itemToSave
 }

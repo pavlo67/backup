@@ -6,18 +6,18 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/apps"
-	"github.com/pavlo67/common/common/connect/connect_sqlite"
+	"github.com/pavlo67/common/common/db/db_sqlite"
 	"github.com/pavlo67/common/common/starter"
 
 	"github.com/pavlo67/tools/components/records"
 )
 
-func TestCRUD(t *testing.T) {
+func Testdb(t *testing.T) {
 	_, cfgService, l := apps.PrepareTests(t, "../../../apps/", "test", "records_sqlite.log")
 	require.NotNil(t, cfgService)
 
 	components := []starter.Starter{
-		{connect_sqlite.Starter(), nil},
+		{db_sqlite.Starter(), nil},
 		{Starter(), nil},
 	}
 

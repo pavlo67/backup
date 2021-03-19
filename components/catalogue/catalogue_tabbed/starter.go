@@ -64,7 +64,7 @@ func (cts *catalogueTabbedStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	if err = joinerOp.Join(catalogueCleanerOp, cts.cleanerKey); err != nil {
-		return errors.CommonError(err, fmt.Sprintf("can't join *catalogueTabbed{} as crud.Cleaner with key '%s'", cts.cleanerKey))
+		return errors.CommonError(err, fmt.Sprintf("can't join *catalogueTabbed{} as db.Cleaner with key '%s'", cts.cleanerKey))
 	}
 
 	return nil

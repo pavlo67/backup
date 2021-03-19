@@ -2,11 +2,13 @@ package records_http
 
 import (
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/db"
+	"github.com/pavlo67/common/common/selectors"
 	"github.com/pavlo67/common/common/server/server_http"
 
+	"github.com/pavlo67/data_exchange/components/tags"
 	"github.com/pavlo67/tools/components/records"
-	"github.com/pavlo67/tools/components/tags"
 )
 
 var _ records.Operator = &recordsHTTP{}
@@ -29,7 +31,7 @@ func New(pagesConfig, restConfig server_http.Config) (records.Operator, error) {
 	return &recordsOp, nil
 }
 
-func (recordsOp *recordsHTTP) Save(records.Item, *crud.Options) (*records.Item, error) {
+func (recordsOp *recordsHTTP) Save(records.Item, *auth.Identity) (records.ID, error) {
 	//ep := recordsOp.pagesConfig.EndpointsSettled[records.IntefaceKeySetCreds]
 	//serverURL := recordsOp.pagesConfig.Host + recordsOp.pagesConfig.Port + ep.Path
 	//
@@ -39,28 +41,32 @@ func (recordsOp *recordsHTTP) Save(records.Item, *crud.Options) (*records.Item, 
 	//}
 	//
 	//var creds *records.Creds
-	//if err := server_http.Request(serverURL, ep, requestBody, creds, &crud.Options{Identity: &records.Identity{ID: recordsID}}, l); err != nil {
+	//if err := server_http.Request(serverURL, ep, requestBody, creds, &auth.Identity{Identity: &records.Identity{ID: recordsID}}, l); err != nil {
 	//	return nil, err
 	//}
 	//
 	//return creds, nil
 
-	return nil, common.ErrNotImplemented
+	return "", common.ErrNotImplemented
 }
 
-func (recordsOp *recordsHTTP) Remove(records.ID, *crud.Options) error {
+func (recordsOp *recordsHTTP) Remove(records.ID, *auth.Identity) error {
 	return common.ErrNotImplemented
 }
 
-func (recordsOp *recordsHTTP) Read(records.ID, *crud.Options) (*records.Item, error) {
+func (recordsOp *recordsHTTP) Read(records.ID, *auth.Identity) (*records.Item, error) {
 	return nil, common.ErrNotImplemented
 }
 
-func (recordsOp *recordsHTTP) List(*crud.Options) ([]records.Item, error) {
+func (recordsOp *recordsHTTP) List(*selectors.Term, *auth.Identity) ([]records.Item, error) {
 	return nil, common.ErrNotImplemented
 }
 
-func (recordsOp *recordsHTTP) Tags(*crud.Options) (tags.StatMap, error) {
+func (recordsOp *recordsHTTP) Stat(*selectors.Term, *auth.Identity) (db.StatMap, error) {
+	return nil, common.ErrNotImplemented
+}
+
+func (recordsOp *recordsHTTP) Tags(*selectors.Term, *auth.Identity) (tags.StatMap, error) {
 	return nil, common.ErrNotImplemented
 }
 

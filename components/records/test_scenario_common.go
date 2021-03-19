@@ -3,10 +3,11 @@ package records
 import (
 	"testing"
 
-	"github.com/pavlo67/tools/components/tags"
+	"github.com/pavlo67/data_exchange/components/structures"
+
+	"github.com/pavlo67/data_exchange/components/tags"
 
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/crud"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +24,6 @@ var embedded = []Content{
 		TypeKey:  "test...",
 		Data:     "wqerwer",
 		Embedded: []Content{{Data: "werwe"}},
-		Tags:     []tags.Item{"1", "332343"},
 	},
 }
 
@@ -34,7 +34,9 @@ var item11 = Item{
 		TypeKey:  "test",
 		Embedded: embedded,
 		Data:     `{"AAA": "aaa", "BBB": 222}`,
-		Tags:     []tags.Item{"1", "333"},
+	},
+	ItemDescription: structures.ItemDescription{
+		Tags: []tags.Item{"1", "333"},
 	},
 }
 
@@ -44,7 +46,9 @@ var item12 = Item{
 		Summary: "6578eegj",
 		TypeKey: "test1",
 		Data:    `{"AAA": "awraa", "BBB": 22552}`,
-		Tags:    []tags.Item{"1", "333"},
+	},
+	ItemDescription: structures.ItemDescription{
+		Tags: []tags.Item{"1", "333"},
 	},
 }
 
@@ -55,21 +59,23 @@ var item22 = Item{
 		TypeKey:  "test2",
 		Data:     `wqerwer`,
 		Embedded: append(embedded, embedded...),
-		Tags:     []tags.Item{"qw1", "333"},
+	},
+	ItemDescription: structures.ItemDescription{
+		Tags: []tags.Item{"qw1", "333"},
 	},
 }
 
-func readOkTest(t *testing.T, recordsOp Operator, item Item, options crud.Options) {
-	itemReaded, err := recordsOp.Read(item.ID, &options)
+func readOkTest(t *testing.T, recordsOp Operator, item Item, identity auth.Identity) {
+	itemReaded, err := recordsOp.Read(item.ID, &identity)
 	require.NoError(t, err)
 	require.NotNil(t, itemReaded)
 
 	require.Equal(t, item.ID, itemReaded.ID)
 	require.Equal(t, item.Content, itemReaded.Content)
-	require.Equal(t, item.OwnerID, itemReaded.OwnerID)
-	require.Equal(t, item.ViewerID, itemReaded.ViewerID)
+	require.Equal(t, item.OwnerNSS, itemReaded.OwnerNSS)
+	require.Equal(t, item.ViewerNSS, itemReaded.ViewerNSS)
 
-	items, err := recordsOp.List(&options)
+	items, err := recordsOp.List(nil, &identity)
 	require.NoError(t, err)
 
 	found := false
@@ -78,20 +84,20 @@ func readOkTest(t *testing.T, recordsOp Operator, item Item, options crud.Option
 			found = true
 			require.Equal(t, item.ID, itemListed.ID)
 			require.Equal(t, item.Content, itemListed.Content)
-			require.Equal(t, item.OwnerID, itemListed.OwnerID)
-			require.Equal(t, item.ViewerID, itemListed.ViewerID)
+			require.Equal(t, item.OwnerNSS, itemListed.OwnerNSS)
+			require.Equal(t, item.ViewerNSS, itemListed.ViewerNSS)
 		}
 	}
 	require.Truef(t, found, "%#v", items)
 
 }
 
-func readFailTest(t *testing.T, recordsOp Operator, itemID ID, options crud.Options) {
-	itemReaded, err := recordsOp.Read(itemID, &options)
+func readFailTest(t *testing.T, recordsOp Operator, itemID ID, identity auth.Identity) {
+	itemReaded, err := recordsOp.Read(itemID, &identity)
 	require.Error(t, err)
 	require.Nil(t, itemReaded)
 
-	items, err := recordsOp.List(&options)
+	items, err := recordsOp.List(nil, &identity)
 	require.NoError(t, err)
 
 	for _, itemListed := range items {

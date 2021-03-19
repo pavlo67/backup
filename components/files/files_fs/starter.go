@@ -69,7 +69,7 @@ func (ffs *filesFSStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	if err = joinerOp.Join(filesCleanerOp, ffs.cleanerKey); err != nil {
-		return errors.Wrapf(err, "can't join *filesFS{} as crud.Cleaner with key '%s'", ffs.cleanerKey)
+		return errors.Wrapf(err, "can't join *filesFS{} as db.Cleaner with key '%s'", ffs.cleanerKey)
 	}
 
 	return nil

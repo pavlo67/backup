@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/pavlo67/common/common/db/db_sqlite"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/connect"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
@@ -25,7 +26,7 @@ var _ starter.Operator = &recordsSQLiteStarter{}
 type recordsSQLiteStarter struct {
 	table string
 
-	connectKey joiner.InterfaceKey
+	dbKey joiner.InterfaceKey
 
 	interfaceKey joiner.InterfaceKey
 	cleanerKey   joiner.InterfaceKey
@@ -38,7 +39,7 @@ func (rss *recordsSQLiteStarter) Name() string {
 func (rss *recordsSQLiteStarter) Prepare(cfg *config.Config, options common.Map) error {
 
 	rss.table, _ = options.String("table")
-	rss.connectKey = joiner.InterfaceKey(options.StringDefault("connect_key", string(connect.InterfaceSQLiteKey)))
+	rss.dbKey = joiner.InterfaceKey(options.StringDefault("db_key", string(db_sqlite.InterfaceKey)))
 
 	rss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(records.InterfaceKey)))
 	rss.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(records.InterfaceCleanerKey)))
@@ -53,9 +54,9 @@ func (rss *recordsSQLiteStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
-	db, _ := joinerOp.Interface(rss.connectKey).(*sql.DB)
+	db, _ := joinerOp.Interface(rss.dbKey).(*sql.DB)
 	if db == nil {
-		return fmt.Errorf("no *sql.DB with key %s", rss.connectKey)
+		return fmt.Errorf("no *sql.DB with key %s", rss.dbKey)
 	}
 	recordsOp, recordsCleanerOp, err := New(db, rss.table)
 	if err != nil {
@@ -67,7 +68,7 @@ func (rss *recordsSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	if err = joinerOp.Join(recordsCleanerOp, rss.cleanerKey); err != nil {
-		return errors.CommonError(err, fmt.Sprintf("can't join *recordsSQLite as crud.Cleaner with key '%s'", rss.cleanerKey))
+		return errors.CommonError(err, fmt.Sprintf("can't join *recordsSQLite as db.Cleaner with key '%s'", rss.cleanerKey))
 	}
 
 	return nil

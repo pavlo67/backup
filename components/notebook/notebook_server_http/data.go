@@ -1,14 +1,14 @@
 package notebook_server_http
 
 import (
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/selectors"
 
 	"github.com/pavlo67/tools/components/records"
 )
 
-func prepareRecord(id records.ID, options *crud.Options) (*records.Item, []records.Item, error) {
-	r, err := recordsOp.Read(id, options)
+func prepareRecord(id records.ID, identity *auth.Identity) (*records.Item, []records.Item, error) {
+	r, err := recordsOp.Read(id, identity)
 	if err != nil {
 		return r, nil, err
 	}
@@ -18,7 +18,6 @@ func prepareRecord(id records.ID, options *crud.Options) (*records.Item, []recor
 		Values: []string{string(id)},
 	}
 
-	options = options.WithSelector(selectorParent)
-	children, err := recordsOp.List(options)
+	children, err := recordsOp.List(&selectorParent, identity)
 	return r, children, err
 }

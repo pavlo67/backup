@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/db"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/filelib"
 
@@ -22,7 +22,7 @@ type filesFS struct {
 
 const onNew = "on filesFS.New(): "
 
-func New(buckets files.Buckets) (files.Operator, crud.Cleaner, error) {
+func New(buckets files.Buckets) (files.Operator, db.Cleaner, error) {
 	if len(buckets) < 1 {
 		return nil, nil, errors.New(onNew + ": no buckets to process")
 	}

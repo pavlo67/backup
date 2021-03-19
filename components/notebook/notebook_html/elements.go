@@ -3,8 +3,9 @@ package notebook_html
 import (
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/server/server_http"
+	"github.com/pavlo67/data_exchange/components/ns"
+	"github.com/pavlo67/data_exchange/components/tags"
 	"github.com/pavlo67/tools/components/records"
-	"github.com/pavlo67/tools/components/tags"
 )
 
 const No = `<b style="size:18px;">»</b> `
@@ -77,17 +78,17 @@ func HTMLAuthor(r *records.Item, identity *auth.Identity) string {
 //	return "В розділах:" + htmlLinks
 //}
 
-func HTMLTags(tags []tags.Item, viewerID, ownerID auth.ID, epTagged server_http.Get1, joiner string) string {
+func HTMLTags(tags []tags.Item, ViewerNSS, OwnerNSS ns.NSS, epTagged server_http.Get1, joiner string) string {
 	var htmlTags string
 
 	for _, tag := range tags {
 		//objectID := strings.TrimSpace(l.To)
 		//if objectID != "" && objectID != "0" {
 		//	link = endpoints["view"].Path(objectID)
-		//} else if ownerID != "" {
-		//	link = endpoints["itemsByTagOwn"].Path(string(ownerID), tag)
+		//} else if OwnerNSS != "" {
+		//	link = endpoints["itemsByTagOwn"].Path(string(OwnerNSS), tag)
 		//} else {
-		//	link = endpoints["itemsByTag"].Path(string(viewerID), tag)
+		//	link = endpoints["itemsByTag"].Path(string(ViewerNSS), tag)
 		//}
 
 		urlStr, err := epTagged(tag)
@@ -137,8 +138,8 @@ func HTMLTags(tags []tags.Item, viewerID, ownerID auth.ID, epTagged server_http.
 //
 //func HTMLTagsIndex(userIdentity *confidenter.Identity, rView, rOwner *auth.Identity) string {
 //	if rOwner != "" {
-//		rOwnerIdentity := rOwner.Identity()
-//		if userIdentity != nil && rOwnerIdentity.ID == userIdentity.ID {
+//		rOwnerNSSentity := rOwner.Identity()
+//		if userIdentity != nil && rOwnerNSSentity.ID == userIdentity.ID {
 //			return `<a href="` + endpoints["tagsOwn"].Path(string(rOwner)) + `">` + _views.Tags + " всі мої мітки</a>\n\n<p>"
 //		} else {
 //			return `<a href="` + endpoints["tagsOwn"].Path(string(rOwner)) + `">` + _views.Tags + " всі мітки користувача</a>\n\n<p>"

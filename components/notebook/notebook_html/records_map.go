@@ -3,12 +3,13 @@ package notebook_html
 import (
 	"strings"
 
+	"github.com/pavlo67/data_exchange/components/ns"
+	"github.com/pavlo67/data_exchange/components/structures"
+
 	"github.com/pavlo67/common/common"
 
-	"github.com/pavlo67/data_exchange/components/ns"
-
+	"github.com/pavlo67/data_exchange/components/tags"
 	"github.com/pavlo67/tools/components/records"
-	"github.com/pavlo67/tools/components/tags"
 	"github.com/pavlo67/tools/components/views/views_html"
 )
 
@@ -55,18 +56,20 @@ func RecordFromData(data map[string][]string) *records.Item {
 	}
 
 	r := records.Item{
-		ID:       records.ID(value(data, "id")),
-		IssuedID: ns.URN(value(data, "urn")),
+		ID: records.ID(value(data, "id")),
 		Content: records.Content{
 			Title:   value(data, "title"),
 			Summary: value(data, "summary"),
 			// TypeKey:  "",
 			Data: value(data, "content_data"),
 			// Embedded: nil,
+		},
+		ItemDescription: structures.ItemDescription{
+			URN:  ns.URN(value(data, "urn")),
 			Tags: tagItems,
 		},
-		//OwnerID:   "",
-		//ViewerID:  "",
+		//OwnerNSS:   "",
+		//ViewerNSS:  "",
 	}
 
 	return &r
@@ -84,12 +87,12 @@ func DataFromRecord(r *records.Item) map[string]string {
 
 	data := map[string]string{
 		"id":           string(r.ID),
-		"urn":          string(r.IssuedID),
+		"urn":          string(r.URN),
 		"data_type":    "record", // TODO!!!
 		"title":        r.Content.Title,
 		"summary":      r.Content.Summary,
 		"content_data": r.Content.Data,
-		"tags":         strings.Join(r.Content.Tags, "; "),
+		"tags":         strings.Join(r.Tags, "; "),
 		// "embedded": r.Content.Embedded,
 		"created_at": r.CreatedAt.Format("02.01.2006 15:04:05"),
 		"updated_at": updatedAt,

@@ -1,6 +1,6 @@
 package views_html
 
-//func HTMLPagination(opt *crud.ReadAllHTTPOptions) string {
+//func HTMLPagination(opt *db.ReadAllHTTPOptions) string {
 //	if opt == nil {
 //		return ""
 //	}

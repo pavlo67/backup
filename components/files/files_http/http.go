@@ -23,7 +23,7 @@ package files_http
 //	return &filesOp, nil
 //}
 
-//func (filesOp *filesHTTP) Save(bucketID files.BucketID, path, newFilePattern string, data []byte, options *crud.Options) (string, error) {
+//func (filesOp *filesHTTP) Save(bucketID files.BucketID, path, newFilePattern string, data []byte, identity *auth.Identity) (string, error) {
 //	if path = strings.TrimSpace(path); path == "" {
 //		path = "."
 //	}
@@ -38,7 +38,7 @@ package files_http
 //	return correctedPath, server_http.Request(serverURL, ep, nil, &correctedPath, options.GetIdentity(), filesOp.logfile)
 //}
 //
-//func (filesOp *filesHTTP) Read(bucketID files.BucketID, path string, options *crud.Options) ([]byte, error) {
+//func (filesOp *filesHTTP) Read(bucketID files.BucketID, path string, identity *auth.Identity) ([]byte, error) {
 //	ep := filesOp.endpoints[files.EPRead]
 //	serverURL := filesOp.host + ep.Path + "/" + string(bucketID) + "/" + path
 //
@@ -46,14 +46,14 @@ package files_http
 //	return data, server_http.Request(serverURL, ep, nil, &data, options.GetIdentity(), filesOp.logfile)
 //}
 //
-//func (filesOp *filesHTTP) Remove(bucketID files.BucketID, path string, options *crud.Options) error {
+//func (filesOp *filesHTTP) Remove(bucketID files.BucketID, path string, identity *auth.Identity) error {
 //	ep := filesOp.endpoints[files.EPRemove]
 //	serverURL := filesOp.host + ep.Path + "/" + string(bucketID) + "/" + path
 //
 //	return server_http.Request(serverURL, ep, nil, nil, options.GetIdentity(), filesOp.logfile)
 //}
 //
-//func (filesOp *filesHTTP) List(bucketID files.BucketID, path string, depth int, options *crud.Options) (files.FilesInfo, error) {
+//func (filesOp *filesHTTP) List(bucketID files.BucketID, path string, depth int, identity *auth.Identity) (files.FilesInfo, error) {
 //	if path = strings.TrimSpace(path); path == "" {
 //		path = "."
 //	}
@@ -65,7 +65,7 @@ package files_http
 //	return filesInfo, server_http.Request(serverURL, ep, nil, &filesInfo, options.GetIdentity(), filesOp.logfile)
 //}
 //
-//func (filesOp *filesHTTP) Stat(bucketID files.BucketID, path string, depth int, options *crud.Options) (*files.FileInfo, error) {
+//func (filesOp *filesHTTP) Stat(bucketID files.BucketID, path string, depth int, identity *auth.Identity) (*files.FileInfo, error) {
 //	if path = strings.TrimSpace(path); path == "" {
 //		path = "."
 //	}

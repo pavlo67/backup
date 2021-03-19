@@ -6,17 +6,17 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/selectors"
 
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
 
+	"github.com/pavlo67/data_exchange/components/tags"
 	"github.com/pavlo67/tools/components/notebook"
 	"github.com/pavlo67/tools/components/notebook/notebook_html"
 	"github.com/pavlo67/tools/components/records"
-	"github.com/pavlo67/tools/components/tags"
 )
 
 var Pages = server_http.Endpoints{
@@ -72,18 +72,18 @@ func errorPage(httpStatus int, notebookHTMLOp notebook_html.Operator, err error,
 var rootPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLRoot,
 	Method:      "GET",
-	WorkerHTTP: func(_ server_http.Operator, req *http.Request, _ server_http.Params, options *crud.Options) (server.Response, error) {
-		tagsStatMap, err := recordsOp.Tags(options)
+	WorkerHTTP: func(_ server_http.Operator, req *http.Request, _ server_http.PathParams, identity *auth.Identity) (server.Response, error) {
+		tagsStatMap, err := recordsOp.Tags(nil, identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Tags()", req)
 		}
 
-		htmlIndex := notebookHTMLOp.HTMLIndex(options)
+		htmlIndex := notebookHTMLOp.HTMLIndex(identity)
 		//if err != nil {
 		//	return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLIndex()", req)
 		//}
 
-		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, options)
+		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, identity)
 		//if err != nil {
 		//	return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
 		//}
@@ -110,14 +110,14 @@ var viewPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLView,
 	Method:      "GET",
 	PathParams:  []string{"record_id"},
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		id := records.ID(params["record_id"])
-		r, children, err := prepareRecord(id, options)
+		r, children, err := prepareRecord(id, identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при prepareRecord()", req)
 		}
 
-		htmlPage, err := notebookHTMLOp.View(r, children, "", options)
+		htmlPage, err := notebookHTMLOp.View(r, children, "", identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.View()", req)
 		}
@@ -134,15 +134,15 @@ var editPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLEdit,
 	Method:      "GET",
 	PathParams:  []string{"record_id"},
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		id := records.ID(params["record_id"])
 
-		r, err := recordsOp.Read(id, options)
+		r, err := recordsOp.Read(id, identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Read()", req)
 		}
 
-		htmlPage, err := notebookHTMLOp.Edit(r, nil, "", options)
+		htmlPage, err := notebookHTMLOp.Edit(r, nil, "", identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.Edit()", req)
 		}
@@ -158,8 +158,8 @@ var editPage = server_http.Endpoint{
 var createPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLCreate,
 	Method:      "GET",
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
-		htmlPage, err := notebookHTMLOp.Edit(nil, nil, "", options)
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
+		htmlPage, err := notebookHTMLOp.Edit(nil, nil, "", identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.Edit()", req)
 		}
@@ -175,7 +175,7 @@ var createPage = server_http.Endpoint{
 var savePage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLSave,
 	Method:      "POST",
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			return errorPage(http.StatusBadRequest, notebookHTMLOp, err, "при ioutil.ReadAll(req.Body)", req)
@@ -191,19 +191,19 @@ var savePage = server_http.Endpoint{
 			return errorPage(http.StatusBadRequest, notebookHTMLOp, fmt.Errorf("on notebook_html.RecordFromData(%#v): got nil", data), "при notebook_html.RecordFromData()", req)
 		}
 
-		r, err = recordsOp.Save(*r, options)
+		r.ID, err = recordsOp.Save(*r, identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Save()", req)
-		} else if r == nil {
-			return errorPage(0, notebookHTMLOp, fmt.Errorf("on recordsOp.Save(%#v, %#v): got nil", *r, options), "при recordsOp.Save()", req)
+		} else if r.ID == "" {
+			return errorPage(0, notebookHTMLOp, fmt.Errorf("on recordsOp.Save(%#v, %#v): got nil", *r, identity), "при recordsOp.Save()", req)
 		}
 
-		r, children, err := prepareRecord(r.ID, options)
+		r, children, err := prepareRecord(r.ID, identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при prepareRecord()", req)
 		}
 
-		htmlPage, err := notebookHTMLOp.View(r, children, "", options)
+		htmlPage, err := notebookHTMLOp.View(r, children, "", identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.View()", req)
 		}
@@ -220,10 +220,10 @@ var deletePage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLDelete,
 	Method:      "POST",
 	PathParams:  []string{"record_id"},
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		id := records.ID(params["record_id"])
 
-		err := recordsOp.Remove(id, options)
+		err := recordsOp.Remove(id, identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Remove()", req)
 		}
@@ -248,13 +248,13 @@ var deletePage = server_http.Endpoint{
 var tagsPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLTags,
 	Method:      "GET",
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
-		tagsStatMap, err := recordsOp.Tags(options)
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
+		tagsStatMap, err := recordsOp.Tags(nil, identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Tags()", req)
 		}
 
-		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, options)
+		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, identity)
 		//if err != nil {
 		//	return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
 		//}
@@ -282,7 +282,7 @@ var taggedPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLTagged,
 	Method:      "GET",
 	PathParams:  []string{"tag"},
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		tag := tags.Item(params["tag"])
 
 		selectorTagged := selectors.Term{
@@ -290,12 +290,12 @@ var taggedPage = server_http.Endpoint{
 			Values: []string{tag},
 		}
 
-		rs, err := recordsOp.List(options.WithSelector(selectorTagged))
+		rs, err := recordsOp.List(&selectorTagged, identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при recordsOp.List()", req)
 		}
 
-		htmlPage, err := notebookHTMLOp.ListTagged(tag, rs, options)
+		htmlPage, err := notebookHTMLOp.ListTagged(tag, rs, identity)
 		if err != nil {
 			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.View()", req)
 		}

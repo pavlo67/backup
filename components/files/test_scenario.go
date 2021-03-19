@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/db"
 	"github.com/pavlo67/common/common/joiner"
 )
 
@@ -24,7 +24,7 @@ func FilesTestScenario(t *testing.T, joinerOp joiner.Operator, interfaceKey, int
 	filesOp, _ := joinerOp.Interface(interfaceKey).(Operator)
 	require.NotNil(t, filesOp)
 
-	filesCleanerOp, _ := joinerOp.Interface(interfaceCleanerKey).(crud.Cleaner)
+	filesCleanerOp, _ := joinerOp.Interface(interfaceCleanerKey).(db.Cleaner)
 	require.NotNil(t, filesCleanerOp)
 	err := filesCleanerOp.Clean(nil)
 	require.NoError(t, err)

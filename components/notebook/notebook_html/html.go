@@ -9,13 +9,12 @@ import (
 	"github.com/cbroglie/mustache"
 
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server/server_http"
 
+	"github.com/pavlo67/data_exchange/components/tags"
 	"github.com/pavlo67/tools/components/notebook"
 	"github.com/pavlo67/tools/components/records"
-	"github.com/pavlo67/tools/components/tags"
 	"github.com/pavlo67/tools/components/views/views_html"
 )
 
@@ -79,7 +78,7 @@ func (htmlOp *notebookHTML) CommonPage(title, htmlHeader, htmlMessage, htmlError
 	return mustache.Render(htmlOp.htmlTemplate, context)
 }
 
-func (htmlOp *notebookHTML) View(r *records.Item, children []records.Item, message string, options *crud.Options) (string, error) {
+func (htmlOp *notebookHTML) View(r *records.Item, children []records.Item, message string, identity *auth.Identity) (string, error) {
 	context := map[string]string{
 		"title":   r.Content.Title,
 		"header":  r.Content.Title,
@@ -92,7 +91,7 @@ func (htmlOp *notebookHTML) View(r *records.Item, children []records.Item, messa
 
 const onHTMLEdit = "on notebookHTML.Edit(): "
 
-func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, message string, options *crud.Options) (string, error) {
+func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, message string, identity *auth.Identity) (string, error) {
 	formID := "nb_edit_" + strconv.FormatInt(time.Now().Unix(), 10) + "_"
 
 	var title, header, action string
@@ -128,8 +127,8 @@ func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, messa
 	return mustache.Render(htmlOp.htmlTemplate, context)
 }
 
-func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, options *crud.Options) (string, error) {
-	htmlList := htmlOp.HTMLRecords(tagged, options.GetIdentity())
+func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, identity *auth.Identity) (string, error) {
+	htmlList := htmlOp.HTMLRecords(tagged, identity)
 	//if errRenderRecords != nil {
 	//	errorID := strconv.FormatInt(time.Now().UnixNano(), 10)
 	//	l.Error(errorID, " / ", errRenderRecords)
@@ -151,7 +150,7 @@ func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, opt
 	return mustache.Render(htmlOp.htmlTemplate, context)
 }
 
-func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, options *crud.Options) string {
+func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, identity *auth.Identity) string {
 
 	tss := tagsStatMap.List(true)
 
@@ -178,7 +177,7 @@ func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, options *crud.Opt
 
 }
 
-func (htmlOp *notebookHTML) HTMLIndex(options *crud.Options) string {
+func (htmlOp *notebookHTML) HTMLIndex(identity *auth.Identity) string {
 	htmlIndex := `<div style="padding:5px;margin: 15px 0 10px 10px;width:200px;float:right;">`
 
 	urlStr := htmlOp.epCreate
@@ -199,7 +198,7 @@ func (htmlOp *notebookHTML) HTMLRecords(recordItems []records.Item, identity *au
 	for _, r := range recordItems {
 		details := `<table class="border" style="padding:3px;margin: 0 0 10px 10px;width:150px;" align=right>` +
 			"<tr><td>" + HTMLAuthor(&r, identity) + "</td></tr>\n" +
-			"<tr><td>" + HTMLTags(r.Content.Tags, r.ViewerID, r.OwnerID, htmlOp.epTagged, "<br>- ") + "</td></tr>\n" +
+			"<tr><td>" + HTMLTags(r.Tags, r.ViewerNSS, r.OwnerNSS, htmlOp.epTagged, "<br>- ") + "</td></tr>\n" +
 			`</table>` +
 			"<p>" + r.Content.Summary
 		// + HTMLFiles(r.Links, pxPreview)

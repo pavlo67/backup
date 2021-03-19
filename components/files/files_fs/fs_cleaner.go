@@ -3,15 +3,16 @@ package files_fs
 import (
 	"os"
 
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/db"
 	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/selectors"
 )
 
-var _ crud.Cleaner = &filesFS{}
+var _ db.Cleaner = &filesFS{}
 
 const onClean = "on filesFS.Clean()"
 
-func (filesOp *filesFS) Clean(opts *crud.Options) error {
+func (filesOp *filesFS) Clean(term *selectors.Term) error {
 	for bucketID, basePath := range filesOp.buckets {
 		if err := os.RemoveAll(basePath); err != nil {
 			return errors.Wrapf(err, onClean+": removing %s --> %s", bucketID, basePath)

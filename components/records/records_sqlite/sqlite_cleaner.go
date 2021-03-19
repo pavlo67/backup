@@ -1,16 +1,17 @@
 package records_sqlite
 
 import (
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/db"
 	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/selectors"
 	"github.com/pavlo67/common/common/sqllib"
 )
 
-var _ crud.Cleaner = &recordsSQLite{}
+var _ db.Cleaner = &recordsSQLite{}
 
 const onClean = "on recordsSQLite.Clean(): "
 
-func (recordsOp *recordsSQLite) Clean(_ *crud.Options) error {
+func (recordsOp *recordsSQLite) Clean(term *selectors.Term) error {
 	if _, err := recordsOp.stmClean.Exec(); err != nil {
 		return errors.Wrapf(err, onClean+sqllib.CantExec, recordsOp.sqlClean, nil)
 	}

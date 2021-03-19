@@ -2,20 +2,18 @@ package records_sqlite
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/db"
 	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/selectors"
 	"github.com/pavlo67/common/common/sqllib"
-	"github.com/pavlo67/common/common/strlib"
-
+	"github.com/pavlo67/data_exchange/components/tags"
 	"github.com/pavlo67/tools/components/records"
-	"github.com/pavlo67/tools/components/tags"
 )
 
 var fieldsToInsert = []string{"title", "summary", "type_key", "data", "embedded", "tags", "urn", "owner_id", "viewer_id", "history"}
@@ -42,7 +40,7 @@ type recordsSQLite struct {
 
 const onNew = "on recordsSQLite.New(): "
 
-func New(db *sql.DB, table string) (records.Operator, crud.Cleaner, error) {
+func New(db *sql.DB, table string) (records.Operator, db.Cleaner, error) {
 	if table == "" {
 		table = records.CollectionDefault
 	}
@@ -78,121 +76,134 @@ func New(db *sql.DB, table string) (records.Operator, crud.Cleaner, error) {
 
 const onSave = "on recordsSQLite.Save(): "
 
-func (recordsOp *recordsSQLite) Save(item records.Item, options *crud.Options) (*records.Item, error) {
+//Save(Item, *auth.Identity) (ID, error)
+//Read(ID, *auth.Identity) (*Item, error)
+//Remove(ID, *auth.Identity) error
+//
+//
+//
+//Tags(*auth.Identity) (tags.StatMap, error)
+//AddParent(ts []tags.Item, id ID) ([]tags.Item, error)
+//
 
-	//if options == nil || options.Identity == nil {
-	//	return nil, errors.CommonError(common.NoRightsKey)
+func (recordsOp *recordsSQLite) Save(item records.Item, options *auth.Identity) (records.ID, error) {
+	return "", common.ErrNotImplemented
+
+	////if options == nil || options.Identity == nil {
+	////	return nil, errors.CommonError(common.NoRightsKey)
+	////}
+	//
+	//// TODO!!! rbac check
+	//
+	//if item.ID == "" {
+	//	// TODO!!!
+	//	item.OwnerNSS = options.Identity.ID
 	//}
-
-	// TODO!!! rbac check
-
-	if item.ID == "" {
-		// TODO!!!
-		item.OwnerID = options.Identity.ID
-	}
-
-	var err error
-
-	embeddedBytes := []byte{} // to satisfy NOT NULL constraint
-	if len(item.Content.Embedded) > 0 {
-		if embeddedBytes, err = json.Marshal(item.Content.Embedded); err != nil {
-			return nil, errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item.Content.Embedded)
-		}
-	}
-
-	tagsBytes := []byte{} // to to satisfy NOT NULL constraint
-	if len(item.Content.Tags) > 0 {
-		if tagsBytes, err = json.Marshal(item.Content.Tags); err != nil {
-			return nil, errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item.Content.Tags)
-		}
-	}
-
-	// TODO!!! append to .History
-
-	historyBytes := []byte{} // to satisfy NOT NULL constraint
-	if len(item.History) > 0 {
-		historyBytes, err = json.Marshal(item.History)
-		if err != nil {
-			return nil, errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item.History)
-		}
-	}
-
-	// "title", "summary", "type_key", "data", "embedded", "tags",
-	// "urn", "owner_id", "viewer_id", "history"
-	values := []interface{}{
-		item.Content.Title, item.Content.Summary, item.Content.TypeKey, item.Content.Data, embeddedBytes, tagsBytes,
-		item.IssuedID, item.OwnerID, item.ViewerID, historyBytes}
-
-	if item.ID == "" {
-		res, err := recordsOp.stmInsert.Exec(values...)
-		if err != nil {
-			return nil, errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlInsert, strlib.Stringify(values))
-		}
-
-		idSQLite, err := res.LastInsertId()
-		if err != nil {
-			return nil, errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, recordsOp.sqlInsert, strlib.Stringify(values))
-		}
-		item.ID = records.ID(strconv.FormatInt(idSQLite, 10))
-
-	} else {
-		values = append(values, time.Now().Format(time.RFC3339), item.ID)
-		if _, err := recordsOp.stmUpdate.Exec(values...); err != nil {
-			return nil, errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlUpdate, strlib.Stringify(values))
-		}
-
-	}
-
-	return &item, nil
+	//
+	//var err error
+	//
+	//embeddedBytes := []byte{} // to satisfy NOT NULL constraint
+	//if len(item.Content.Embedded) > 0 {
+	//	if embeddedBytes, err = json.Marshal(item.Content.Embedded); err != nil {
+	//		return nil, errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item.Content.Embedded)
+	//	}
+	//}
+	//
+	//tagsBytes := []byte{} // to to satisfy NOT NULL constraint
+	//if len(item.Tags) > 0 {
+	//	if tagsBytes, err = json.Marshal(item.Tags); err != nil {
+	//		return nil, errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item.Tags)
+	//	}
+	//}
+	//
+	//// TODO!!! append to .History
+	//
+	//historyBytes := []byte{} // to satisfy NOT NULL constraint
+	//if len(item.History) > 0 {
+	//	historyBytes, err = json.Marshal(item.History)
+	//	if err != nil {
+	//		return nil, errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item.History)
+	//	}
+	//}
+	//
+	//// "title", "summary", "type_key", "data", "embedded", "tags",
+	//// "urn", "owner_id", "viewer_id", "history"
+	//values := []interface{}{
+	//	item.Content.Title, item.Content.Summary, item.Content.TypeKey, item.Content.Data, embeddedBytes, tagsBytes,
+	//	item.URN, item.OwnerNSS, item.ViewerNSS, historyBytes}
+	//
+	//if item.ID == "" {
+	//	res, err := recordsOp.stmInsert.Exec(values...)
+	//	if err != nil {
+	//		return nil, errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlInsert, strlib.Stringify(values))
+	//	}
+	//
+	//	idSQLite, err := res.LastInsertId()
+	//	if err != nil {
+	//		return nil, errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, recordsOp.sqlInsert, strlib.Stringify(values))
+	//	}
+	//	item.ID = records.ID(strconv.FormatInt(idSQLite, 10))
+	//
+	//} else {
+	//	values = append(values, time.Now().Format(time.RFC3339), item.ID)
+	//	if _, err := recordsOp.stmUpdate.Exec(values...); err != nil {
+	//		return nil, errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlUpdate, strlib.Stringify(values))
+	//	}
+	//
+	//}
+	//
+	//return &item, nil
 }
 
 const onRead = "on recordsSQLite.Read(): "
 
-func (recordsOp *recordsSQLite) Read(id records.ID, options *crud.Options) (*records.Item, error) {
-	idNum, err := strconv.ParseUint(string(id), 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf(onRead+"wrong id (%s)", id)
-	}
+func (recordsOp *recordsSQLite) Read(id records.ID, options *auth.Identity) (*records.Item, error) {
+	return nil, common.ErrNotImplemented
 
-	item := records.Item{ID: id}
-
-	var embeddedBytes, tagsBytes, historyBytes []byte
-
-	// "title", "summary", "type_key", "data", "embedded", "tags",
-	// "urn", "owner_id", "viewer_id", "history", "updated_at", "created_at"
-
-	if err = recordsOp.stmRead.QueryRow(idNum).Scan(
-		&item.Content.Title, &item.Content.Summary, &item.Content.TypeKey, &item.Content.Data, &embeddedBytes, &tagsBytes,
-		&item.IssuedID, &item.OwnerID, &item.ViewerID, &historyBytes, &item.UpdatedAt, &item.CreatedAt); err == sql.ErrNoRows {
-		return nil, common.ErrNotFound
-	} else if err != nil {
-		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, recordsOp.sqlRead, idNum)
-	}
-
-	if len(embeddedBytes) > 0 {
-		if err = json.Unmarshal(embeddedBytes, &item.Content.Embedded); err != nil {
-			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Embedded (%s)", embeddedBytes)
-		}
-	}
-
-	if len(tagsBytes) > 0 {
-		if err = json.Unmarshal(tagsBytes, &item.Content.Tags); err != nil {
-			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Tags (%s)", tagsBytes)
-		}
-	}
-
-	if len(historyBytes) > 0 {
-		if err = json.Unmarshal(historyBytes, &item.History); err != nil {
-			return &item, errors.Wrapf(err, onRead+"can't unmarshal .History (%s)", historyBytes)
-		}
-	}
-
-	return &item, nil
+	//idNum, err := strconv.ParseUint(string(id), 10, 64)
+	//if err != nil {
+	//	return nil, fmt.Errorf(onRead+"wrong id (%s)", id)
+	//}
+	//
+	//item := records.Item{ID: id}
+	//
+	//var embeddedBytes, tagsBytes, historyBytes []byte
+	//
+	//// "title", "summary", "type_key", "data", "embedded", "tags",
+	//// "urn", "owner_id", "viewer_id", "history", "updated_at", "created_at"
+	//
+	//if err = recordsOp.stmRead.QueryRow(idNum).Scan(
+	//	&item.Content.Title, &item.Content.Summary, &item.Content.TypeKey, &item.Content.Data, &embeddedBytes, &tagsBytes,
+	//	&item.URN, &item.OwnerNSS, &item.ViewerNSS, &historyBytes, &item.UpdatedAt, &item.CreatedAt); err == sql.ErrNoRows {
+	//	return nil, common.ErrNotFound
+	//} else if err != nil {
+	//	return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, recordsOp.sqlRead, idNum)
+	//}
+	//
+	//if len(embeddedBytes) > 0 {
+	//	if err = json.Unmarshal(embeddedBytes, &item.Content.Embedded); err != nil {
+	//		return &item, errors.Wrapf(err, onRead+"can't unmarshal .Embedded (%s)", embeddedBytes)
+	//	}
+	//}
+	//
+	//if len(tagsBytes) > 0 {
+	//	if err = json.Unmarshal(tagsBytes, &item.Tags); err != nil {
+	//		return &item, errors.Wrapf(err, onRead+"can't unmarshal .Tags (%s)", tagsBytes)
+	//	}
+	//}
+	//
+	//if len(historyBytes) > 0 {
+	//	if err = json.Unmarshal(historyBytes, &item.History); err != nil {
+	//		return &item, errors.Wrapf(err, onRead+"can't unmarshal .History (%s)", historyBytes)
+	//	}
+	//}
+	//
+	//return &item, nil
 }
 
 const onRemove = "on recordsSQLite.Remove()"
 
-func (recordsOp *recordsSQLite) Remove(id records.ID, options *crud.Options) error {
+func (recordsOp *recordsSQLite) Remove(id records.ID, options *auth.Identity) error {
 
 	// TODO!!! rbac check
 
@@ -210,158 +221,161 @@ func (recordsOp *recordsSQLite) Remove(id records.ID, options *crud.Options) err
 
 const onList = "on recordsSQLite.List()"
 
-func (recordsOp *recordsSQLite) List(options *crud.Options) ([]records.Item, error) {
+func (recordsOp *recordsSQLite) List(*selectors.Term, *auth.Identity) ([]records.Item, error) {
+	return nil, common.ErrNotImplemented
 
-	condition, values, err := Conditions(options)
-	if err != nil {
-		return nil, fmt.Errorf(onList+": wrong selector in options: %#v", options.GetSelector())
-	}
-
-	query := sqllib.SQLList(recordsOp.table, fieldsToListStr, condition, options)
-	stm, err := recordsOp.db.Prepare(query)
-	if err != nil {
-		return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
-	}
-
-	//l.Infof("%s / %#v\n%s", condition, values, query)
-
-	rows, err := stm.Query(values...)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	} else if err != nil {
-		return nil, errors.Wrapf(err, onList+": "+sqllib.CantQuery, query, values)
-	}
-	defer rows.Close()
-
-	var items []records.Item
-
-	for rows.Next() {
-		var idNum int64
-		var item records.Item
-		var embeddedBytes, tagsBytes, historyBytes []byte
-
-		// "title", "summary", "type_key", "data", "embedded", "tags",
-		// "urn", "owner_id", "viewer_id", "history", "updated_at", "created_at",
-		// "id"
-
-		if err := rows.Scan(
-			&item.Content.Title, &item.Content.Summary, &item.Content.TypeKey, &item.Content.Data, &embeddedBytes, &tagsBytes,
-			&item.IssuedID, &item.OwnerID, &item.ViewerID, &historyBytes, &item.UpdatedAt, &item.CreatedAt,
-			&idNum); err != nil {
-			return items, errors.Wrapf(err, onList+": "+sqllib.CantScanQueryRow, query, values)
-		}
-
-		if len(embeddedBytes) > 0 {
-			if err = json.Unmarshal(embeddedBytes, &item.Content.Embedded); err != nil {
-				return items, errors.Wrapf(err, onList+": can't unmarshal .Embedded (%s)", embeddedBytes)
-			}
-		}
-
-		if len(tagsBytes) > 0 {
-			if err = json.Unmarshal(tagsBytes, &item.Content.Tags); err != nil {
-				return items, errors.Wrapf(err, onList+": can't unmarshal .Tags (%s)", tagsBytes)
-			}
-		}
-
-		if len(historyBytes) > 0 {
-			if err = json.Unmarshal(historyBytes, &item.History); err != nil {
-				return items, errors.Wrapf(err, onList+": can't unmarshal .History (%s)", historyBytes)
-			}
-		}
-
-		item.ID = records.ID(strconv.FormatInt(idNum, 10))
-		items = append(items, item)
-	}
-
-	if err = rows.Err(); err != nil {
-		return items, errors.Wrapf(err, onList+": "+sqllib.RowsError, query, values)
-	}
-
-	return items, nil
+	//condition, values, err := Conditions(options)
+	//if err != nil {
+	//	return nil, fmt.Errorf(onList+": wrong selector in options: %#v", options.GetSelector())
+	//}
+	//
+	//query := sqllib.SQLList(recordsOp.table, fieldsToListStr, condition, options)
+	//stm, err := recordsOp.db.Prepare(query)
+	//if err != nil {
+	//	return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
+	//}
+	//
+	////l.Infof("%s / %#v\n%s", condition, values, query)
+	//
+	//rows, err := stm.Query(values...)
+	//if err == sql.ErrNoRows {
+	//	return nil, nil
+	//} else if err != nil {
+	//	return nil, errors.Wrapf(err, onList+": "+sqllib.CantQuery, query, values)
+	//}
+	//defer rows.Close()
+	//
+	//var items []records.Item
+	//
+	//for rows.Next() {
+	//	var idNum int64
+	//	var item records.Item
+	//	var embeddedBytes, tagsBytes, historyBytes []byte
+	//
+	//	// "title", "summary", "type_key", "data", "embedded", "tags",
+	//	// "urn", "owner_id", "viewer_id", "history", "updated_at", "created_at",
+	//	// "id"
+	//
+	//	if err := rows.Scan(
+	//		&item.Content.Title, &item.Content.Summary, &item.Content.TypeKey, &item.Content.Data, &embeddedBytes, &tagsBytes,
+	//		&item.URN, &item.OwnerNSS, &item.ViewerNSS, &historyBytes, &item.UpdatedAt, &item.CreatedAt,
+	//		&idNum); err != nil {
+	//		return items, errors.Wrapf(err, onList+": "+sqllib.CantScanQueryRow, query, values)
+	//	}
+	//
+	//	if len(embeddedBytes) > 0 {
+	//		if err = json.Unmarshal(embeddedBytes, &item.Content.Embedded); err != nil {
+	//			return items, errors.Wrapf(err, onList+": can't unmarshal .Embedded (%s)", embeddedBytes)
+	//		}
+	//	}
+	//
+	//	if len(tagsBytes) > 0 {
+	//		if err = json.Unmarshal(tagsBytes, &item.Tags); err != nil {
+	//			return items, errors.Wrapf(err, onList+": can't unmarshal .Tags (%s)", tagsBytes)
+	//		}
+	//	}
+	//
+	//	if len(historyBytes) > 0 {
+	//		if err = json.Unmarshal(historyBytes, &item.History); err != nil {
+	//			return items, errors.Wrapf(err, onList+": can't unmarshal .History (%s)", historyBytes)
+	//		}
+	//	}
+	//
+	//	item.ID = records.ID(strconv.FormatInt(idNum, 10))
+	//	items = append(items, item)
+	//}
+	//
+	//if err = rows.Err(); err != nil {
+	//	return items, errors.Wrapf(err, onList+": "+sqllib.RowsError, query, values)
+	//}
+	//
+	//return items, nil
 }
 
 const onTags = "on recordsSQLite.Tags()"
 
-func (recordsOp *recordsSQLite) Tags(options *crud.Options) (tags.StatMap, error) {
+func (recordsOp *recordsSQLite) Tags(*selectors.Term, *auth.Identity) (tags.StatMap, error) {
+	return nil, common.ErrNotImplemented
 
-	condition, values, err := Conditions(options)
-	if err != nil {
-		return nil, fmt.Errorf(onList+": wrong selector in options: %#v", options.GetSelector())
-	}
-
-	query := sqllib.SQLList(recordsOp.table, "tags", condition, options)
-	stm, err := recordsOp.db.Prepare(query)
-	if err != nil {
-		return nil, errors.Wrapf(err, onTags+": can't db.Prepare(%s)", query)
-	}
-
-	rows, err := stm.Query(values...)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	} else if err != nil {
-		return nil, errors.Wrapf(err, onTags+": "+sqllib.CantQuery, query, values)
-	}
-	defer rows.Close()
-
-	tagsStat := tags.StatMap{}
-
-	for rows.Next() {
-		var tagsBytes []byte
-
-		if err := rows.Scan(&tagsBytes); err != nil {
-			return tagsStat, errors.Wrapf(err, onTags+": "+sqllib.CantScanQueryRow, query, values)
-		}
-
-		if len(tagsBytes) > 0 {
-			var ts []tags.Item
-			if err = json.Unmarshal(tagsBytes, &ts); err != nil {
-				// TODO!!! collect errors
-				l.Errorf(onTags+": can't unmarshal ts (%s): %s", tagsBytes, err)
-				continue
-			}
-
-			for _, tag := range ts {
-				// l.Info(tag, tagsStat[tag])
-
-				// ts := tagsStat[tag]
-				tagsStat[tag] = tagsStat[tag] + 1
-			}
-		}
-
-	}
-
-	if err = rows.Err(); err != nil {
-		return tagsStat, errors.Wrapf(err, onTags+": "+sqllib.RowsError, query, values)
-	}
-
-	return tagsStat, nil
+	//condition, values, err := Conditions(options)
+	//if err != nil {
+	//	return nil, fmt.Errorf(onList+": wrong selector in options: %#v", options.GetSelector())
+	//}
+	//
+	//query := sqllib.SQLList(recordsOp.table, "tags", condition, options)
+	//stm, err := recordsOp.db.Prepare(query)
+	//if err != nil {
+	//	return nil, errors.Wrapf(err, onTags+": can't db.Prepare(%s)", query)
+	//}
+	//
+	//rows, err := stm.Query(values...)
+	//if err == sql.ErrNoRows {
+	//	return nil, nil
+	//} else if err != nil {
+	//	return nil, errors.Wrapf(err, onTags+": "+sqllib.CantQuery, query, values)
+	//}
+	//defer rows.Close()
+	//
+	//tagsStat := tags.StatMap{}
+	//
+	//for rows.Next() {
+	//	var tagsBytes []byte
+	//
+	//	if err := rows.Scan(&tagsBytes); err != nil {
+	//		return tagsStat, errors.Wrapf(err, onTags+": "+sqllib.CantScanQueryRow, query, values)
+	//	}
+	//
+	//	if len(tagsBytes) > 0 {
+	//		var ts []tags.Item
+	//		if err = json.Unmarshal(tagsBytes, &ts); err != nil {
+	//			// TODO!!! collect errors
+	//			l.Errorf(onTags+": can't unmarshal ts (%s): %s", tagsBytes, err)
+	//			continue
+	//		}
+	//
+	//		for _, tag := range ts {
+	//			// l.Info(tag, tagsStat[tag])
+	//
+	//			// ts := tagsStat[tag]
+	//			tagsStat[tag] = tagsStat[tag] + 1
+	//		}
+	//	}
+	//
+	//}
+	//
+	//if err = rows.Err(); err != nil {
+	//	return tagsStat, errors.Wrapf(err, onTags+": "+sqllib.RowsError, query, values)
+	//}
+	//
+	//return tagsStat, nil
 }
 
 func (recordsOp *recordsSQLite) Close() error {
 	return errors.Wrap(recordsOp.db.Close(), "on recordsSQLite.Close()")
 }
 
-//const onStat = "on recordsSQLite.StatMap(): "
-//
-//func (recordsOp *recordsSQLite) StatMap(*crud.Options) (common.Map, error) {
-//	condition, values, err := selectors_sql.Use(term)
-//	if err != nil {
-//		termStr, _ := json.Marshal(term)
-//		return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
-//	}
-//
-//	query := sqllib.SQLCount(recordsOp.table, condition, options)
-//	stm, err := recordsOp.db.Prepare(query)
-//	if err != nil {
-//		return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)
-//	}
-//
-//	var num uint64
-//
-//	err = stm.QueryRow(values...).Scan(&num)
-//	if err != nil {
-//		return 0, errors.Wrapf(err, onCount+sqllib.CantScanQueryRow, query, values)
-//	}
-//
-//	return nil, common.ErrNotImplemented
-//}
+const onStat = "on recordsSQLite.StatMap(): "
+
+func (recordsOp *recordsSQLite) Stat(*selectors.Term, *auth.Identity) (db.StatMap, error) {
+	return nil, common.ErrNotImplemented
+	//	condition, values, err := selectors_sql.Use(term)
+	//	if err != nil {
+	//		termStr, _ := json.Marshal(term)
+	//		return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
+	//	}
+	//
+	//	query := sqllib.SQLCount(recordsOp.table, condition, options)
+	//	stm, err := recordsOp.db.Prepare(query)
+	//	if err != nil {
+	//		return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)
+	//	}
+	//
+	//	var num uint64
+	//
+	//	err = stm.QueryRow(values...).Scan(&num)
+	//	if err != nil {
+	//		return 0, errors.Wrapf(err, onCount+sqllib.CantScanQueryRow, query, values)
+	//	}
+	//
+	//	return nil, common.ErrNotImplemented
+}

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
@@ -16,7 +16,7 @@ import (
 var saveEndpoint = server_http.Endpoint{
 	Method:     "POST",
 	PathParams: []string{"bucket_id", "path", "new_file_pattern"},
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		bucketID := files.BucketID(params["bucket_id"])
 		path := params["path"]
 		newFilePattern := params["new_file_pattern"]
@@ -38,7 +38,7 @@ var saveEndpoint = server_http.Endpoint{
 var readEndpoint = server_http.Endpoint{
 	Method:     "GET",
 	PathParams: []string{"bucket_id", "path"},
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		bucketID := files.BucketID(params["bucket_id"])
 		path := params["path"]
 
@@ -54,7 +54,7 @@ var readEndpoint = server_http.Endpoint{
 var removeEndpoint = server_http.Endpoint{
 	Method:     "DELETE",
 	PathParams: []string{"bucket_id", "path"},
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		bucketID := files.BucketID(params["bucket_id"])
 		path := params["path"]
 
@@ -69,7 +69,7 @@ var removeEndpoint = server_http.Endpoint{
 var listEndpoint = server_http.Endpoint{
 	Method:     "GET",
 	PathParams: []string{"bucket_id", "path", "depth"},
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		bucketID := files.BucketID(params["bucket_id"])
 		path := params["path"]
 		depth, err := strconv.Atoi(params["depth"])
@@ -89,7 +89,7 @@ var listEndpoint = server_http.Endpoint{
 var statEndpoint = server_http.Endpoint{
 	Method:     "GET",
 	PathParams: []string{"bucket_id", "path", "depth"},
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		bucketID := files.BucketID(params["bucket_id"])
 		path := params["path"]
 		depth, err := strconv.Atoi(params["depth"])
