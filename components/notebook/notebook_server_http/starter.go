@@ -9,9 +9,9 @@ import (
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
 
-	"github.com/pavlo67/tools/components/files"
-	"github.com/pavlo67/tools/components/notebook/notebook_html"
-	"github.com/pavlo67/tools/components/records"
+	"github.com/pavlo67/tools/components/notebook/notebook_server_http/notebook_html"
+	"github.com/pavlo67/tools/entities/files"
+	"github.com/pavlo67/tools/entities/records"
 )
 
 const InterfaceKey joiner.InterfaceKey = "notebook_server_http"

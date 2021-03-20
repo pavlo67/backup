@@ -4,7 +4,7 @@ import (
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/data_exchange/components/ns"
 
-	"github.com/pavlo67/tools/components/files"
+	"github.com/pavlo67/tools/entities/files"
 )
 
 type Item struct {

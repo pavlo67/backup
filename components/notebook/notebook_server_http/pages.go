@@ -9,14 +9,13 @@ import (
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/selectors"
 
-	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
 
 	"github.com/pavlo67/data_exchange/components/tags"
 	"github.com/pavlo67/tools/components/notebook"
-	"github.com/pavlo67/tools/components/notebook/notebook_html"
-	"github.com/pavlo67/tools/components/records"
+	"github.com/pavlo67/tools/components/notebook/notebook_server_http/notebook_html"
+	"github.com/pavlo67/tools/entities/records"
 )
 
 var Pages = server_http.Endpoints{
@@ -31,44 +30,6 @@ var Pages = server_http.Endpoints{
 	taggedPage,
 }
 
-func errorPage(httpStatus int, notebookHTMLOp notebook_html.Operator, err error, publicDetails string, req *http.Request) (server.Response, error) {
-	if httpStatus == 0 {
-		httpStatus = http.StatusInternalServerError
-	}
-
-	htmlPage, errRender := notebookHTMLOp.CommonPage(
-		"помилка",
-		"",
-		"",
-		publicDetails,
-		"",
-		"",
-	)
-
-	var errs []interface{}
-
-	if err != nil {
-		errs = []interface{}{err}
-	}
-	if errRender != nil {
-		errs = append(errs, errRender)
-	}
-
-	if len(errs) > 0 {
-		if req != nil {
-			err = errors.CommonError(append([]interface{}{fmt.Errorf("on %s %s", req.Method, req.URL)}, errs...)...)
-		} else {
-			err = errors.CommonError(errs...)
-		}
-	}
-
-	return server.Response{
-		Status:   http.StatusOK,
-		Data:     []byte(htmlPage),
-		MIMEType: "text/html; charset=utf-8",
-	}, err
-}
-
 var rootPage = server_http.Endpoint{
 	InternalKey: notebook.IntefaceKeyHTMLRoot,
 	Method:      "GET",
@@ -79,14 +40,7 @@ var rootPage = server_http.Endpoint{
 		}
 
 		htmlIndex := notebookHTMLOp.HTMLIndex(identity)
-		//if err != nil {
-		//	return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLIndex()", req)
-		//}
-
 		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, identity)
-		//if err != nil {
-		//	return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
-		//}
 
 		htmlPage, errRender := notebookHTMLOp.CommonPage(
 			"вхід",
@@ -112,9 +66,9 @@ var viewPage = server_http.Endpoint{
 	PathParams:  []string{"record_id"},
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 		id := records.ID(params["record_id"])
-		r, children, err := prepareRecord(id, identity)
+		r, children, err := records.ReadWithChildren(recordsOp, id, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при prepareRecord()", req)
+			return errorPage(0, notebookHTMLOp, err, "при recordsOp.ReadWithChildren()", req)
 		}
 
 		htmlPage, err := notebookHTMLOp.View(r, children, "", identity)
@@ -198,9 +152,9 @@ var savePage = server_http.Endpoint{
 			return errorPage(0, notebookHTMLOp, fmt.Errorf("on recordsOp.Save(%#v, %#v): got nil", *r, identity), "при recordsOp.Save()", req)
 		}
 
-		r, children, err := prepareRecord(r.ID, identity)
+		r, children, err := records.ReadWithChildren(recordsOp, r.ID, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при prepareRecord()", req)
+			return errorPage(0, notebookHTMLOp, err, "при ReadWithChildren()", req)
 		}
 
 		htmlPage, err := notebookHTMLOp.View(r, children, "", identity)
