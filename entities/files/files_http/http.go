@@ -4,15 +4,15 @@ package files_http
 //
 //type filesHTTP struct {
 //	host      string
-//	endpoints server_http.Endpoints
+//	endpoints server_http.Config
 //}
 //
 //const onNew = "on filesHTTP.New()"
 //
-//func New(access config.Access, prefix string, endpoints server_http.Endpoints) (files.Operator, error) {
+//func New(access config.Access, prefix string, endpoints server_http.Config) (files.Operator, error) {
 //	filesOp := filesHTTP{
 //		host:      access.Host,
-//		endpoints: server_http.Endpoints{},
+//		endpoints: server_http.Config{},
 //	}
 //
 //	if access.Port > 0 {

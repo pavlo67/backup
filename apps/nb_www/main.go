@@ -1,9 +1,12 @@
 package main
 
 import (
+	"io/ioutil"
+
 	"github.com/pavlo67/common/common/apps"
-	"github.com/pavlo67/common/common/starter"
-	"github.com/pavlo67/tools/apps/nb_www/nb_www_settings"
+	"github.com/pavlo67/common/common/filelib"
+	"github.com/pavlo67/tools/common/actor"
+	"github.com/pavlo67/tools/components/notebook_www/notebook_server_http"
 )
 
 var (
@@ -18,17 +21,15 @@ func main() {
 		return
 	}
 
-	starters, err := nb_www_settings.ServerComponents()
+	templatePath := filelib.CurrentPath() + "templates/local.html"
+	htmlTemplateBytes, err := ioutil.ReadFile(templatePath)
 	if err != nil {
-		l.Fatal(err)
+		l.Fatalf("on ioutil.ReadFile(%s): %s", templatePath, err)
 	}
 
-	label := "NB/HTML/REST BUILD"
-	joinerOp, err := starter.Run(starters, cfgService, label, l)
-	if err != nil {
-		l.Fatal(err)
+	actorsWWW := []actor.OperatorWWW{
+		notebook_server_http.Actor(),
 	}
-	defer joinerOp.CloseAll()
 
-	nb_www_settings.WG.Wait()
+	actor.RunWWW(cfgService, string(htmlTemplateBytes), "NB/HTML/REST BUILD", actorsWWW, l)
 }

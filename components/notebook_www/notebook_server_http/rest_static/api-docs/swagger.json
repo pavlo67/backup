@@ -1,0 +1,12 @@
+{
+ "info": {
+  "title": "Notebook REST API",
+  "version": "0.0.1"
+ },
+ "paths": {},
+ "port": ":3002",
+ "schemes": [
+  "http"
+ ],
+ "swagger": "2.0"
+}

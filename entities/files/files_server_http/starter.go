@@ -5,7 +5,6 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
@@ -53,21 +52,21 @@ func (mshs *managementServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf(onRun+": no files.Operator with key %s", mshs.filesKey)
 	}
 
-	if err := joinerOp.Join(&readEndpoint, files.HandlerRead); err != nil {
-		return errors.Wrapf(err, "can't join readEndpoint as server_http.Endpoint with key '%s'", files.HandlerRead)
-	}
-	if err := joinerOp.Join(&saveEndpoint, files.HandlerSave); err != nil {
-		return errors.Wrapf(err, "can't join saveEndpoint as server_http.Endpoint with key '%s'", files.HandlerSave)
-	}
-	if err := joinerOp.Join(&removeEndpoint, files.HandlerRemove); err != nil {
-		return errors.Wrapf(err, "can't join removeEndpoint as server_http.Endpoint with key '%s'", files.HandlerRemove)
-	}
-	if err := joinerOp.Join(&listEndpoint, files.HandlerList); err != nil {
-		return errors.Wrapf(err, "can't join listEndpoint as server_http.Endpoint with key '%s'", files.HandlerList)
-	}
-	if err := joinerOp.Join(&statEndpoint, files.HandlerStat); err != nil {
-		return errors.Wrapf(err, "can't join statEndpoint as server_http.Endpoint with key '%s'", files.HandlerStat)
-	}
+	//if err := joinerOp.Join(&readEndpoint, files.HandlerRead); err != nil {
+	//	return errors.Wrapf(err, "can't join readEndpoint as server_http.Endpoint with key '%s'", files.HandlerRead)
+	//}
+	//if err := joinerOp.Join(&saveEndpoint, files.HandlerSave); err != nil {
+	//	return errors.Wrapf(err, "can't join saveEndpoint as server_http.Endpoint with key '%s'", files.HandlerSave)
+	//}
+	//if err := joinerOp.Join(&removeEndpoint, files.HandlerRemove); err != nil {
+	//	return errors.Wrapf(err, "can't join removeEndpoint as server_http.Endpoint with key '%s'", files.HandlerRemove)
+	//}
+	//if err := joinerOp.Join(&listEndpoint, files.HandlerList); err != nil {
+	//	return errors.Wrapf(err, "can't join listEndpoint as server_http.Endpoint with key '%s'", files.HandlerList)
+	//}
+	//if err := joinerOp.Join(&statEndpoint, files.HandlerStat); err != nil {
+	//	return errors.Wrapf(err, "can't join statEndpoint as server_http.Endpoint with key '%s'", files.HandlerStat)
+	//}
 
 	return nil
 }

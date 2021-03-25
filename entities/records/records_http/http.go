@@ -5,7 +5,7 @@ import (
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/db"
 	"github.com/pavlo67/common/common/selectors"
-	"github.com/pavlo67/common/common/server/server_http"
+	server_http "github.com/pavlo67/tools/common/server/server_http2"
 
 	"github.com/pavlo67/data_exchange/components/tags"
 	"github.com/pavlo67/tools/entities/records"
@@ -32,7 +32,7 @@ func New(pagesConfig, restConfig server_http.Config) (records.Operator, error) {
 }
 
 func (recordsOp *recordsHTTP) Save(records.Item, *auth.Identity) (records.ID, error) {
-	//ep := recordsOp.pagesConfig.EndpointsSettled[records.IntefaceKeySetCreds]
+	//ep := recordsOp.pagesConfig.Config[records.IntefaceKeySetCreds]
 	//serverURL := recordsOp.pagesConfig.Host + recordsOp.pagesConfig.Port + ep.Path
 	//
 	//requestBody, err := json.Marshal(toSet)

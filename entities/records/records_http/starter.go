@@ -8,8 +8,8 @@ import (
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
-	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pavlo67/common/common/starter"
+	server_http "github.com/pavlo67/tools/common/server/server_http2"
 
 	"github.com/pavlo67/tools/entities/records"
 )
@@ -49,16 +49,16 @@ func (ahs *recordsHTTPStarter) Prepare(cfg *config.Config, options common.Map) e
 
 func (ahs *recordsHTTPStarter) Run(joinerOp joiner.Operator) error {
 	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+		return fmt.Errorf("no logger.OperatorV2 with key %s", logger.InterfaceKey)
 	}
 
 	recordsOp, err := New(ahs.pagesConfig, ahs.restConfig)
 	if err != nil {
-		return errors.Wrap(err, "can't init *recordsHTTP{} as records.Operator")
+		return errors.Wrap(err, "can't init *recordsHTTP{} as records.OperatorV2")
 	}
 
 	if err = joinerOp.Join(recordsOp, ahs.interfaceKey); err != nil {
-		return errors.Wrapf(err, "can't join *recordsHTTP{} as records.Operator with key '%s'", ahs.interfaceKey)
+		return errors.Wrapf(err, "can't join *recordsHTTP{} as records.OperatorV2 with key '%s'", ahs.interfaceKey)
 	}
 
 	return nil
