@@ -6,6 +6,7 @@ import (
 	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/tools/common/actor"
+
 	"github.com/pavlo67/tools/components/notebook_www/notebook_server_http"
 )
 
@@ -31,5 +32,11 @@ func main() {
 		notebook_server_http.Actor(),
 	}
 
-	actor.RunWWW(cfgService, string(htmlTemplateBytes), "NB/HTML/REST BUILD", actorsWWW, l)
+	joinerOps, err := actor.RunWWW(cfgService, string(htmlTemplateBytes), "NB/HTML/REST BUILD", actorsWWW, l)
+	for _, joinerOp := range joinerOps {
+		defer joinerOp.CloseAll()
+	}
+
+	l.Fatal(err)
+
 }

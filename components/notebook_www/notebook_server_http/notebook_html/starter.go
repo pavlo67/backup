@@ -22,9 +22,8 @@ var l logger.Operator
 var _ starter.Operator = &notebookHTMLStarter{}
 
 type notebookHTMLStarter struct {
-	htmlTemplate string
-	pagesConfig  *server_http.Config
-	restConfig   *server_http.Config
+	pagesConfig *server_http.ConfigPages
+	// restConfig  *server_http.Config
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -34,16 +33,10 @@ func (nhs *notebookHTMLStarter) Name() string {
 }
 
 func (nhs *notebookHTMLStarter) Prepare(cfg *config.Config, options common.Map) error {
-	var ok bool
-
-	if nhs.htmlTemplate, ok = options.String("html_template"); !ok {
-		return fmt.Errorf(`no html template in options["html_template"]`)
-	}
-
 	switch v := options["pages_config"].(type) {
-	case server_http.Config:
+	case server_http.ConfigPages:
 		nhs.pagesConfig = &v
-	case *server_http.Config:
+	case *server_http.ConfigPages:
 		nhs.pagesConfig = v
 	}
 	if nhs.pagesConfig == nil {
@@ -70,7 +63,7 @@ func (nhs *notebookHTMLStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no logger.OperatorV2 with key %s", logger.InterfaceKey)
 	}
 
-	notebookOp, err := New(nhs.htmlTemplate, *nhs.pagesConfig) // *nhs.restConfig
+	notebookOp, err := New(*nhs.pagesConfig) // *nhs.restConfig
 	if err != nil {
 		return errors.CommonError(err, "can't init *notebookHTML as notebook_html.OperatorV2")
 	}

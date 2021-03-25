@@ -7,10 +7,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
-
-	"github.com/pavlo67/common/common/auth"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -29,20 +26,17 @@ type serverHTTPJschmhr struct {
 	tlsKeyFile  string
 
 	// onRequest server_http.OnRequestMiddleware
+
+	wrappersHTTP map[server_http.WrapperHTTPKey]WrapperHTTP
 }
 
-func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnRequestMiddleware) (server_http.OperatorV2, error) {
+func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnRequestMiddleware, wrappersHTTP map[server_http.WrapperHTTPKey]WrapperHTTP) (server_http.OperatorV2, error) {
 	if port <= 0 {
 		return nil, fmt.Errorf("on server_http_jschmhr.New(): wrong port = %d", port)
 	}
 
 	//if onRequest == nil {
 	//	return nil, errors.New("on server_http_jschmhr.New(): no server_http.OnRequestMiddleware")
-	//}
-
-	//var secretENVsToLower []string
-	//for _, secretENV := range secretENVs {
-	//	secretENVsToLower = append(secretENVsToLower, strings.ToLower(secretENV))
 	//}
 
 	router := httprouter.New()
@@ -60,6 +54,7 @@ func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnReque
 		tlsKeyFile:   tlsKeyFile,
 
 		// onRequest: onRequest,
+		wrappersHTTP: wrappersHTTP,
 	}, nil
 }
 
@@ -83,66 +78,24 @@ func (s *serverHTTPJschmhr) Addr() (port int, https bool) {
 	return s.port, s.tlsCertFile != "" && s.tlsKeyFile != ""
 }
 
-//func (s *serverHTTPJschmhr) ServerHTTP() *http.Server {
-//	return s.httpServer
-//}
+const onHandle = "on serverHTTPJschmhr.Handle()"
 
-const onHandleEndpoint = "on serverHTTPJschmhr.HandleEndpoint()"
+func (s *serverHTTPJschmhr) Handle(key server_http.EndpointKey, serverPath string, wrapperHTTPKey server_http.WrapperHTTPKey, data interface{}) error {
+	wrapperHTTP := s.wrappersHTTP[wrapperHTTPKey]
+	if wrapperHTTP == nil {
+		return fmt.Errorf(onHandle+": wrong wrapperHTTPKey (%s) on %s [%s]", wrapperHTTPKey, key, serverPath)
+	}
 
-func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPath string, endpoint server_http.Endpoint) error {
+	method, path, handler, err := wrapperHTTP(s, serverPath, data)
+	if err != nil {
+		return err
+	}
 
-	method := strings.ToUpper(endpoint.Method)
-	path := endpoint.PathTemplate(serverPath)
-
-	if endpoint.WorkerHTTP == nil {
-		return errors.New(onHandleEndpoint + ": " + method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
+	if handler == nil {
+		return errors.New(onHandle + ": " + method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
 	}
 
 	s.HandleOptions(key, path)
-
-	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
-		//options, err := s.onRequest.Identity(r)
-		//if err != nil {
-		//	l.Error(err)
-		//}
-		var identity *auth.Identity
-
-		var params server_http.PathParams
-		if len(paramsHR) > 0 {
-			params = server_http.PathParams{}
-			for _, p := range paramsHR {
-				params[p.Key] = p.Value
-			}
-		}
-
-		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
-		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
-		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
-		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
-
-		responseData, err := endpoint.WorkerHTTP(s, r, params, identity)
-		if err != nil {
-			l.Error(err)
-		}
-
-		if responseData.MIMEType != "" {
-			w.Header().Set("Content-Type", responseData.MIMEType)
-		}
-		w.Header().Set("Content-Length", strconv.Itoa(len(responseData.Data)))
-		if responseData.FileName != "" {
-			w.Header().Set("Content-Disposition", "attachment; filename="+responseData.FileName)
-		}
-
-		if responseData.Status > 0 {
-			w.WriteHeader(responseData.Status)
-		} else {
-			w.WriteHeader(http.StatusOK)
-		}
-
-		if _, err := w.Write(responseData.Data); err != nil {
-			l.Error("can't write response", err)
-		}
-	}
 
 	l.Infof("%-10s: %s %s", key, method, path)
 	switch method {
@@ -155,10 +108,11 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPa
 	case "DELETE":
 		s.httpServeMux.DELETE(path, handler)
 	default:
-		return fmt.Errorf(onHandleEndpoint+": method (%s) isn't supported", method)
+		return fmt.Errorf(onHandle+": method (%s) isn't supported", method)
 	}
 
 	return nil
+
 }
 
 func (s *serverHTTPJschmhr) HandleOptions(key server_http.EndpointKey, serverPath string) {

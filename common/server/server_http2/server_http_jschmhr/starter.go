@@ -22,7 +22,8 @@ var l logger.Operator
 var _ starter.Operator = &server_http_jschmhrStarter{}
 
 type server_http_jschmhrStarter struct {
-	config server.Config
+	config       server.Config
+	htmlTemplate string
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -32,6 +33,7 @@ func (ss *server_http_jschmhrStarter) Name() string {
 }
 
 func (ss *server_http_jschmhrStarter) Prepare(cfg *config.Config, options common.Map) error {
+	ss.htmlTemplate = options.StringDefault("html_template", "")
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 
 	configKey := options.StringDefault("config_key", "server_http")
@@ -52,7 +54,14 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 	//	return fmt.Errorf("no server_http.OnRequestMiddleware with key %s", server_http.OnRequestMiddlewareInterfaceKey)
 	//}
 
-	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, onRequest)
+	wrappersHTTP := map[server_http.WrapperHTTPKey]WrapperHTTP{
+		server_http.WrapperHTTPREST: WrapperHTTPREST,
+	}
+	if ss.htmlTemplate != "" {
+		wrappersHTTP[server_http.WrapperHTTPPage] = WrapperHTTPPage(ss.htmlTemplate)
+	}
+
+	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, onRequest, wrappersHTTP)
 	if err != nil {
 		return errors.Wrap(err, "on server_http_jschmhr.New()")
 	}

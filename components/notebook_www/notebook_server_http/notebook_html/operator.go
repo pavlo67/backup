@@ -11,11 +11,11 @@ type Operator interface {
 
 	// complete pages ------------------------------------------
 
-	CommonPage(title, htmlHeader, htmlMessage, htmlError, htmlIndex, htmlContent string) (string, error)
+	CommonPage(title, htmlHeader, htmlMessage, htmlError, htmlIndex, htmlContent string) (map[string]string, error)
 
-	View(r *records.Item, children []records.Item, message string, identity *auth.Identity) (string, error)
-	Edit(r *records.Item, children []records.Item, message string, identity *auth.Identity) (string, error)
-	ListTagged(tag tags.Item, tagged []records.Item, identity *auth.Identity) (string, error)
+	View(r *records.Item, children []records.Item, message string, identity *auth.Identity) (map[string]string, error)
+	Edit(r *records.Item, children []records.Item, message string, identity *auth.Identity) (map[string]string, error)
+	ListTagged(tag tags.Item, tagged []records.Item, identity *auth.Identity) (map[string]string, error)
 
 	// page elements  ------------------------------------------
 

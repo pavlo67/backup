@@ -35,7 +35,7 @@ func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
 	//	return nil, err
 	//}
 	//
-	//if err = PagesConfig.Complete("", 0, pagesPrefix); err != nil {
+	//if err = EndpointsPages.Complete("", 0, pagesPrefix); err != nil {
 	//	return nil, err
 	//}
 
@@ -43,11 +43,11 @@ func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
 	//	return nil, err
 	//}
 
-	htmlTemplate := options.StringDefault("html_template", "")
+	//htmlTemplate := options.StringDefault("html_template", "")
+	//"html_template": htmlTemplate,
 
 	renderOptions := common.Map{
-		"html_template": htmlTemplate,
-		"pages_config":  &PagesConfig,
+		"pages_config": &PagesConfig,
 		// "rest_config":   &RestConfig,
 	}
 
@@ -76,13 +76,13 @@ func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
 	return starters, nil
 }
 
-func (*notebookActor) Config() (server_http.Config, error) {
+func (*notebookActor) Config() (server_http.ConfigPages, error) {
 	return PagesConfig, nil
 }
 
 //func ClientComponents() ([]starter.Starter, error) {
 //
-//	if err := PagesConfig.CompleteDirectly(notebook_server_http.Pages, "", 0, pagesPrefix); err != nil {
+//	if err := EndpointsPages.CompleteDirectly(notebook_server_http.Endpoints, "", 0, pagesPrefix); err != nil {
 //		return nil, err
 //	}
 //
@@ -91,7 +91,7 @@ func (*notebookActor) Config() (server_http.Config, error) {
 //	//}
 //
 //	endpointsOptions := common.Map{
-//		"pages_config": &PagesConfig,
+//		"pages_config": &EndpointsPages,
 //		// "rest_config":  restConfig,
 //	}
 //

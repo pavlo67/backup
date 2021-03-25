@@ -6,10 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cbroglie/mustache"
-
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/errors"
 	server_http "github.com/pavlo67/tools/common/server/server_http2"
 	"github.com/pavlo67/tools/components/notebook_www"
 
@@ -21,8 +18,6 @@ import (
 var _ Operator = &notebookHTML{}
 
 type notebookHTML struct {
-	htmlTemplate string
-
 	epCreate string
 	epView   server_http.Get1
 	epTagged server_http.Get1
@@ -30,10 +25,7 @@ type notebookHTML struct {
 
 const onNew = "on notebookHTML.New(): "
 
-func New(htmlTemplate string, pagesConfig server_http.Config) (Operator, error) { // , restConfig
-	if strings.TrimSpace(htmlTemplate) == "" {
-		return nil, errors.New("no htmlTemplate to render pages")
-	}
+func New(pagesConfig server_http.ConfigPages) (Operator, error) { // , restConfig
 
 	epCreate, err := server_http.CheckGet0(pagesConfig, notebook_www.IntefaceKeyHTMLCreate, false)
 	if err != nil {
@@ -51,16 +43,15 @@ func New(htmlTemplate string, pagesConfig server_http.Config) (Operator, error) 
 	}
 
 	return &notebookHTML{
-		htmlTemplate: htmlTemplate,
-		epCreate:     epCreate,
-		epView:       epView,
-		epTagged:     epTagged,
+		epCreate: epCreate,
+		epView:   epView,
+		epTagged: epTagged,
 	}, nil
 }
 
 // TODO!!! look at https://github.com/kataras/blocks
 
-func (htmlOp *notebookHTML) CommonPage(title, htmlHeader, htmlMessage, htmlError, htmlIndex, htmlContent string) (string, error) {
+func (htmlOp *notebookHTML) CommonPage(title, htmlHeader, htmlMessage, htmlError, htmlIndex, htmlContent string) (map[string]string, error) {
 
 	if htmlError = strings.TrimSpace(htmlError); htmlError != "" {
 		htmlError = "На жаль, виникла помилка:-(\n<p>" + htmlError
@@ -75,15 +66,10 @@ func (htmlOp *notebookHTML) CommonPage(title, htmlHeader, htmlMessage, htmlError
 		"content": htmlContent,
 	}
 
-	result, err := mustache.Render(htmlOp.htmlTemplate, context)
-	if err != nil {
-		return result, fmt.Errorf("on notebookHTML.CommonPage(): on mustache.Render(h%s, %#v) got %s", htmlOp.htmlTemplate, context, err)
-	}
-
-	return result, nil
+	return context, nil
 }
 
-func (htmlOp *notebookHTML) View(r *records.Item, children []records.Item, message string, identity *auth.Identity) (string, error) {
+func (htmlOp *notebookHTML) View(r *records.Item, children []records.Item, message string, identity *auth.Identity) (map[string]string, error) {
 	context := map[string]string{
 		"title":   r.Content.Title,
 		"header":  r.Content.Title,
@@ -91,12 +77,12 @@ func (htmlOp *notebookHTML) View(r *records.Item, children []records.Item, messa
 		"content": views_html.HTMLViewTable(dataFields, DataFromRecord(r), nil),
 	}
 
-	return mustache.Render(htmlOp.htmlTemplate, context)
+	return context, nil
 }
 
 const onHTMLEdit = "on notebookHTML.Edit(): "
 
-func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, message string, identity *auth.Identity) (string, error) {
+func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, message string, identity *auth.Identity) (map[string]string, error) {
 	formID := "nb_edit_" + strconv.FormatInt(time.Now().Unix(), 10) + "_"
 
 	var title, header, action string
@@ -129,10 +115,10 @@ func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, messa
 		"content": views_html.HTMLEditTable(updateFields, formID, "/save", dataFromRecord, nil),
 	}
 
-	return mustache.Render(htmlOp.htmlTemplate, context)
+	return context, nil
 }
 
-func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, identity *auth.Identity) (string, error) {
+func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, identity *auth.Identity) (map[string]string, error) {
 	htmlList := htmlOp.HTMLRecords(tagged, identity)
 	//if errRenderRecords != nil {
 	//	errorID := strconv.FormatInt(time.Now().UnixNano(), 10)
@@ -152,7 +138,7 @@ func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, ide
 		"header":  "Все з теґом '" + tag + "'",
 		"content": htmlList,
 	}
-	return mustache.Render(htmlOp.htmlTemplate, context)
+	return context, nil
 }
 
 func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, identity *auth.Identity) string {

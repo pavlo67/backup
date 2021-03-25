@@ -1,7 +1,6 @@
 package files_http
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/pavlo67/common/common"
@@ -25,7 +24,7 @@ type filesHTTPStarter struct {
 	config config.Access
 
 	//prefix    string
-	endpoints server_http.Endpoints
+	endpoints server_http.EndpointsREST
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -48,13 +47,13 @@ func (ihs *filesHTTPStarter) Prepare(cfg *config.Config, options common.Map) err
 
 	ihs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(files.InterfaceKey)))
 
-	if endpoints, ok := options["endpoints"].(server_http.Endpoints); ok {
-		ihs.endpoints = endpoints
-	} else if endpointsPtr, ok := options["endpoints"].(*server_http.Endpoints); ok {
-		ihs.endpoints = *endpointsPtr
-	} else {
-		return errors.New("no endpoints description for filesHTTPStarter")
-	}
+	//if endpoints, ok := options["endpoints"].(server_http.Endpoints); ok {
+	//	ihs.endpoints = endpoints
+	//} else if endpointsPtr, ok := options["endpoints"].(*server_http.Endpoints); ok {
+	//	ihs.endpoints = *endpointsPtr
+	//} else {
+	//	return errors.New("no endpoints description for filesHTTPStarter")
+	//}
 
 	return nil
 }
