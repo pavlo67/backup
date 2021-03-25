@@ -13,7 +13,7 @@ var (
 )
 
 func main() {
-	versionOnly, _, cfgService, l := apps.Prepare(BuildDate, BuildTag, BuildCommit, "apps/_environments/")
+	versionOnly, _, cfgService, l := apps.Prepare(BuildDate, BuildTag, BuildCommit, "_environments/")
 	if versionOnly {
 		return
 	}

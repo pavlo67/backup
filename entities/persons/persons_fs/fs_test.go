@@ -15,7 +15,7 @@ import (
 func TestPersonsFS(t *testing.T) {
 	_, cfgService, l := apps.PrepareTests(
 		t,
-		"../../../apps/_environments/",
+		"../../../_environments/",
 		"test",
 		"", // "persons_test."+strconv.FormatInt(time.Now().Unix(), 10)+".log",
 	)

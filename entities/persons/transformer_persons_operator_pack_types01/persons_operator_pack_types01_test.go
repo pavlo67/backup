@@ -28,7 +28,7 @@ import (
 func TestTransformPersonsOperatorPack(t *testing.T) {
 
 	return
-	_, cfgService, l := apps.PrepareTests(t, "../../../apps/_environments/", "test", "")
+	_, cfgService, l := apps.PrepareTests(t, "../../../_environments/", "test", "")
 
 	components := []starter.Starter{
 		{db_sqlite.Starter(), nil},
