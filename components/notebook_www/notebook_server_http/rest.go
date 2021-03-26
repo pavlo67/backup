@@ -10,7 +10,7 @@ package notebook_server_http
 //
 //	Title:     "Notebook REST API",
 //	Version:   "0.0.1",
-//	Endpoints: server_http.EndpointsConfig{
+//	EndpointsSettled: server_http.EndpointsConfig{
 //		// auth.IntefaceKeyAuthenticate:     {Path: "/auth", Tags: []string{"unauthorized"}},
 //
 //		// notebook.IntefaceKeyRESTRead:     {Path: "/read", Tags: []string{"unauthorized"}},

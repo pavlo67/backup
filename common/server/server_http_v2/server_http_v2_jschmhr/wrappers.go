@@ -1,4 +1,4 @@
-package server_http_jschmhr
+package server_http_v2_jschmhr
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/pavlo67/common/common/auth"
 
-	server_http "github.com/pavlo67/tools/common/server/server_http2"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 )
 
 type HandlerHTTP = httprouter.Handle
@@ -22,12 +22,12 @@ type WrapperHTTP func(op server_http.OperatorV2, serverPath string, data interfa
 var _ WrapperHTTP = WrapperHTTPREST
 
 func WrapperHTTPREST(serverOpV2 server_http.OperatorV2, serverPath string, data interface{}) (string, string, HandlerHTTP, error) {
-	var ep *server_http.EndpointREST
+	var ep *server_http.Endpoint
 
 	switch v := data.(type) {
-	case server_http.EndpointREST:
+	case server_http.Endpoint:
 		ep = &v
-	case *server_http.EndpointREST:
+	case *server_http.Endpoint:
 		ep = v
 	}
 
@@ -55,7 +55,7 @@ func WrapperHTTPREST(serverOpV2 server_http.OperatorV2, serverPath string, data 
 		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
 		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
 
-		responseData, err := ep.WorkerHTTPREST(serverOpV2, r, params, identity)
+		responseData, err := ep.WorkerHTTP(serverOpV2, r, params, identity)
 		if err != nil {
 			l.Error(err)
 		}

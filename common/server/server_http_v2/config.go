@@ -6,39 +6,66 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
-	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/server"
-
 	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/logger"
+	"github.com/pavlo67/common/common/server"
 )
 
-type WorkerHTTPREST func(OperatorV2, *http.Request, PathParams, *auth.Identity) (server.Response, error)
-
-type EndpointREST struct {
-	EndpointDescription
-	WorkerHTTPREST
+type Config struct {
+	ConfigCommon
+	EndpointsSettled
 }
 
-type EndpointRESTSettled struct {
+type EndpointsSettled map[EndpointKey]EndpointSettled
+
+type EndpointSettled struct {
 	Path     string
 	Tags     []string `json:",omitempty"`
 	Produces []string `json:",omitempty"`
-	EndpointREST
+	Endpoint
 }
 
-type EndpointsREST map[EndpointKey]EndpointRESTSettled
+type WorkerHTTP func(OperatorV2, *http.Request, PathParams, *auth.Identity) (server.Response, error)
 
-type ConfigREST struct {
-	ConfigCommon
-	Endpoints EndpointsREST
+type Endpoint struct {
+	EndpointDescription
+	WorkerHTTP
 }
 
-func (c ConfigREST) EP(endpointKey EndpointKey, params []string, createFullURL bool) (string, string, error) {
-	ep, ok := c.Endpoints[endpointKey]
+// ConfigCommon -----------------------------------------------------------------------------
+
+type ConfigCommon struct {
+	Title   string
+	Version string
+	Host    string
+	Port    string
+	Prefix  string
+}
+
+func (c *ConfigCommon) Complete(host string, port int, prefix string) error {
+	if c == nil {
+		return errors.New("no server_http.Config to complete")
+	}
+
+	var portStr string
+	if port > 0 {
+		portStr = ":" + strconv.Itoa(port)
+	}
+
+	c.Host, c.Port, c.Prefix = host, portStr, prefix
+
+	return nil
+}
+
+// Config -----------------------------------------------------------------------------------
+
+func (c Config) EP(endpointKey EndpointKey, params []string, createFullURL bool) (string, string, error) {
+	ep, ok := c.EndpointsSettled[endpointKey]
 	if !ok {
 		return "", "", fmt.Errorf("no endpoint with key '%s'", endpointKey)
 	}
@@ -68,10 +95,10 @@ func (c ConfigREST) EP(endpointKey EndpointKey, params []string, createFullURL b
 
 type Swagger map[string]interface{}
 
-func (c ConfigREST) SwaggerV2(isHTTPS bool) ([]byte, error) {
+func (c Config) SwaggerV2(isHTTPS bool) ([]byte, error) {
 	paths := map[string]common.Map{} // map[string]map[string]map[string]interface{}{}
 
-	for key, ep := range c.Endpoints {
+	for key, ep := range c.EndpointsSettled {
 
 		path := c.Prefix + ep.PathTemplateBraced(ep.Path)
 		method := strings.ToLower(ep.Method)
@@ -167,7 +194,7 @@ func (c ConfigREST) SwaggerV2(isHTTPS bool) ([]byte, error) {
 	return json.MarshalIndent(swagger, "", " ")
 }
 
-func (c ConfigREST) InitSwagger(isHTTPS bool, swaggerStaticFilePath string, l logger.Operator) error {
+func (c Config) InitSwagger(isHTTPS bool, swaggerStaticFilePath string, l logger.Operator) error {
 	swaggerJSON, err := c.SwaggerV2(isHTTPS)
 	if err != nil {
 		return err
@@ -182,13 +209,13 @@ func (c ConfigREST) InitSwagger(isHTTPS bool, swaggerStaticFilePath string, l lo
 
 const onHandleEndpoints = "on server_http.HandleEndpoints()"
 
-func (c ConfigREST) HandleEndpoints(srvOp OperatorV2, l logger.Operator) error {
+func (c Config) HandleEndpoints(srvOp OperatorV2, l logger.Operator) error {
 	if srvOp == nil {
 		return errors.New(onHandleEndpoints + ": srvOp == nil")
 	}
 
-	for key, ep := range c.Endpoints {
-		if err := srvOp.Handle(key, c.Prefix+ep.Path, WrapperHTTPREST, ep.EndpointREST); err != nil {
+	for key, ep := range c.EndpointsSettled {
+		if err := srvOp.Handle(key, c.Prefix+ep.Path, WrapperHTTPREST, ep.Endpoint); err != nil {
 			return fmt.Errorf(onHandleEndpoints+": handling %s, %s, %#v got %s", key, ep.Path, ep, err)
 		}
 	}

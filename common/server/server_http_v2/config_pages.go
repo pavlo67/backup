@@ -31,11 +31,11 @@ type EndpointPageSettled struct {
 	EndpointPage
 }
 
-type EndpointsPages map[EndpointKey]EndpointPageSettled
+type EndpointsPageSettled map[EndpointKey]EndpointPageSettled
 
 type ConfigPages struct {
 	ConfigCommon
-	Endpoints EndpointsPages
+	EndpointsPageSettled
 }
 
 const onHandlePages = "on server_http.HandlePages()"
@@ -45,7 +45,7 @@ func (c ConfigPages) HandlePages(srvOp OperatorV2, l logger.Operator) error {
 		return errors.New(onHandlePages + ": srvOp == nil")
 	}
 
-	for key, ep := range c.Endpoints {
+	for key, ep := range c.EndpointsPageSettled {
 		if err := srvOp.Handle(key, c.Prefix+ep.Path, WrapperHTTPPage, ep.EndpointPage); err != nil {
 			return fmt.Errorf(onHandlePages+": handling %s, %s, %#v got %s", key, ep.Path, ep, err)
 		}
@@ -63,7 +63,7 @@ type Get3 func(string, string, string) (string, error)
 type Get4 func(string, string, string, string) (string, error)
 
 func CheckGet0(c ConfigPages, endpointKey EndpointKey, createFullURL bool) (string, error) {
-	ep, ok := c.Endpoints[endpointKey]
+	ep, ok := c.EndpointsPageSettled[endpointKey]
 	if !ok {
 		return "", fmt.Errorf("no endpoint with key '%s'", endpointKey)
 	}
@@ -85,7 +85,7 @@ func CheckGet0(c ConfigPages, endpointKey EndpointKey, createFullURL bool) (stri
 }
 
 func CheckGet1(c ConfigPages, endpointKey EndpointKey, createFullURL bool) (Get1, error) {
-	ep, ok := c.Endpoints[endpointKey]
+	ep, ok := c.EndpointsPageSettled[endpointKey]
 	if !ok {
 		return nil, fmt.Errorf("no endpoint with key '%s'", endpointKey)
 	}
@@ -114,7 +114,7 @@ func CheckGet1(c ConfigPages, endpointKey EndpointKey, createFullURL bool) (Get1
 }
 
 func CheckGet2(c ConfigPages, endpointKey EndpointKey, createFullURL bool) (Get2, error) {
-	ep, ok := c.Endpoints[endpointKey]
+	ep, ok := c.EndpointsPageSettled[endpointKey]
 	if !ok {
 		return nil, fmt.Errorf("no endpoint with key '%s'", endpointKey)
 	}
@@ -146,7 +146,7 @@ func CheckGet2(c ConfigPages, endpointKey EndpointKey, createFullURL bool) (Get2
 }
 
 func CheckGet3(c ConfigPages, endpointKey EndpointKey, createFullURL bool) (Get3, error) {
-	ep, ok := c.Endpoints[endpointKey]
+	ep, ok := c.EndpointsPageSettled[endpointKey]
 	if !ok {
 		return nil, fmt.Errorf("no endpoint with key '%s'", endpointKey)
 	}
@@ -178,7 +178,7 @@ func CheckGet3(c ConfigPages, endpointKey EndpointKey, createFullURL bool) (Get3
 }
 
 func CheckGet4(c ConfigPages, endpointKey EndpointKey, createFullURL bool) (Get4, error) {
-	ep, ok := c.Endpoints[endpointKey]
+	ep, ok := c.EndpointsPageSettled[endpointKey]
 	if !ok {
 		return nil, fmt.Errorf("no endpoint with key '%s'", endpointKey)
 	}

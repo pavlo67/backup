@@ -1,4 +1,4 @@
-package server_http_jschmhr
+package server_http_v2_jschmhr
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/pavlo67/common/common/errors"
-	server_http "github.com/pavlo67/tools/common/server/server_http2"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 )
 
 var _ server_http.OperatorV2 = &serverHTTPJschmhr{}
@@ -112,15 +112,9 @@ func (s *serverHTTPJschmhr) Handle(key server_http.EndpointKey, serverPath strin
 	}
 
 	return nil
-
 }
 
 func (s *serverHTTPJschmhr) HandleOptions(key server_http.EndpointKey, serverPath string) {
-	//if strlib.In(s.handledOptions, serverPath) {
-	//	//l.Infof("- %#v", s.handledOptions)
-	//	return
-	//}
-
 	s.httpServeMux.OPTIONS(serverPath, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		l.Infof("%-10s: OPTIONS %s", key, serverPath)
 		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
@@ -128,11 +122,11 @@ func (s *serverHTTPJschmhr) HandleOptions(key server_http.EndpointKey, serverPat
 		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
 		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
 	})
-
-	//s.handledOptions = append(s.handledOptions, serverPath)
 }
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
+
+const filepathSuffix = "*filepath"
 
 func (s *serverHTTPJschmhr) HandleFiles(key server_http.EndpointKey, serverPath string, staticPath server_http.StaticPath) error {
 	l.Infof("%-10s: FILES %s <-- %s", key, serverPath, staticPath.LocalPath)
@@ -140,7 +134,11 @@ func (s *serverHTTPJschmhr) HandleFiles(key server_http.EndpointKey, serverPath 
 	// TODO: check localPath
 
 	if staticPath.MIMEType == nil {
+
 		// TODO!!! CORS
+		if len(serverPath) < len(filepathSuffix) || serverPath[len(serverPath)-len(filepathSuffix):] != filepathSuffix {
+			serverPath += "*filepath"
+		}
 
 		s.httpServeMux.ServeFiles(serverPath, http.Dir(staticPath.LocalPath))
 		return nil
@@ -179,13 +177,3 @@ func (s *serverHTTPJschmhr) HandleFiles(key server_http.EndpointKey, serverPath 
 // if err != nil {
 //	l.ErrStr("can't read MIMEType for file: ", localPath+"/"+r.ExportID.PathWithParams, err)
 // }
-
-//func (s *serverHTTPJschmhr) HandleGetString(serverRoute, str string, mimeType *string) {
-//	s.handleFunc("GET", serverRoute, func(w http.ResponseWriter, r *http.Request, params httprouter.Content) {
-//		if mimeType != nil {
-//			// "application/javascript"
-//			w.Header().Set("Content-Type", *mimeType)
-//		}
-//		w.Write([]byte(str))
-//	})
-//}

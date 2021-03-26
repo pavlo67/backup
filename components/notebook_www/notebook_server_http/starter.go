@@ -69,6 +69,6 @@ func (nshs *notebookServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no notebook_html.Operator with key %s", nshs.recordsHTMLKey)
 	}
 
-	//return Endpoints.Join(joinerOp)
+	//return EndpointsSettled.Join(joinerOp)
 	return nil
 }

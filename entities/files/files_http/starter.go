@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
-	server_http "github.com/pavlo67/tools/common/server/server_http2"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 
 	"github.com/pavlo67/tools/entities/files"
 )
@@ -24,7 +24,7 @@ type filesHTTPStarter struct {
 	config config.Access
 
 	//prefix    string
-	endpoints server_http.EndpointsREST
+	endpoints server_http.EndpointsSettled
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -47,9 +47,9 @@ func (ihs *filesHTTPStarter) Prepare(cfg *config.Config, options common.Map) err
 
 	ihs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(files.InterfaceKey)))
 
-	//if endpoints, ok := options["endpoints"].(server_http.Endpoints); ok {
+	//if endpoints, ok := options["endpoints"].(server_http.EndpointsSettled); ok {
 	//	ihs.endpoints = endpoints
-	//} else if endpointsPtr, ok := options["endpoints"].(*server_http.Endpoints); ok {
+	//} else if endpointsPtr, ok := options["endpoints"].(*server_http.EndpointsSettled); ok {
 	//	ihs.endpoints = *endpointsPtr
 	//} else {
 	//	return errors.New("no endpoints description for filesHTTPStarter")

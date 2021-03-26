@@ -5,7 +5,7 @@ import (
 	"github.com/pavlo67/common/common/db/db_sqlite"
 	"github.com/pavlo67/common/common/starter"
 	"github.com/pavlo67/tools/common/actor"
-	server_http "github.com/pavlo67/tools/common/server/server_http2"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 	"github.com/pavlo67/tools/components/notebook_www/notebook_server_http/notebook_html"
 	"github.com/pavlo67/tools/entities/files"
 	"github.com/pavlo67/tools/entities/files/files_fs"
@@ -35,7 +35,7 @@ func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
 	//	return nil, err
 	//}
 	//
-	//if err = EndpointsPages.Complete("", 0, pagesPrefix); err != nil {
+	//if err = EndpointsPageSettled.Complete("", 0, pagesPrefix); err != nil {
 	//	return nil, err
 	//}
 
@@ -82,7 +82,7 @@ func (*notebookActor) Config() (server_http.ConfigPages, error) {
 
 //func ClientComponents() ([]starter.Starter, error) {
 //
-//	if err := EndpointsPages.CompleteDirectly(notebook_server_http.Endpoints, "", 0, pagesPrefix); err != nil {
+//	if err := EndpointsPageSettled.CompleteDirectly(notebook_server_http.EndpointsSettled, "", 0, pagesPrefix); err != nil {
 //		return nil, err
 //	}
 //
@@ -91,7 +91,7 @@ func (*notebookActor) Config() (server_http.ConfigPages, error) {
 //	//}
 //
 //	endpointsOptions := common.Map{
-//		"pages_config": &EndpointsPages,
+//		"pages_config": &EndpointsPageSettled,
 //		// "rest_config":  restConfig,
 //	}
 //

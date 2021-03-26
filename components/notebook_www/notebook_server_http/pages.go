@@ -9,7 +9,7 @@ import (
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/selectors"
 
-	server_http "github.com/pavlo67/tools/common/server/server_http2"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 
 	"github.com/pavlo67/data_exchange/components/tags"
 	"github.com/pavlo67/tools/components/notebook_www"
@@ -23,7 +23,7 @@ var PagesConfig = server_http.ConfigPages{
 		Version: "0.0.1",
 	},
 
-	Endpoints: server_http.EndpointsPages{
+	EndpointsPageSettled: server_http.EndpointsPageSettled{
 		notebook_www.IntefaceKeyHTMLRoot:   {Path: "/", EndpointPage: rootPage},
 		notebook_www.IntefaceKeyHTMLView:   {Path: "/view", EndpointPage: viewPage},
 		notebook_www.IntefaceKeyHTMLCreate: {Path: "/create", EndpointPage: createPage},

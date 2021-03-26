@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/pavlo67/common/common/auth"
-	server_http "github.com/pavlo67/tools/common/server/server_http2"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 	"github.com/pavlo67/tools/components/notebook_www"
 
 	"github.com/pavlo67/data_exchange/components/tags"

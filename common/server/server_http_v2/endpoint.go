@@ -61,7 +61,7 @@ func (ed EndpointDescription) PathTemplateBraced(serverPath string) string {
 	return serverPath + "/{" + strings.Join(ed.PathParams, "}/{") + "}"
 }
 
-//func (ep EndpointREST) PathWithParams(params ...string) string {
+//func (ep Endpoint) PathWithParams(params ...string) string {
 //	matches := rePathParam.FindAllStringSubmatchIndex(ep.Path, -1)
 //
 //	numMatches := len(matches)

@@ -1,9 +1,9 @@
 package files_server_http
 
-//var saveEndpoint = server_http.EndpointREST{
+//var saveEndpoint = server_http.Endpoint{
 //	Method:     "POST",
 //	PathParams: []string{"bucket_id", "path", "new_file_pattern"},
-//	WorkerHTTPREST: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
+//	WorkerHTTP: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 //		bucketID := files.BucketID(params["bucket_id"])
 //		path := params["path"]
 //		newFilePattern := params["new_file_pattern"]
@@ -22,10 +22,10 @@ package files_server_http
 //	},
 //}
 //
-//var readEndpoint = server_http.EndpointREST{
+//var readEndpoint = server_http.Endpoint{
 //	Method:     "GET",
 //	PathParams: []string{"bucket_id", "path"},
-//	WorkerHTTPREST: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
+//	WorkerHTTP: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 //		bucketID := files.BucketID(params["bucket_id"])
 //		path := params["path"]
 //
@@ -38,10 +38,10 @@ package files_server_http
 //	},
 //}
 //
-//var removeEndpoint = server_http.EndpointREST{
+//var removeEndpoint = server_http.Endpoint{
 //	Method:     "DELETE",
 //	PathParams: []string{"bucket_id", "path"},
-//	WorkerHTTPREST: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
+//	WorkerHTTP: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 //		bucketID := files.BucketID(params["bucket_id"])
 //		path := params["path"]
 //
@@ -53,10 +53,10 @@ package files_server_http
 //	},
 //}
 //
-//var listEndpoint = server_http.EndpointREST{
+//var listEndpoint = server_http.Endpoint{
 //	Method:     "GET",
 //	PathParams: []string{"bucket_id", "path", "depth"},
-//	WorkerHTTPREST: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
+//	WorkerHTTP: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 //		bucketID := files.BucketID(params["bucket_id"])
 //		path := params["path"]
 //		depth, err := strconv.Atoi(params["depth"])
@@ -73,10 +73,10 @@ package files_server_http
 //	},
 //}
 //
-//var statEndpoint = server_http.EndpointREST{
+//var statEndpoint = server_http.Endpoint{
 //	Method:     "GET",
 //	PathParams: []string{"bucket_id", "path", "depth"},
-//	WorkerHTTPREST: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
+//	WorkerHTTP: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 //		bucketID := files.BucketID(params["bucket_id"])
 //		path := params["path"]
 //		depth, err := strconv.Atoi(params["depth"])

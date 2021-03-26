@@ -4,7 +4,7 @@ import (
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/data_exchange/components/ns"
 	"github.com/pavlo67/data_exchange/components/tags"
-	server_http "github.com/pavlo67/tools/common/server/server_http2"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 	"github.com/pavlo67/tools/entities/records"
 )
 

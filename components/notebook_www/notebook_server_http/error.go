@@ -3,7 +3,7 @@ package notebook_server_http
 import (
 	"net/http"
 
-	server_http "github.com/pavlo67/tools/common/server/server_http2"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 
 	"github.com/pavlo67/tools/components/notebook_www/notebook_server_http/notebook_html"
 )

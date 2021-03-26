@@ -13,18 +13,18 @@ import (
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
 
-	server_http "github.com/pavlo67/tools/common/server/server_http2"
-	"github.com/pavlo67/tools/common/server/server_http2/server_http_jschmhr"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
+	"github.com/pavlo67/tools/common/server/server_http_v2/server_http_v2_jschmhr"
 )
 
 type OperatorWWW interface {
 	Name() string
 	Starters(options common.Map) ([]starter.Starter, error)
 	Config() (server_http.ConfigPages, error)
-	//Root() *server_http.EndpointREST
-	//Details() *server_http.EndpointREST
-	//Accept() *server_http.EndpointREST
-	//Search() *server_http.EndpointREST
+	//Root() *server_http.Endpoint
+	//Details() *server_http.Endpoint
+	//Accept() *server_http.Endpoint
+	//Search() *server_http.Endpoint
 }
 
 func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *config.Config, options common.Map, l logger.Operator) (joiner.Operator, error) {
@@ -61,15 +61,19 @@ func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *c
 
 }
 
-func RunWWW(cfgService *config.Config, htmlTemplate, label string, actorsWWW []OperatorWWW, l logger.Operator) ([]joiner.Operator, error) {
+func RunWWW(cfgService *config.Config, htmlTemplate, staticPath, label string, actorsWWW []OperatorWWW, l logger.Operator) (joinerOps []joiner.Operator, err error) {
+
+	// initiating common components & http server -----------------------------------------
 
 	starters := []starter.Starter{
 		// general purposes components
 		{control.Starter(), nil},
-		{server_http_jschmhr.Starter(), common.Map{"html_template": htmlTemplate}},
+		{server_http_v2_jschmhr.Starter(), common.Map{"html_template": htmlTemplate}},
 	}
 
-	var joinerOps []joiner.Operator
+	//if err := HandleSwagger(joinerOp, srvOp); err != nil {
+	//	return err
+	//}
 
 	joinerOp, err := starter.Run(starters, cfgService, label, l)
 	joinerOps = append(joinerOps, joinerOp)
@@ -82,6 +86,12 @@ func RunWWW(cfgService *config.Config, htmlTemplate, label string, actorsWWW []O
 		return joinerOps, fmt.Errorf("no server_http.OperatorV2 with key %s", server_http.InterfaceKey)
 	}
 
+	if err = srvOp.HandleFiles("static", "/static/", server_http.StaticPath{LocalPath: staticPath}); err != nil {
+		return joinerOps, err
+	}
+
+	// initiating actors on http server ---------------------------------------------------
+
 	for _, actorWWW := range actorsWWW {
 		joinerOp, err := RunOneWWW(srvOp, actorWWW, cfgService, nil, l)
 		joinerOps = append(joinerOps, joinerOp)
@@ -90,9 +100,7 @@ func RunWWW(cfgService *config.Config, htmlTemplate, label string, actorsWWW []O
 		}
 	}
 
-	//if err := HandleSwagger(joinerOp, srvOp); err != nil {
-	//	return err
-	//}
+	// starting http server ---------------------------------------------------------------
 
 	var WG sync.WaitGroup
 	WG.Add(1)
@@ -105,6 +113,8 @@ func RunWWW(cfgService *config.Config, htmlTemplate, label string, actorsWWW []O
 	}()
 
 	WG.Wait()
+
+	// ------------------------------------------------------------------------------------
 
 	return joinerOps, nil
 }

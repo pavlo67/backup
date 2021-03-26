@@ -1,4 +1,4 @@
-package server_http_jschmhr
+package server_http_v2_jschmhr
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/starter"
-	server_http "github.com/pavlo67/tools/common/server/server_http2"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 )
 
 func Starter() starter.Operator {
