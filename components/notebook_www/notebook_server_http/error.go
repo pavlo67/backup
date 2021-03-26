@@ -3,6 +3,8 @@ package notebook_server_http
 import (
 	"net/http"
 
+	"github.com/pavlo67/common/common/errors"
+
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 
 	"github.com/pavlo67/tools/components/notebook_www/notebook_server_http/notebook_html"
@@ -22,7 +24,7 @@ func errorPage(httpStatus int, notebookHTMLOp notebook_html.Operator, err error,
 		"",
 	)
 	if errRender != nil {
-		l.Error(err)
+		l.Error(publicDetails, " ", err)
 	}
 
 	//
@@ -35,5 +37,5 @@ func errorPage(httpStatus int, notebookHTMLOp notebook_html.Operator, err error,
 	return server_http.ResponsePage{
 		Status:    http.StatusOK,
 		Fragments: context,
-	}, err
+	}, errors.CommonError(publicDetails, " ", err)
 }

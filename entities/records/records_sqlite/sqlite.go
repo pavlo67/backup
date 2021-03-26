@@ -6,6 +6,10 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/pavlo67/common/common/strlib"
+	"github.com/pavlo67/data_exchange/components/ns"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
@@ -87,73 +91,74 @@ const onSave = "on recordsSQLite.Save(): "
 //AddParent(ts []tags.Item, id ID) ([]tags.Item, error)
 //
 
-func (recordsOp *recordsSQLite) Save(item records.Item, options *auth.Identity) (records.ID, error) {
-	return "", common.ErrNotImplemented
+func (recordsOp *recordsSQLite) Save(item records.Item, identity *auth.Identity) (records.ID, error) {
 
-	////if options == nil || options.Identity == nil {
-	////	return nil, errors.CommonError(common.NoRightsKey)
-	////}
-	//
-	//// TODO!!! rbac check
-	//
-	//if item.ID == "" {
-	//	// TODO!!!
-	//	item.OwnerNSS = options.Identity.ID
-	//}
-	//
-	//var err error
-	//
-	//embeddedBytes := []byte{} // to satisfy NOT NULL constraint
-	//if len(item.Content.Embedded) > 0 {
-	//	if embeddedBytes, err = json.Marshal(item.Content.Embedded); err != nil {
-	//		return nil, errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item.Content.Embedded)
-	//	}
-	//}
-	//
-	//tagsBytes := []byte{} // to to satisfy NOT NULL constraint
-	//if len(item.Tags) > 0 {
-	//	if tagsBytes, err = json.Marshal(item.Tags); err != nil {
-	//		return nil, errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item.Tags)
-	//	}
-	//}
-	//
-	//// TODO!!! append to .History
-	//
-	//historyBytes := []byte{} // to satisfy NOT NULL constraint
-	//if len(item.History) > 0 {
-	//	historyBytes, err = json.Marshal(item.History)
-	//	if err != nil {
-	//		return nil, errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item.History)
-	//	}
-	//}
-	//
-	//// "title", "summary", "type_key", "data", "embedded", "tags",
-	//// "urn", "owner_id", "viewer_id", "history"
-	//values := []interface{}{
-	//	item.Content.Title, item.Content.Summary, item.Content.TypeKey, item.Content.Data, embeddedBytes, tagsBytes,
-	//	item.URN, item.OwnerNSS, item.ViewerNSS, historyBytes}
-	//
-	//if item.ID == "" {
-	//	res, err := recordsOp.stmInsert.Exec(values...)
-	//	if err != nil {
-	//		return nil, errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlInsert, strlib.Stringify(values))
-	//	}
-	//
-	//	idSQLite, err := res.LastInsertId()
-	//	if err != nil {
-	//		return nil, errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, recordsOp.sqlInsert, strlib.Stringify(values))
-	//	}
-	//	item.ID = records.ID(strconv.FormatInt(idSQLite, 10))
-	//
-	//} else {
-	//	values = append(values, time.Now().Format(time.RFC3339), item.ID)
-	//	if _, err := recordsOp.stmUpdate.Exec(values...); err != nil {
-	//		return nil, errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlUpdate, strlib.Stringify(values))
-	//	}
-	//
-	//}
-	//
-	//return &item, nil
+	if identity == nil {
+
+		identity = &auth.Identity{}
+		// TODO!!!
+		// return "", errors.CommonError(common.NoRightsKey)
+	}
+
+	// TODO!!! rbac check
+
+	if item.ID == "" {
+		// TODO!!!
+		item.OwnerNSS = ns.NSS(identity.ID)
+	}
+
+	var err error
+
+	embeddedBytes := []byte{} // to satisfy NOT NULL constraint
+	if len(item.Content.Embedded) > 0 {
+		if embeddedBytes, err = json.Marshal(item.Content.Embedded); err != nil {
+			return "", errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item.Content.Embedded)
+		}
+	}
+
+	tagsBytes := []byte{} // to to satisfy NOT NULL constraint
+	if len(item.Tags) > 0 {
+		if tagsBytes, err = json.Marshal(item.Tags); err != nil {
+			return "", errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item.Tags)
+		}
+	}
+
+	// TODO!!! append to .History
+
+	historyBytes := []byte{} // to satisfy NOT NULL constraint
+	if len(item.History) > 0 {
+		historyBytes, err = json.Marshal(item.History)
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item.History)
+		}
+	}
+
+	// "title", "summary", "type_key", "data", "embedded", "tags",
+	// "urn", "owner_id", "viewer_id", "history"
+	values := []interface{}{
+		item.Content.Title, item.Content.Summary, item.Content.TypeKey, item.Content.Data, embeddedBytes, tagsBytes,
+		item.URN, item.OwnerNSS, item.ViewerNSS, historyBytes}
+
+	if item.ID == "" {
+		res, err := recordsOp.stmInsert.Exec(values...)
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlInsert, strlib.Stringify(values))
+		}
+
+		idSQLite, err := res.LastInsertId()
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, recordsOp.sqlInsert, strlib.Stringify(values))
+		}
+		return records.ID(strconv.FormatInt(idSQLite, 10)), nil
+
+	}
+
+	values = append(values, time.Now().Format(time.RFC3339), item.ID)
+	if _, err := recordsOp.stmUpdate.Exec(values...); err != nil {
+		return "", errors.Wrapf(err, onSave+sqllib.CantExec, recordsOp.sqlUpdate, strlib.Stringify(values))
+	}
+
+	return item.ID, nil
 }
 
 const onRead = "on recordsSQLite.Read(): "

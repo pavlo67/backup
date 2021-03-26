@@ -119,7 +119,7 @@ func WrapperHTTPPage(htmlTemplate string) WrapperHTTP {
 
 			responseData, err := ep.WorkerHTTPPage(serverOpV2, r, params, identity)
 			if err != nil {
-				l.Error(err)
+				l.Error("on ep.WorkerHTTPPage(): ", err)
 			}
 
 			if responseData.Status > 0 {
@@ -139,8 +139,9 @@ func WrapperHTTPPage(htmlTemplate string) WrapperHTTP {
 			}
 		}
 
+		method := strings.ToUpper(ep.Method)
 		path := ep.PathTemplate(serverPath)
 
-		return "GET", path, handler, nil
+		return method, path, handler, nil
 	}
 }
