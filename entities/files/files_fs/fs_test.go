@@ -21,9 +21,8 @@ func TestFilesFS(t *testing.T) {
 	err := cfgService.Value("files_fs", &cfg)
 	require.NoErrorf(t, err, "%#v", cfgService)
 
-	bucketID := files.BucketID("test_bucket")
 	components := []starter.Starter{
-		{Starter(), common.Map{"buckets": files.Buckets{bucketID: cfg.Path}}},
+		{Starter(), common.Map{"base_path": cfg.Path}},
 	}
 
 	joinerOp, err := starter.Run(components, cfgService, "CLI BUILD FOR TEST", l)
@@ -31,5 +30,5 @@ func TestFilesFS(t *testing.T) {
 	require.NotNil(t, joinerOp)
 	defer joinerOp.CloseAll()
 
-	files.FilesTestScenario(t, joinerOp, files.InterfaceKey, files.InterfaceKeyCleaner, bucketID)
+	files.FilesTestScenario(t, joinerOp, files.InterfaceKey, files.InterfaceKeyCleaner)
 }

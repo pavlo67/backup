@@ -13,10 +13,8 @@ var _ db.Cleaner = &filesFS{}
 const onClean = "on filesFS.Clean()"
 
 func (filesOp *filesFS) Clean(term *selectors.Term) error {
-	for bucketID, basePath := range filesOp.buckets {
-		if err := os.RemoveAll(basePath); err != nil {
-			return errors.Wrapf(err, onClean+": removing %s --> %s", bucketID, basePath)
-		}
+	if err := os.RemoveAll(filesOp.basePath); err != nil {
+		return errors.Wrapf(err, onClean+": removing %s", filesOp.basePath)
 	}
 
 	return nil

@@ -5,10 +5,9 @@ import (
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 )
 
-const InterfaceKey joiner.InterfaceKey = "notebook"
+const InterfaceKey joiner.InterfaceKey = "notebook_www"
 
 const IntefaceKeyHTMLRoot server_http.EndpointKey = "notebook_html_root"
-
 const IntefaceKeyHTMLView server_http.EndpointKey = "notebook_html_view"
 const IntefaceKeyHTMLCreate server_http.EndpointKey = "notebook_html_create"
 const IntefaceKeyHTMLEdit server_http.EndpointKey = "notebook_html_edit"
@@ -18,7 +17,6 @@ const IntefaceKeyHTMLDelete server_http.EndpointKey = "notebook_html_delete"
 const IntefaceKeyHTMLTags server_http.EndpointKey = "notebook_html_tags"
 const IntefaceKeyHTMLTagged server_http.EndpointKey = "notebook_html_tagged"
 
-//
 //const IntefaceKeyRESTRead joiner.InterfaceKey = "notebook_rest_read"
 //const IntefaceKeyRESTSave joiner.InterfaceKey = "notebook_rest_save"
 //const IntefaceKeyRESTDele joiner.InterfaceKey = "notebook_rest_dele"

@@ -2,6 +2,7 @@ package files_fs
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
@@ -20,7 +21,7 @@ var l logger.Operator
 var _ starter.Operator = &filesFSStarter{}
 
 type filesFSStarter struct {
-	buckets      files.Buckets
+	basePath     string
 	interfaceKey joiner.InterfaceKey
 	cleanerKey   joiner.InterfaceKey
 
@@ -33,9 +34,9 @@ func (ffs *filesFSStarter) Name() string {
 
 func (ffs *filesFSStarter) Prepare(cfg *config.Config, options common.Map) error {
 
-	ffs.buckets, _ = options["buckets"].(files.Buckets)
-	if ffs.buckets == nil {
-		return fmt.Errorf("no 'buckets' in options: %#v", options)
+	ffs.basePath = strings.TrimSpace(options.StringDefault("base_path", ""))
+	if ffs.basePath == "" {
+		return fmt.Errorf("no 'base_path' in options: %#v", options)
 	}
 
 	//configKey := strings.TrimSpace(options.StringDefault("config_key", "buckets"))
@@ -59,7 +60,7 @@ func (ffs *filesFSStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
-	filesOp, filesCleanerOp, err := New(ffs.buckets)
+	filesOp, filesCleanerOp, err := New(ffs.basePath)
 	if err != nil {
 		return errors.Wrap(err, "can't init *filesFS{} as files.Operator")
 	}

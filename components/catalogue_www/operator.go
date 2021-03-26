@@ -13,9 +13,9 @@ type Item struct {
 }
 
 type Operator interface {
-	Save(bucketID files.BucketID, item Item, identity *auth.Identity) (string, error)
-	Read(bucketID files.BucketID, path string, identity *auth.Identity) (*Item, error)
-	Remove(bucketID files.BucketID, path string, identity *auth.Identity) error
-	List(bucketID files.BucketID, path string, depth int, identity *auth.Identity) ([]Item, error)
-	Stat(bucketID files.BucketID, path string, depth int, identity *auth.Identity) (*Item, error)
+	Save(item Item, identity *auth.Identity) (string, error)
+	Read(path string, identity *auth.Identity) (*Item, error)
+	Remove(path string, identity *auth.Identity) error
+	List(path string, depth int, identity *auth.Identity) ([]Item, error)
+	Stat(path string, depth int, identity *auth.Identity) (*Item, error)
 }

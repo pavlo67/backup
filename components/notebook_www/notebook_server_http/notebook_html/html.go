@@ -119,7 +119,7 @@ func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, messa
 }
 
 func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, identity *auth.Identity) (map[string]string, error) {
-	htmlList := htmlOp.HTMLRecords(tagged, identity)
+	htmlList := htmlOp.HTMLFiles(tagged, identity)
 	//if errRenderRecords != nil {
 	//	errorID := strconv.FormatInt(time.Now().UnixNano(), 10)
 	//	l.Error(errorID, " / ", errRenderRecords)
@@ -127,7 +127,7 @@ func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, ide
 	//		"помилка",
 	//		"",
 	//		"",
-	//		"при htmlOp.HTMLRecords() / "+errorID,
+	//		"при htmlOp.HTMLList() / "+errorID,
 	//		"",
 	//		"",
 	//	)
@@ -179,7 +179,7 @@ func (htmlOp *notebookHTML) HTMLIndex(identity *auth.Identity) string {
 
 }
 
-func (htmlOp *notebookHTML) HTMLRecords(recordItems []records.Item, identity *auth.Identity) string {
+func (htmlOp *notebookHTML) HTMLFiles(recordItems []records.Item, identity *auth.Identity) string {
 	if len(recordItems) < 1 {
 		return "нема записів"
 	}

@@ -6,16 +6,12 @@ import (
 )
 
 type Operator interface {
-	Save(bucketID BucketID, path, newFilePattern string, data []byte) (string, error)
-	Read(bucketID BucketID, path string) ([]byte, error)
-	Remove(bucketID BucketID, path string) error
-	List(bucketID BucketID, path string, depth int) (Items, error)
-	Stat(bucketID BucketID, path string, depth int) (*Item, error)
+	Save(path, newFilePattern string, data []byte) (string, error)
+	Read(path string) ([]byte, error)
+	Remove(path string) error
+	List(path string, depth int) (Items, error)
+	Stat(path string, depth int) (*Item, error)
 }
-
-type BucketID string
-
-type Buckets map[BucketID]string
 
 type Item struct {
 	Path string

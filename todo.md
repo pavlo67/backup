@@ -1,7 +1,8 @@
 
-## files
 
-* RBAC
+## files_fs
+
+* options: follow_symlinks / allow_access_beyond_root 
 
 
 ## records

@@ -7,7 +7,6 @@ import (
 	"github.com/pavlo67/tools/common/actor"
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 	"github.com/pavlo67/tools/components/notebook_www/notebook_server_http/notebook_html"
-	"github.com/pavlo67/tools/entities/files"
 	"github.com/pavlo67/tools/entities/files/files_fs"
 	"github.com/pavlo67/tools/entities/records/records_sqlite"
 )
@@ -25,8 +24,8 @@ func (*notebookActor) Name() string {
 	return ""
 }
 
-var bucketsOptions = common.Map{
-	"buckets": files.Buckets{files.BucketID("1"): "../1"},
+var filesOptions = common.Map{
+	"base_path": "../_files_fs_test",
 }
 
 func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
@@ -62,7 +61,7 @@ func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
 		//{auth_server_http.Starter(), nil}, // common.Map{"auth_jwt_key": ""}
 
 		// notebook components
-		{files_fs.Starter(), bucketsOptions},
+		{files_fs.Starter(), filesOptions},
 		{records_sqlite.Starter(), nil},
 		{notebook_html.Starter(), renderOptions},
 		{Starter(), nil},
