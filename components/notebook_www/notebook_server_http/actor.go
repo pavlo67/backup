@@ -29,22 +29,6 @@ var filesOptions = common.Map{
 }
 
 func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
-	//htmlTemplate, err := HTMLTemplate()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//if err = EndpointsPageSettled.Complete("", 0, pagesPrefix); err != nil {
-	//	return nil, err
-	//}
-
-	//if err = RestConfig.Complete("", 0, restPrefix); err != nil {
-	//	return nil, err
-	//}
-
-	//htmlTemplate := options.StringDefault("html_template", "")
-	//"html_template": htmlTemplate,
-
 	renderOptions := common.Map{
 		"pages_config": &PagesConfig,
 		// "rest_config":   &RestConfig,

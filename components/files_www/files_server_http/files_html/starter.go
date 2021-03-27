@@ -9,30 +9,31 @@ import (
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
+
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 )
 
-const InterfaceKey joiner.InterfaceKey = "notebook_html"
+const InterfaceKey joiner.InterfaceKey = "files_html"
 
 func Starter() starter.Operator {
-	return &notebookHTMLStarter{}
+	return &filesHTMLStarter{}
 }
 
 var l logger.Operator
-var _ starter.Operator = &notebookHTMLStarter{}
+var _ starter.Operator = &filesHTMLStarter{}
 
-type notebookHTMLStarter struct {
+type filesHTMLStarter struct {
 	pagesConfig *server_http.ConfigPages
 	// restConfig  *server_http.Config
 
 	interfaceKey joiner.InterfaceKey
 }
 
-func (nhs *notebookHTMLStarter) Name() string {
+func (nhs *filesHTMLStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (nhs *notebookHTMLStarter) Prepare(cfg *config.Config, options common.Map) error {
+func (nhs *filesHTMLStarter) Prepare(cfg *config.Config, options common.Map) error {
 	switch v := options["pages_config"].(type) {
 	case server_http.ConfigPages:
 		nhs.pagesConfig = &v
@@ -58,18 +59,18 @@ func (nhs *notebookHTMLStarter) Prepare(cfg *config.Config, options common.Map) 
 	return nil
 }
 
-func (nhs *notebookHTMLStarter) Run(joinerOp joiner.Operator) error {
+func (nhs *filesHTMLStarter) Run(joinerOp joiner.Operator) error {
 	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
 		return fmt.Errorf("no logger.OperatorV2 with key %s", logger.InterfaceKey)
 	}
 
-	notebookOp, err := New(*nhs.pagesConfig) // *nhs.restConfig
+	filesOp, err := New(*nhs.pagesConfig) // *nhs.restConfig
 	if err != nil {
-		return errors.CommonError(err, "can't init *filesHTML as notebook_html.OperatorV2")
+		return errors.CommonError(err, "can't init *filesHTML as files_html.Operator")
 	}
 
-	if err = joinerOp.Join(notebookOp, nhs.interfaceKey); err != nil {
-		return errors.CommonError(err, fmt.Sprintf("can't join *filesHTML as notebook_html.OperatorV2 with key '%s'", nhs.interfaceKey))
+	if err = joinerOp.Join(filesOp, nhs.interfaceKey); err != nil {
+		return errors.CommonError(err, fmt.Sprintf("can't join *filesHTML as files_html.Operator with key '%s'", nhs.interfaceKey))
 	}
 
 	return nil

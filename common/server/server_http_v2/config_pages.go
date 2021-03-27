@@ -12,9 +12,11 @@ import (
 	"github.com/pavlo67/common/common/logger"
 )
 
+type Fragments map[string]string
+
 type ResponsePage struct {
-	Status    int
-	Fragments map[string]string
+	Status int
+	Fragments
 }
 
 type WorkerHTTPPage func(OperatorV2, *http.Request, PathParams, *auth.Identity) (ResponsePage, error)

@@ -44,25 +44,22 @@ var rootPage = server_http.EndpointPage{
 	WorkerHTTPPage: func(_ server_http.OperatorV2, req *http.Request, _ server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
 		tagsStatMap, err := recordsOp.Tags(nil, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Tags()", req)
+			return server_http.ErrorPage(0, err, "при recordsOp.Tags()", req)
 		}
 
 		htmlIndex := notebookHTMLOp.HTMLIndex(identity)
 		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, identity)
 
-		htmlPage, errRender := notebookHTMLOp.CommonPage(
+		fragments := server_http.CommonFragments(
 			"вхід",
 			"Вхід",
 			"", "", htmlIndex,
 			"Розділи (теми) цієї бази даних: \n<p>"+htmlTags,
 		)
-		if errRender != nil {
-			return errorPage(0, notebookHTMLOp, errRender, "при notebookHTMLOp.CommonPage()", req)
-		}
 
 		return server_http.ResponsePage{
 			Status:    http.StatusOK,
-			Fragments: htmlPage,
+			Fragments: fragments,
 		}, nil
 	},
 }
@@ -77,17 +74,17 @@ var viewPage = server_http.EndpointPage{
 		id := records.ID(params["record_id"])
 		r, children, err := records.ReadWithChildren(recordsOp, id, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при recordsOp.ReadWithChildren()", req)
+			return server_http.ErrorPage(0, err, "при recordsOp.ReadWithChildren()", req)
 		}
 
-		htmlPage, err := notebookHTMLOp.View(r, children, "", identity)
+		fragments, err := notebookHTMLOp.FragmentsView(r, children, "", identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.View()", req)
+			return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsView()", req)
 		}
 
 		return server_http.ResponsePage{
 			Status:    http.StatusOK,
-			Fragments: htmlPage,
+			Fragments: fragments,
 		}, nil
 	},
 }
@@ -103,17 +100,17 @@ var editPage = server_http.EndpointPage{
 
 		r, err := recordsOp.Read(id, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Read()", req)
+			return server_http.ErrorPage(0, err, "при recordsOp.Read()", req)
 		}
 
-		htmlPage, err := notebookHTMLOp.Edit(r, nil, "", identity)
+		fragments, err := notebookHTMLOp.FragmentsEdit(r, nil, "", identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.Edit()", req)
+			return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsEdit()", req)
 		}
 
 		return server_http.ResponsePage{
 			Status:    http.StatusOK,
-			Fragments: htmlPage,
+			Fragments: fragments,
 		}, nil
 	},
 }
@@ -124,14 +121,14 @@ var createPage = server_http.EndpointPage{
 		Method: "GET",
 	},
 	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		htmlPage, err := notebookHTMLOp.Edit(nil, nil, "", identity)
+		fragments, err := notebookHTMLOp.FragmentsEdit(nil, nil, "", identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.Edit()", req)
+			return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsEdit()", req)
 		}
 
 		return server_http.ResponsePage{
 			Status:    http.StatusOK,
-			Fragments: htmlPage,
+			Fragments: fragments,
 		}, nil
 	},
 }
@@ -144,39 +141,39 @@ var savePage = server_http.EndpointPage{
 	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return errorPage(http.StatusBadRequest, notebookHTMLOp, err, "при ioutil.ReadAll(req.Body)", req)
+			return server_http.ErrorPage(http.StatusBadRequest, err, "при ioutil.ReadAll(req.Body)", req)
 		}
 
 		data, err := url.ParseQuery(string(body))
 		if err != nil {
-			return errorPage(http.StatusBadRequest, notebookHTMLOp, err, "при url.ParseQuery(body)", req)
+			return server_http.ErrorPage(http.StatusBadRequest, err, "при url.ParseQuery(body)", req)
 		}
 
 		r := notebook_html.RecordFromData(data)
 		if r == nil {
-			return errorPage(http.StatusBadRequest, notebookHTMLOp, fmt.Errorf("on notebook_html.RecordFromData(%#v): got nil", data), "при notebook_html.RecordFromData()", req)
+			return server_http.ErrorPage(http.StatusBadRequest, fmt.Errorf("on notebook_html.RecordFromData(%#v): got nil", data), "при notebook_html.RecordFromData()", req)
 		}
 
 		r.ID, err = recordsOp.Save(*r, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Save()", req)
+			return server_http.ErrorPage(0, err, "при recordsOp.Save()", req)
 		} else if r.ID == "" {
-			return errorPage(0, notebookHTMLOp, fmt.Errorf("on recordsOp.Save(%#v, %#v): got nil", *r, identity), "при recordsOp.Save()", req)
+			return server_http.ErrorPage(0, fmt.Errorf("on recordsOp.Save(%#v, %#v): got nil", *r, identity), "при recordsOp.Save()", req)
 		}
 
 		r, children, err := records.ReadWithChildren(recordsOp, r.ID, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при ReadWithChildren()", req)
+			return server_http.ErrorPage(0, err, "при ReadWithChildren()", req)
 		}
 
-		htmlPage, err := notebookHTMLOp.View(r, children, "", identity)
+		fragments, err := notebookHTMLOp.FragmentsView(r, children, "", identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.View()", req)
+			return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsView()", req)
 		}
 
 		return server_http.ResponsePage{
 			Status:    http.StatusOK,
-			Fragments: htmlPage,
+			Fragments: fragments,
 		}, nil
 	},
 }
@@ -192,21 +189,18 @@ var deletePage = server_http.EndpointPage{
 
 		err := recordsOp.Remove(id, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Remove()", req)
+			return server_http.ErrorPage(0, err, "при recordsOp.Remove()", req)
 		}
 
-		htmlPage, errRender := notebookHTMLOp.CommonPage(
+		fragments := server_http.CommonFragments(
 			"запис вилучено",
 			"Запис вилучено",
 			"", "", "", "",
 		)
-		if errRender != nil {
-			return errorPage(0, notebookHTMLOp, errRender, "при notebookHTMLOp.CommonPage()", req)
-		}
 
 		return server_http.ResponsePage{
 			Status:    http.StatusOK,
-			Fragments: htmlPage,
+			Fragments: fragments,
 		}, nil
 	},
 }
@@ -219,27 +213,24 @@ var tagsPage = server_http.EndpointPage{
 	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
 		tagsStatMap, err := recordsOp.Tags(nil, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при recordsOp.Tags()", req)
+			return server_http.ErrorPage(0, err, "при recordsOp.Tags()", req)
 		}
 
 		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, identity)
 		//if err != nil {
-		//	return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
+		//	return ErrorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
 		//}
 
-		htmlPage, errRender := notebookHTMLOp.CommonPage(
+		fragments := server_http.CommonFragments(
 			"теґи",
 			"Теґи",
 			"", "", "",
 			"Розділи (теми) цієї бази даних: \n<p>"+htmlTags,
 		)
-		if errRender != nil {
-			return errorPage(0, notebookHTMLOp, errRender, "при notebookHTMLOp.CommonPage()", req)
-		}
 
 		return server_http.ResponsePage{
 			Status:    http.StatusOK,
-			Fragments: htmlPage,
+			Fragments: fragments,
 		}, nil
 
 	},
@@ -261,17 +252,17 @@ var taggedPage = server_http.EndpointPage{
 
 		rs, err := recordsOp.List(&selectorTagged, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при recordsOp.List()", req)
+			return server_http.ErrorPage(0, err, "при recordsOp.List()", req)
 		}
 
-		htmlPage, err := notebookHTMLOp.ListTagged(tag, rs, identity)
+		fragments, err := notebookHTMLOp.FragmentsListTagged(tag, rs, identity)
 		if err != nil {
-			return errorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.View()", req)
+			return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsView()", req)
 		}
 
 		return server_http.ResponsePage{
 			Status:    http.StatusOK,
-			Fragments: htmlPage,
+			Fragments: fragments,
 		}, nil
 
 	},

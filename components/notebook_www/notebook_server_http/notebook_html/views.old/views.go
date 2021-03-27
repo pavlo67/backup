@@ -60,7 +60,7 @@ const noteFormID = "note"
 //	return o, nil, nil, nil
 //}
 //
-//func (gt *noteTranslator) View(userIdentity *confidenter.Identity, o *interfaces.Object, linkedObjects []interfaces.Object, tab string) map[string]string {
+//func (gt *noteTranslator) FragmentsView(userIdentity *confidenter.Identity, o *interfaces.Object, linkedObjects []interfaces.Object, tab string) map[string]string {
 //	if o == nil {
 //		return map[string]string{
 //			"caput":   "Перегляд",
@@ -137,12 +137,12 @@ const noteFormID = "note"
 //	return map[string]string{
 //		"caput":   "Нова нотатка",
 //		"titulus": "Нова нотатка",
-//		"corpus":  items.Edit(user, createFields, noteFormID, data, nil, frontOps, rView, false),
+//		"corpus":  items.FragmentsEdit(user, createFields, noteFormID, data, nil, frontOps, rView, false),
 //	}
 //
 //}
 //
-//func (gt *noteTranslator) Edit(user *confidenter.User, o *interfaces.Object, context *genera.Context) map[string]string {
+//func (gt *noteTranslator) FragmentsEdit(user *confidenter.User, o *interfaces.Object, context *genera.Context) map[string]string {
 //	if o == nil {
 //		return map[string]string{
 //			"caput":   "Редаґування",
@@ -181,7 +181,7 @@ const noteFormID = "note"
 //	}
 //
 //	publicChanges := o.Managers != nil && o.Managers[rights.Change] == o.RView
-//	responseData["corpus"] = items.Edit(user, updateFields, noteFormID, data, nil, frontOps, o.RView, publicChanges)
+//	responseData["corpus"] = items.FragmentsEdit(user, updateFields, noteFormID, data, nil, frontOps, o.RView, publicChanges)
 //	return responseData
 //
 //}

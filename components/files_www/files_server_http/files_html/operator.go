@@ -2,19 +2,20 @@ package files_html
 
 import (
 	"github.com/pavlo67/common/common/auth"
+	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 
-	"github.com/pavlo67/tools/entities/records"
+	"github.com/pavlo67/tools/entities/files"
 )
 
 type Operator interface {
 
 	// complete pages ------------------------------------------
 
-	CommonPage(title, htmlHeader, htmlMessage, htmlError, htmlIndex, htmlContent string) (map[string]string, error)
-	View(r *records.Item, children []records.Item, message string, identity *auth.Identity) (map[string]string, error)
-	Edit(r *records.Item, children []records.Item, message string, identity *auth.Identity) (map[string]string, error)
+	FragmentsList(filesItems []files.Item, path string, identity *auth.Identity) (server_http.Fragments, error)
+	//FragmentsView(r *files.Item, path string, identity *auth.Identity) (server_http.Fragments, error)
+	//FragmentsEdit(r *files.Item, path string, identity *auth.Identity) (server_http.Fragments, error)
 
 	// page elements  ------------------------------------------
 
-	HTMLFiles(recordItems []records.Item, identity *auth.Identity) string
+	HTMLFiles(filesItems []files.Item, identity *auth.Identity) string
 }

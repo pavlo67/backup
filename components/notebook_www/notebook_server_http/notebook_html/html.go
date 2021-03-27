@@ -51,42 +51,24 @@ func New(pagesConfig server_http.ConfigPages) (Operator, error) { // , restConfi
 
 // TODO!!! look at https://github.com/kataras/blocks
 
-func (htmlOp *notebookHTML) CommonPage(title, htmlHeader, htmlMessage, htmlError, htmlIndex, htmlContent string) (map[string]string, error) {
-
-	if htmlError = strings.TrimSpace(htmlError); htmlError != "" {
-		htmlError = "На жаль, виникла помилка:-(\n<p>" + htmlError
-	}
-
-	context := map[string]string{
-		"title":   title,
-		"header":  htmlHeader,
-		"message": htmlMessage,
-		"error":   htmlError,
-		"index":   htmlIndex,
-		"content": htmlContent,
-	}
-
-	return context, nil
-}
-
-func (htmlOp *notebookHTML) View(r *records.Item, children []records.Item, message string, identity *auth.Identity) (map[string]string, error) {
-	context := map[string]string{
+func (htmlOp *notebookHTML) FragmentsView(r *records.Item, children []records.Item, message string, identity *auth.Identity) (server_http.Fragments, error) {
+	fragments := server_http.Fragments{
 		"title":   r.Content.Title,
 		"header":  r.Content.Title,
 		"message": message,
 		"content": views_html.HTMLViewTable(dataFields, DataFromRecord(r), nil),
 	}
 
-	return context, nil
+	return fragments, nil
 }
 
-const onHTMLEdit = "on notebookHTML.Edit(): "
+const onHTMLEdit = "on notebookHTML.FragmentsEdit(): "
 
-func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, message string, identity *auth.Identity) (map[string]string, error) {
+func (htmlOp *notebookHTML) FragmentsEdit(r *records.Item, children []records.Item, message string, identity *auth.Identity) (server_http.Fragments, error) {
 	formID := "nb_edit_" + strconv.FormatInt(time.Now().Unix(), 10) + "_"
 
 	var title, header, action string
-	var dataFromRecord map[string]string
+	var dataFromRecord server_http.Fragments
 	if r == nil {
 		header = "Створення запису"
 		action = "зберегти запис"
@@ -104,41 +86,29 @@ func (htmlOp *notebookHTML) Edit(r *records.Item, children []records.Item, messa
 			action,
 			"submit",
 			nil,
-			map[string]string{"class": "ut"},
+			server_http.Fragments{"class": "ut"},
 		},
 	)
 
-	context := map[string]string{
+	fragments := server_http.Fragments{
 		"title":   title,
 		"header":  header + title,
 		"message": message,
 		"content": views_html.HTMLEditTable(updateFields, formID, "/save", dataFromRecord, nil),
 	}
 
-	return context, nil
+	return fragments, nil
 }
 
-func (htmlOp *notebookHTML) ListTagged(tag tags.Item, tagged []records.Item, identity *auth.Identity) (map[string]string, error) {
+func (htmlOp *notebookHTML) FragmentsListTagged(tag tags.Item, tagged []records.Item, identity *auth.Identity) (server_http.Fragments, error) {
 	htmlList := htmlOp.HTMLFiles(tagged, identity)
-	//if errRenderRecords != nil {
-	//	errorID := strconv.FormatInt(time.Now().UnixNano(), 10)
-	//	l.Error(errorID, " / ", errRenderRecords)
-	//	return htmlOp.CommonPage(
-	//		"помилка",
-	//		"",
-	//		"",
-	//		"при htmlOp.HTMLList() / "+errorID,
-	//		"",
-	//		"",
-	//	)
-	//}
 
-	context := map[string]string{
+	fragments := server_http.Fragments{
 		"title":   "все з теґом '" + tag + "'",
 		"header":  "Все з теґом '" + tag + "'",
 		"content": htmlList,
 	}
-	return context, nil
+	return fragments, nil
 }
 
 func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, identity *auth.Identity) string {
