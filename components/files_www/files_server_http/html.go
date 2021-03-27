@@ -1,4 +1,4 @@
-package files_html
+package files_server_http
 
 import (
 	"github.com/pavlo67/tools/entities/files"
@@ -7,8 +7,6 @@ import (
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 )
 
-var _ Operator = &filesHTML{}
-
 type filesHTML struct {
 	//epCreate string
 	//epView   server_http.Get1
@@ -16,7 +14,7 @@ type filesHTML struct {
 
 const onNew = "on filesHTML.New(): "
 
-func New(pagesConfig server_http.ConfigPages) (Operator, error) { // , restConfig
+func New(pagesConfig server_http.ConfigPages) (*filesHTML, error) { // , restConfig
 
 	//epCreate, err := server_http.CheckGet0(pagesConfig, files_www.IntefaceKeyHTMLCreate, false)
 	//if err != nil {

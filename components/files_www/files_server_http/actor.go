@@ -7,7 +7,6 @@ import (
 	"github.com/pavlo67/tools/common/actor"
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 
-	"github.com/pavlo67/tools/components/files_www/files_server_http/files_html"
 	"github.com/pavlo67/tools/entities/files/files_fs"
 )
 
@@ -29,13 +28,8 @@ var filesOptions = common.Map{
 }
 
 func (*filesActor) Starters(options common.Map) ([]starter.Starter, error) {
-	renderOptions := common.Map{
-		"pages_config": &PagesConfig,
-	}
-
 	starters := []starter.Starter{
 		{files_fs.Starter(), filesOptions},
-		{files_html.Starter(), renderOptions},
 		{Starter(), nil},
 	}
 

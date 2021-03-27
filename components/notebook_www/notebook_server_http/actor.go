@@ -6,7 +6,6 @@ import (
 	"github.com/pavlo67/common/common/starter"
 	"github.com/pavlo67/tools/common/actor"
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
-	"github.com/pavlo67/tools/components/notebook_www/notebook_server_http/notebook_html"
 	"github.com/pavlo67/tools/entities/files/files_fs"
 	"github.com/pavlo67/tools/entities/records/records_sqlite"
 )
@@ -29,11 +28,6 @@ var filesOptions = common.Map{
 }
 
 func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
-	renderOptions := common.Map{
-		"pages_config": &PagesConfig,
-		// "rest_config":   &RestConfig,
-	}
-
 	starters := []starter.Starter{
 		// general purposes components
 		{db_sqlite.Starter(), nil},
@@ -47,7 +41,6 @@ func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
 		// notebook components
 		{files_fs.Starter(), filesOptions},
 		{records_sqlite.Starter(), nil},
-		{notebook_html.Starter(), renderOptions},
 		{Starter(), nil},
 
 		// action managers

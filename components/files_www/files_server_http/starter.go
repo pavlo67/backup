@@ -3,8 +3,6 @@ package files_server_http
 import (
 	"fmt"
 
-	"github.com/pavlo67/tools/components/files_www/files_server_http/files_html"
-
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
@@ -24,11 +22,11 @@ var _ starter.Operator = &filesServerHTTPStarter{}
 
 var l logger.Operator
 var filesOp files.Operator
-var filesHTMLOp files_html.Operator
+var filesHTMLOp *filesHTML
 
 type filesServerHTTPStarter struct {
-	filesKey     joiner.InterfaceKey
-	filesHTMLKey joiner.InterfaceKey
+	filesKey joiner.InterfaceKey
+	// filesHTMLKey joiner.InterfaceKey
 	interfaceKey joiner.InterfaceKey
 }
 
@@ -38,7 +36,7 @@ func (fshs *filesServerHTTPStarter) Name() string {
 
 func (fshs *filesServerHTTPStarter) Prepare(cfg *config.Config, options common.Map) error {
 	fshs.filesKey = joiner.InterfaceKey(options.StringDefault("files_key", string(files.InterfaceKey)))
-	fshs.filesHTMLKey = joiner.InterfaceKey(options.StringDefault("files_html_key", string(files_html.InterfaceKey)))
+	// fshs.filesHTMLKey = joiner.InterfaceKey(options.StringDefault("files_html_key", string(files_html.InterfaceKey)))
 	fshs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil
@@ -55,8 +53,9 @@ func (fshs *filesServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf(onRun+": no files.Operator with key %s", fshs.filesKey)
 	}
 
-	if filesHTMLOp, _ = joinerOp.Interface(fshs.filesHTMLKey).(files_html.Operator); filesHTMLOp == nil {
-		return fmt.Errorf("no files_html.Operator with key %s", fshs.filesHTMLKey)
+	var err error
+	if filesHTMLOp, err = New(PagesConfig); err != nil {
+		return fmt.Errorf(onRun+": %s", err)
 	}
 
 	return nil

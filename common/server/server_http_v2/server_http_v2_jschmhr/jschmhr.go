@@ -27,10 +27,10 @@ type serverHTTPJschmhr struct {
 
 	// onRequest server_http.OnRequestMiddleware
 
-	wrappersHTTP map[server_http.WrapperHTTPKey]WrapperHTTP
+	wrappersHTTP map[server_http.WrapperHTTPKey]server_http.WrapperHTTP
 }
 
-func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnRequestMiddleware, wrappersHTTP map[server_http.WrapperHTTPKey]WrapperHTTP) (server_http.OperatorV2, error) {
+func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnRequestMiddleware, wrappersHTTP map[server_http.WrapperHTTPKey]server_http.WrapperHTTP) (server_http.OperatorV2, error) {
 	if port <= 0 {
 		return nil, fmt.Errorf("on server_http_jschmhr.New(): wrong port = %d", port)
 	}

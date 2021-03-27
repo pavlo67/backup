@@ -17,8 +17,8 @@ var PagesConfig = server_http.ConfigPages{
 	},
 
 	EndpointsPageSettled: server_http.EndpointsPageSettled{
-		files_www.IntefaceKeyHTMLList:   {Path: "/files_list", EndpointPage: listPage},
-		files_www.IntefaceKeyHTMLDelete: {Path: "/files_delete", EndpointPage: deletePage},
+		files_www.IntefaceKeyHTMLList:   {Path: "/list", EndpointPage: listPage},
+		files_www.IntefaceKeyHTMLDelete: {Path: "/delete", EndpointPage: deletePage},
 
 		//files_www.IntefaceKeyHTMLView:   {Path: "/view", EndpointPage: viewPage},
 		//files_www.IntefaceKeyHTMLCreate: {Path: "/create", EndpointPage: createPage},

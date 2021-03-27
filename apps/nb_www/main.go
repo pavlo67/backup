@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/pavlo67/common/common"
+
 	"github.com/pavlo67/tools/components/files_www/files_server_http"
 
 	"github.com/pavlo67/common/common/apps"
@@ -44,9 +46,9 @@ func main() {
 
 	// actors start --------------------------------------------------------------------------------
 
-	actorsWWW := []actor.OperatorWWW{
-		notebook_server_http.Actor(),
-		files_server_http.Actor(),
+	actorsWWW := []actor.ActorWWW{
+		{notebook_server_http.Actor(), common.Map{"prefix": "nb"}},
+		{files_server_http.Actor(), common.Map{"prefix": "files"}},
 	}
 
 	joinerOps, err := actor.RunWWW(cfgService, string(htmlTemplateBytes), staticPath, "NB/HTML/REST BUILD", actorsWWW, l)

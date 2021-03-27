@@ -3,6 +3,8 @@ package server_http_v2_jschmhr
 import (
 	"fmt"
 
+	"github.com/pavlo67/tools/common/server/server_http_v2/server_http_v2_jschmhr/wrapper_page"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
@@ -54,11 +56,11 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 	//	return fmt.Errorf("no server_http.OnRequestMiddleware with key %s", server_http.OnRequestMiddlewareInterfaceKey)
 	//}
 
-	wrappersHTTP := map[server_http.WrapperHTTPKey]WrapperHTTP{
+	wrappersHTTP := map[server_http.WrapperHTTPKey]server_http.WrapperHTTP{
 		server_http.WrapperHTTPREST: WrapperHTTPREST,
 	}
 	if ss.htmlTemplate != "" {
-		wrappersHTTP[server_http.WrapperHTTPPage] = WrapperHTTPPage(ss.htmlTemplate)
+		wrappersHTTP[server_http.WrapperHTTPPage] = wrapper_page.WrapperHTTPPage(ss.htmlTemplate, nil, l)
 	}
 
 	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, onRequest, wrappersHTTP)

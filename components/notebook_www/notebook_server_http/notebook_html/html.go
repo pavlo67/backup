@@ -7,42 +7,49 @@ import (
 	"time"
 
 	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/logger"
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
-	"github.com/pavlo67/tools/components/notebook_www"
 
 	"github.com/pavlo67/data_exchange/components/tags"
+
 	"github.com/pavlo67/tools/common/views/views_html"
 	"github.com/pavlo67/tools/entities/records"
+
+	"github.com/pavlo67/tools/components/notebook_www"
 )
 
-var _ Operator = &notebookHTML{}
-
-type notebookHTML struct {
+type HTMLOp struct {
 	epCreate string
 	epView   server_http.Get1
 	epTagged server_http.Get1
 }
 
-const onNew = "on notebookHTML.New(): "
+const onNew = "on HTMLOp.New(): "
 
-func New(pagesConfig server_http.ConfigPages) (Operator, error) { // , restConfig
+var l logger.Operator
+
+func New(pagesConfig server_http.ConfigPages, lCommon logger.Operator) (*HTMLOp, error) { // , restConfig
+	if lCommon == nil {
+		return nil, fmt.Errorf(onNew + ": no logger.Operator")
+	}
 
 	epCreate, err := server_http.CheckGet0(pagesConfig, notebook_www.IntefaceKeyHTMLCreate, false)
 	if err != nil {
-		return nil, err
+		return nil, errors.CommonError(err, onNew)
 	}
 
 	epView, err := server_http.CheckGet1(pagesConfig, notebook_www.IntefaceKeyHTMLView, false)
 	if err != nil {
-		return nil, err
+		return nil, errors.CommonError(err, onNew)
 	}
 
 	epTagged, err := server_http.CheckGet1(pagesConfig, notebook_www.IntefaceKeyHTMLTagged, false)
 	if err != nil {
-		return nil, err
+		return nil, errors.CommonError(err, onNew)
 	}
 
-	return &notebookHTML{
+	return &HTMLOp{
 		epCreate: epCreate,
 		epView:   epView,
 		epTagged: epTagged,
@@ -51,7 +58,7 @@ func New(pagesConfig server_http.ConfigPages) (Operator, error) { // , restConfi
 
 // TODO!!! look at https://github.com/kataras/blocks
 
-func (htmlOp *notebookHTML) FragmentsView(r *records.Item, children []records.Item, message string, identity *auth.Identity) (server_http.Fragments, error) {
+func (htmlOp *HTMLOp) FragmentsView(r *records.Item, children []records.Item, message string, identity *auth.Identity) (server_http.Fragments, error) {
 	fragments := server_http.Fragments{
 		"title":   r.Content.Title,
 		"header":  r.Content.Title,
@@ -62,9 +69,9 @@ func (htmlOp *notebookHTML) FragmentsView(r *records.Item, children []records.It
 	return fragments, nil
 }
 
-const onHTMLEdit = "on notebookHTML.FragmentsEdit(): "
+const onHTMLEdit = "on HTMLOp.FragmentsEdit(): "
 
-func (htmlOp *notebookHTML) FragmentsEdit(r *records.Item, children []records.Item, message string, identity *auth.Identity) (server_http.Fragments, error) {
+func (htmlOp *HTMLOp) FragmentsEdit(r *records.Item, children []records.Item, message string, identity *auth.Identity) (server_http.Fragments, error) {
 	formID := "nb_edit_" + strconv.FormatInt(time.Now().Unix(), 10) + "_"
 
 	var title, header, action string
@@ -100,7 +107,7 @@ func (htmlOp *notebookHTML) FragmentsEdit(r *records.Item, children []records.It
 	return fragments, nil
 }
 
-func (htmlOp *notebookHTML) FragmentsListTagged(tag tags.Item, tagged []records.Item, identity *auth.Identity) (server_http.Fragments, error) {
+func (htmlOp *HTMLOp) FragmentsListTagged(tag tags.Item, tagged []records.Item, identity *auth.Identity) (server_http.Fragments, error) {
 	htmlList := htmlOp.HTMLFiles(tagged, identity)
 
 	fragments := server_http.Fragments{
@@ -111,7 +118,7 @@ func (htmlOp *notebookHTML) FragmentsListTagged(tag tags.Item, tagged []records.
 	return fragments, nil
 }
 
-func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, identity *auth.Identity) string {
+func (htmlOp *HTMLOp) HTMLTags(tagsStatMap tags.StatMap, identity *auth.Identity) string {
 
 	tss := tagsStatMap.List(true)
 
@@ -138,7 +145,7 @@ func (htmlOp *notebookHTML) HTMLTags(tagsStatMap tags.StatMap, identity *auth.Id
 
 }
 
-func (htmlOp *notebookHTML) HTMLIndex(identity *auth.Identity) string {
+func (htmlOp *HTMLOp) HTMLIndex(identity *auth.Identity) string {
 	htmlIndex := `<div style="padding:5px;margin: 15px 0 10px 10px;width:200px;float:right;">`
 
 	urlStr := htmlOp.epCreate
@@ -149,7 +156,7 @@ func (htmlOp *notebookHTML) HTMLIndex(identity *auth.Identity) string {
 
 }
 
-func (htmlOp *notebookHTML) HTMLFiles(recordItems []records.Item, identity *auth.Identity) string {
+func (htmlOp *HTMLOp) HTMLFiles(recordItems []records.Item, identity *auth.Identity) string {
 	if len(recordItems) < 1 {
 		return "нема записів"
 	}

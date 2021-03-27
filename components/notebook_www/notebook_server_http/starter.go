@@ -23,10 +23,9 @@ func Starter() starter.Operator {
 var _ starter.Operator = &notebookServerHTTPStarter{}
 
 type notebookServerHTTPStarter struct {
-	filesKey        joiner.InterfaceKey
-	recordsKey      joiner.InterfaceKey
-	notebookHTMLKey joiner.InterfaceKey
-	tagsHTMLKey     joiner.InterfaceKey
+	filesKey    joiner.InterfaceKey
+	recordsKey  joiner.InterfaceKey
+	tagsHTMLKey joiner.InterfaceKey
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -36,7 +35,7 @@ type notebookServerHTTPStarter struct {
 var l logger.Operator
 var recordsOp records.Operator
 var filesOp files.Operator
-var notebookHTMLOp notebook_html.Operator
+var notebookHTMLOp *notebook_html.HTMLOp
 
 func (nshs *notebookServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
@@ -45,28 +44,30 @@ func (nshs *notebookServerHTTPStarter) Name() string {
 func (nshs *notebookServerHTTPStarter) Prepare(_ *config.Config, options common.Map) error {
 	nshs.filesKey = joiner.InterfaceKey(options.StringDefault("files_key", string(files.InterfaceKey)))
 	nshs.recordsKey = joiner.InterfaceKey(options.StringDefault("records_key", string(records.InterfaceKey)))
-	nshs.notebookHTMLKey = joiner.InterfaceKey(options.StringDefault("notebook_html_key", string(notebook_html.InterfaceKey)))
 
 	nshs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil
 }
 
+const onRun = "on notebookServerHTTPStarter.Run()"
+
 func (nshs *notebookServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+		return fmt.Errorf(onRun+": no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
 	if filesOp, _ = joinerOp.Interface(nshs.filesKey).(files.Operator); filesOp == nil {
-		return fmt.Errorf("no files.Operator with key %s", nshs.filesKey)
+		return fmt.Errorf(onRun+": no files.Operator with key %s", nshs.filesKey)
 	}
 
 	if recordsOp, _ = joinerOp.Interface(nshs.recordsKey).(records.Operator); recordsOp == nil {
-		return fmt.Errorf("no records.Operator with key %s", nshs.recordsKey)
+		return fmt.Errorf(onRun+": no records.Operator with key %s", nshs.recordsKey)
 	}
 
-	if notebookHTMLOp, _ = joinerOp.Interface(nshs.notebookHTMLKey).(notebook_html.Operator); notebookHTMLOp == nil {
-		return fmt.Errorf("no notebook_html.Operator with key %s", nshs.notebookHTMLKey)
+	var err error
+	if notebookHTMLOp, err = notebook_html.New(PagesConfig, l); err != nil {
+		return fmt.Errorf(onRun+": %s", err)
 	}
 
 	return nil

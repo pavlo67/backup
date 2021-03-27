@@ -17,6 +17,11 @@ import (
 	"github.com/pavlo67/tools/common/server/server_http_v2/server_http_v2_jschmhr"
 )
 
+type ActorWWW struct {
+	OperatorWWW
+	Options common.Map
+}
+
 type OperatorWWW interface {
 	Name() string
 	Starters(options common.Map) ([]starter.Starter, error)
@@ -27,7 +32,7 @@ type OperatorWWW interface {
 	//Search() *server_http.Endpoint
 }
 
-func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *config.Config, options common.Map, l logger.Operator) (joiner.Operator, error) {
+func RunOneWWW(srvOp server_http.OperatorV2, actorWWW ActorWWW, cfgService *config.Config, options common.Map, l logger.Operator) (joiner.Operator, error) {
 	starters, err := actorWWW.Starters(options)
 	if err != nil {
 		l.Fatal(err)
@@ -38,7 +43,7 @@ func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *c
 		return joinerOp, err
 	}
 
-	pagesPrefix := actorWWW.Name()
+	pagesPrefix := actorWWW.Options.StringDefault("prefix", "")
 
 	serverConfig, err := actorWWW.Config()
 	if err != nil {
@@ -61,7 +66,7 @@ func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *c
 
 }
 
-func RunWWW(cfgService *config.Config, htmlTemplate, staticPath, label string, actorsWWW []OperatorWWW, l logger.Operator) (joinerOps []joiner.Operator, err error) {
+func RunWWW(cfgService *config.Config, htmlTemplate, staticPath, label string, actorsWWW []ActorWWW, l logger.Operator) (joinerOps []joiner.Operator, err error) {
 
 	// initiating common components & http server -----------------------------------------
 
