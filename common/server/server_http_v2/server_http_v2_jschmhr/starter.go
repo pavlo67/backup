@@ -3,6 +3,10 @@ package server_http_v2_jschmhr
 import (
 	"fmt"
 
+	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
+
+	"github.com/pavlo67/tools/common/thread"
+
 	"github.com/pavlo67/tools/common/server/server_http_v2/server_http_v2_jschmhr/wrapper_page"
 
 	"github.com/pkg/errors"
@@ -26,6 +30,7 @@ var _ starter.Operator = &server_http_jschmhrStarter{}
 type server_http_jschmhrStarter struct {
 	config       server.Config
 	htmlTemplate string
+	processMenu  thread.FIFOKVItemsGetString
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -36,6 +41,10 @@ func (ss *server_http_jschmhrStarter) Name() string {
 
 func (ss *server_http_jschmhrStarter) Prepare(cfg *config.Config, options common.Map) error {
 	ss.htmlTemplate = options.StringDefault("html_template", "")
+	if ss.processMenu, _ = options["process_menu"].(thread.FIFOKVItemsGetString); ss.processMenu == nil {
+		return fmt.Errorf("no thread.FIFOKVItemsGetString in options[process_menu]: %#v", options)
+	}
+
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 
 	configKey := options.StringDefault("config_key", "server_http")
@@ -60,7 +69,17 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 		server_http.WrapperHTTPREST: WrapperHTTPREST,
 	}
 	if ss.htmlTemplate != "" {
-		wrappersHTTP[server_http.WrapperHTTPPage] = wrapper_page.WrapperHTTPPage(ss.htmlTemplate, nil, l)
+		var processMenu wrapper_page.CommonFragments
+
+		if ss.processMenu != nil {
+			processMenu = &nb_www_menu.SetMenu{Process: ss.processMenu}
+		}
+
+		wrappersHTTP[server_http.WrapperHTTPPage] = wrapper_page.WrapperHTTPPage(
+			ss.htmlTemplate,
+			processMenu,
+			l,
+		)
 	}
 
 	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, onRequest, wrappersHTTP)

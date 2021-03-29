@@ -16,7 +16,6 @@ import (
 // Page ----------------------------------------------------------------------------------------------------
 
 type CommonFragments interface {
-	Save(key, fragment string) error
 	Set(fragments server_http.Fragments) (server_http.Fragments, error)
 }
 
@@ -64,7 +63,7 @@ func WrapperHTTPPage(htmlTemplate string, commonFragments CommonFragments, l log
 			var fragments server_http.Fragments
 			if commonFragments == nil {
 				fragments = responseData.Fragments
-			} else if fragments, err = commonFragments.Set(fragments); err != nil {
+			} else if fragments, err = commonFragments.Set(responseData.Fragments); err != nil {
 				l.Error("on commonFragments(): ", err)
 			}
 

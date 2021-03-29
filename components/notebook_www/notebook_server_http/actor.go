@@ -3,24 +3,40 @@ package notebook_server_http
 import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/db/db_sqlite"
+	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
+	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
 	"github.com/pavlo67/tools/common/actor"
+	"github.com/pavlo67/tools/common/kv"
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
+	"github.com/pavlo67/tools/common/thread"
 	"github.com/pavlo67/tools/entities/files/files_fs"
 	"github.com/pavlo67/tools/entities/records/records_sqlite"
 )
 
 var _ actor.OperatorWWW = &notebookActor{}
 
-func Actor() actor.OperatorWWW {
-	return &notebookActor{}
+var key = logger.GetCallInfo().PackageName
+
+func Actor(modifyMenu thread.FIFOKVItemsAdd, prefix string) actor.OperatorWWW {
+	modifyMenu.Add(kv.Item{
+		Key: []string{key},
+		Value: nb_www_menu.MenuItemWWW{
+			HRef:  "/" + prefix,
+			Title: key,
+		},
+	})
+	return &notebookActor{
+		modifyMenu: modifyMenu,
+	}
 }
 
 type notebookActor struct {
+	modifyMenu thread.FIFOKVItemsAdd
 }
 
 func (*notebookActor) Name() string {
-	return ""
+	return key
 }
 
 var filesOptions = common.Map{

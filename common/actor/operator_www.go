@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/pavlo67/tools/common/thread"
+
 	"github.com/pavlo67/common/common/joiner"
 
 	"github.com/pavlo67/common/common"
@@ -26,6 +28,7 @@ type OperatorWWW interface {
 	Name() string
 	Starters(options common.Map) ([]starter.Starter, error)
 	Config() (server_http.ConfigPages, error)
+
 	//Root() *server_http.Endpoint
 	//Details() *server_http.Endpoint
 	//Accept() *server_http.Endpoint
@@ -66,14 +69,15 @@ func RunOneWWW(srvOp server_http.OperatorV2, actorWWW ActorWWW, cfgService *conf
 
 }
 
-func RunWWW(cfgService *config.Config, htmlTemplate, staticPath, label string, actorsWWW []ActorWWW, l logger.Operator) (joinerOps []joiner.Operator, err error) {
+func RunWWW(cfgService *config.Config, label, htmlTemplate, staticPath string, processMenu thread.FIFOKVItemsGetString, actorsWWW []ActorWWW,
+	l logger.Operator) (joinerOps []joiner.Operator, err error) {
 
 	// initiating common components & http server -----------------------------------------
 
 	starters := []starter.Starter{
 		// general purposes components
 		{control.Starter(), nil},
-		{server_http_v2_jschmhr.Starter(), common.Map{"html_template": htmlTemplate}},
+		{server_http_v2_jschmhr.Starter(), common.Map{"html_template": htmlTemplate, "process_menu": processMenu}},
 	}
 
 	//if err := HandleSwagger(joinerOp, srvOp); err != nil {

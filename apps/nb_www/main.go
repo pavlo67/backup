@@ -4,6 +4,10 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
+
+	"github.com/pavlo67/tools/common/thread"
+
 	"github.com/pavlo67/common/common"
 
 	"github.com/pavlo67/tools/components/files_www/files_server_http"
@@ -46,14 +50,26 @@ func main() {
 
 	// actors start --------------------------------------------------------------------------------
 
-	actorsWWW := []actor.ActorWWW{
-		{notebook_server_http.Actor(), common.Map{"prefix": "nb"}},
-		{files_server_http.Actor(), common.Map{"prefix": "files"}},
+	processMenu, err := thread.NewFIFOKVItems(&nb_www_menu.MenuWWW{})
+	if err != nil {
+		l.Fatalf("on thread.NewFIFOKVItems(): %s", err)
 	}
 
-	joinerOps, err := actor.RunWWW(cfgService, string(htmlTemplateBytes), staticPath, "NB/HTML/REST BUILD", actorsWWW, l)
+	actorsWWW := []actor.ActorWWW{
+		{notebook_server_http.Actor(processMenu, "nb"), common.Map{"prefix": "nb"}},
+		{files_server_http.Actor(processMenu, "files"), common.Map{"prefix": "files"}},
+	}
+
+	joinerOps, err := actor.RunWWW(
+		cfgService, "NB/HTML/REST BUILD",
+		string(htmlTemplateBytes), staticPath, processMenu,
+		actorsWWW,
+		l,
+	)
 	for _, joinerOp := range joinerOps {
-		defer joinerOp.CloseAll()
+		if joinerOp != nil {
+			defer joinerOp.CloseAll()
+		}
 	}
 
 	l.Fatal(err)
