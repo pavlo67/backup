@@ -23,10 +23,10 @@ var _ starter.Operator = &filesServerHTTPStarter{}
 var l logger.Operator
 var filesOp files.Operator
 var filesHTMLOp *filesHTML
+var prefix string
 
 type filesServerHTTPStarter struct {
-	filesKey joiner.InterfaceKey
-	// filesHTMLKey joiner.InterfaceKey
+	filesKey     joiner.InterfaceKey
 	interfaceKey joiner.InterfaceKey
 }
 
@@ -38,6 +38,7 @@ func (fshs *filesServerHTTPStarter) Prepare(cfg *config.Config, options common.M
 	fshs.filesKey = joiner.InterfaceKey(options.StringDefault("files_key", string(files.InterfaceKey)))
 	// fshs.filesHTMLKey = joiner.InterfaceKey(options.StringDefault("files_html_key", string(files_html.InterfaceKey)))
 	fshs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
+	prefix = options.StringDefault("prefix", "")
 
 	return nil
 }

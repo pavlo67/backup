@@ -19,15 +19,11 @@ import (
 	"github.com/pavlo67/tools/common/server/server_http_v2/server_http_v2_jschmhr"
 )
 
-type ActorWWW struct {
-	OperatorWWW
-	Options common.Map
-}
-
 type OperatorWWW interface {
 	Name() string
-	Starters(options common.Map) ([]starter.Starter, error)
-	Config() (server_http.ConfigPages, error)
+	Options() common.Map
+	Starters() ([]starter.Starter, error)
+	Config() (*server_http.ConfigPages, error)
 
 	//Root() *server_http.Endpoint
 	//Details() *server_http.Endpoint
@@ -35,8 +31,8 @@ type OperatorWWW interface {
 	//Search() *server_http.Endpoint
 }
 
-func RunOneWWW(srvOp server_http.OperatorV2, actorWWW ActorWWW, cfgService *config.Config, options common.Map, l logger.Operator) (joiner.Operator, error) {
-	starters, err := actorWWW.Starters(options)
+func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *config.Config, l logger.Operator) (joiner.Operator, error) {
+	starters, err := actorWWW.Starters()
 	if err != nil {
 		l.Fatal(err)
 	}
@@ -46,30 +42,23 @@ func RunOneWWW(srvOp server_http.OperatorV2, actorWWW ActorWWW, cfgService *conf
 		return joinerOp, err
 	}
 
-	pagesPrefix := actorWWW.Options.StringDefault("prefix", "")
-
 	serverConfig, err := actorWWW.Config()
-	if err != nil {
-		return joinerOp, err
+	if err != nil || serverConfig == nil {
+		return joinerOp, fmt.Errorf("on actorWWW.Config(): got %#v / %s", serverConfig, err)
 	}
 
 	port, _ := srvOp.Addr()
-
-	serverConfig.Complete("", port, pagesPrefix)
+	prefix := actorWWW.Options().StringDefault("prefix", "")
+	serverConfig.Complete("", port, prefix)
 	if err := serverConfig.HandlePages(srvOp, l); err != nil {
 		return joinerOp, err
 	}
-
-	//pagesStaticPath := filelib.CurrentPath() + "../pages_static/"
-	//if err := srvOp.HandleFiles("pages_static", pagesPrefix+"/static/*filepath", server_http.StaticPath{LocalPath: pagesStaticPath}); err != nil {
-	//	l.Fatal(err)
-	//}
 
 	return joinerOp, nil
 
 }
 
-func RunWWW(cfgService *config.Config, label, htmlTemplate, staticPath string, processMenu thread.FIFOKVItemsGetString, actorsWWW []ActorWWW,
+func RunWWW(cfgService *config.Config, label, htmlTemplate, staticPath string, processMenu thread.FIFOKVItemsGetString, actorsWWW []OperatorWWW,
 	l logger.Operator) (joinerOps []joiner.Operator, err error) {
 
 	// initiating common components & http server -----------------------------------------
@@ -102,7 +91,7 @@ func RunWWW(cfgService *config.Config, label, htmlTemplate, staticPath string, p
 	// initiating actors on http server ---------------------------------------------------
 
 	for _, actorWWW := range actorsWWW {
-		joinerOp, err := RunOneWWW(srvOp, actorWWW, cfgService, nil, l)
+		joinerOp, err := RunOneWWW(srvOp, actorWWW, cfgService, l)
 		joinerOps = append(joinerOps, joinerOp)
 		if err != nil {
 			return joinerOps, err

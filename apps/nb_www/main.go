@@ -55,9 +55,9 @@ func main() {
 		l.Fatalf("on thread.NewFIFOKVItems(): %s", err)
 	}
 
-	actorsWWW := []actor.ActorWWW{
-		{notebook_server_http.Actor(processMenu, "nb"), common.Map{"prefix": "nb"}},
-		{files_server_http.Actor(processMenu, "files"), common.Map{"prefix": "files"}},
+	actorsWWW := []actor.OperatorWWW{
+		notebook_server_http.Actor(processMenu, common.Map{"prefix": "nb"}),
+		files_server_http.Actor(processMenu, common.Map{"prefix": "files"}),
 	}
 
 	joinerOps, err := actor.RunWWW(

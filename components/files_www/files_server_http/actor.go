@@ -18,41 +18,54 @@ var _ actor.OperatorWWW = &filesActor{}
 
 var key = logger.GetCallInfo().PackageName
 
-func Actor(modifyMenu thread.FIFOKVItemsAdd, prefix string) actor.OperatorWWW {
+const title = "файли"
+
+func Actor(modifyMenu thread.FIFOKVItemsAdd, options common.Map) actor.OperatorWWW {
+	prefix := options.StringDefault("prefix", "")
 	modifyMenu.Add(kv.Item{
 		Key: []string{key},
 		Value: nb_www_menu.MenuItemWWW{
 			HRef:  "/" + prefix + "/list",
-			Title: key,
+			Title: title,
 		},
 	})
 
 	return &filesActor{
+		options:    options,
 		modifyMenu: modifyMenu,
 	}
 }
 
 type filesActor struct {
+	options    common.Map
 	modifyMenu thread.FIFOKVItemsAdd
 }
 
 func (*filesActor) Name() string {
-	return key
+	return title
+}
+
+func (fa *filesActor) Options() common.Map {
+	if fa == nil {
+		return nil
+	}
+	return fa.options
 }
 
 var filesOptions = common.Map{
 	"base_path": "../_files_fs_test",
 }
 
-func (*filesActor) Starters(options common.Map) ([]starter.Starter, error) {
+func (fa *filesActor) Starters() ([]starter.Starter, error) {
+	prefix := fa.Options().StringDefault("prefix", "")
+
 	starters := []starter.Starter{
 		{files_fs.Starter(), filesOptions},
-		{Starter(), nil},
-	}
+		{Starter(), common.Map{"prefix": prefix}}}
 
 	return starters, nil
 }
 
-func (*filesActor) Config() (server_http.ConfigPages, error) {
-	return PagesConfig, nil
+func (*filesActor) Config() (*server_http.ConfigPages, error) {
+	return &PagesConfig, nil
 }

@@ -18,32 +18,46 @@ var _ actor.OperatorWWW = &notebookActor{}
 
 var key = logger.GetCallInfo().PackageName
 
-func Actor(modifyMenu thread.FIFOKVItemsAdd, prefix string) actor.OperatorWWW {
+const title = "нотатки"
+
+func Actor(modifyMenu thread.FIFOKVItemsAdd, options common.Map) actor.OperatorWWW {
+	prefix := options.StringDefault("prefix", "")
 	modifyMenu.Add(kv.Item{
 		Key: []string{key},
 		Value: nb_www_menu.MenuItemWWW{
 			HRef:  "/" + prefix,
-			Title: key,
+			Title: title,
 		},
 	})
 	return &notebookActor{
+		options:    options,
 		modifyMenu: modifyMenu,
 	}
 }
 
 type notebookActor struct {
+	options    common.Map
 	modifyMenu thread.FIFOKVItemsAdd
 }
 
 func (*notebookActor) Name() string {
-	return key
+	return title
+}
+
+func (na *notebookActor) Options() common.Map {
+	if na == nil {
+		return nil
+	}
+	return na.options
 }
 
 var filesOptions = common.Map{
 	"base_path": "../_files_fs_test",
 }
 
-func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
+func (na *notebookActor) Starters() ([]starter.Starter, error) {
+	prefix := na.Options().StringDefault("prefix", "")
+
 	starters := []starter.Starter{
 		// general purposes components
 		{db_sqlite.Starter(), nil},
@@ -57,7 +71,7 @@ func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
 		// notebook components
 		{files_fs.Starter(), filesOptions},
 		{records_sqlite.Starter(), nil},
-		{Starter(), nil},
+		{Starter(), common.Map{"prefix": prefix}},
 
 		// action managers
 
@@ -68,8 +82,8 @@ func (*notebookActor) Starters(options common.Map) ([]starter.Starter, error) {
 	return starters, nil
 }
 
-func (*notebookActor) Config() (server_http.ConfigPages, error) {
-	return PagesConfig, nil
+func (*notebookActor) Config() (*server_http.ConfigPages, error) {
+	return &PagesConfig, nil
 }
 
 //func ClientComponents() ([]starter.Starter, error) {

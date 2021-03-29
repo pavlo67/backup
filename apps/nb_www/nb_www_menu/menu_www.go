@@ -85,7 +85,7 @@ POINTS:
 	var htmlPoints []string
 	for _, menuItem := range menuWWW.items {
 
-		htmlPoints = append(htmlPoints, fmt.Sprintf(`<a HRef="%s">%s</a>`, menuItem.Value.HRef, menuItem.Value.Title))
+		htmlPoints = append(htmlPoints, fmt.Sprintf(`<li><a href="%s">%s</a></li>`, menuItem.Value.HRef, menuItem.Value.Title))
 	}
 	menuWWW.html = strings.Join(htmlPoints, "\n")
 

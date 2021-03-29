@@ -47,7 +47,7 @@ var listPage = server_http.EndpointPage{
 			return server_http.ErrorPage(0, err, "при filesOp.List()", req)
 		}
 
-		htmlPage, err := filesHTMLOp.FragmentsList(filesItems, path, identity)
+		htmlPage, err := filesHTMLOp.FragmentsList(prefix, path, filesItems, path, identity)
 		if err != nil {
 			return server_http.ErrorPage(0, err, "при filesHTMLOp.FragmentsView()", req)
 		}
