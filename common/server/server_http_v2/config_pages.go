@@ -42,7 +42,11 @@ type ConfigPages struct {
 
 const onHandlePages = "on server_http.HandlePages()"
 
-func (c ConfigPages) HandlePages(srvOp OperatorV2, l logger.Operator) error {
+func (c *ConfigPages) HandlePages(srvOp OperatorV2, l logger.Operator) error {
+	if c == nil {
+		return nil
+	}
+
 	if srvOp == nil {
 		return errors.New(onHandlePages + ": srvOp == nil")
 	}

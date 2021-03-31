@@ -49,7 +49,7 @@ type ConfigCommon struct {
 
 func (c *ConfigCommon) Complete(host string, port int, prefix string) error {
 	if c == nil {
-		return errors.New("no server_http.Config to complete")
+		return nil // errors.New("no server_http.Config to complete")
 	}
 
 	var portStr string
@@ -64,7 +64,11 @@ func (c *ConfigCommon) Complete(host string, port int, prefix string) error {
 
 // Config -----------------------------------------------------------------------------------
 
-func (c Config) EP(endpointKey EndpointKey, params []string, createFullURL bool) (string, string, error) {
+func (c *Config) EP(endpointKey EndpointKey, params []string, createFullURL bool) (string, string, error) {
+	if c == nil {
+		return "", "", nil
+	}
+
 	ep, ok := c.EndpointsSettled[endpointKey]
 	if !ok {
 		return "", "", fmt.Errorf("no endpoint with key '%s'", endpointKey)
@@ -95,7 +99,11 @@ func (c Config) EP(endpointKey EndpointKey, params []string, createFullURL bool)
 
 type Swagger map[string]interface{}
 
-func (c Config) SwaggerV2(isHTTPS bool) ([]byte, error) {
+func (c *Config) SwaggerV2(isHTTPS bool) ([]byte, error) {
+	if c == nil {
+		return nil, nil
+	}
+
 	paths := map[string]common.Map{} // map[string]map[string]map[string]interface{}{}
 
 	for key, ep := range c.EndpointsSettled {
@@ -194,7 +202,11 @@ func (c Config) SwaggerV2(isHTTPS bool) ([]byte, error) {
 	return json.MarshalIndent(swagger, "", " ")
 }
 
-func (c Config) InitSwagger(isHTTPS bool, swaggerStaticFilePath string, l logger.Operator) error {
+func (c *Config) InitSwagger(isHTTPS bool, swaggerStaticFilePath string, l logger.Operator) error {
+	if c == nil {
+		return nil
+	}
+
 	swaggerJSON, err := c.SwaggerV2(isHTTPS)
 	if err != nil {
 		return err
@@ -209,7 +221,11 @@ func (c Config) InitSwagger(isHTTPS bool, swaggerStaticFilePath string, l logger
 
 const onHandleEndpoints = "on server_http.HandleEndpoints()"
 
-func (c Config) HandleEndpoints(srvOp OperatorV2, l logger.Operator) error {
+func (c *Config) HandleEndpoints(srvOp OperatorV2, l logger.Operator) error {
+	if c == nil {
+		return nil
+	}
+
 	if srvOp == nil {
 		return errors.New(onHandleEndpoints + ": srvOp == nil")
 	}

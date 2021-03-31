@@ -21,9 +21,8 @@ import (
 
 type OperatorWWW interface {
 	Name() string
-	Options() common.Map
 	Starters() ([]starter.Starter, error)
-	Config() (*server_http.ConfigPages, error)
+	Config() (*Config, *server_http.Config, *server_http.ConfigPages, error)
 
 	//Root() *server_http.Endpoint
 	//Details() *server_http.Endpoint
@@ -42,15 +41,14 @@ func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *c
 		return joinerOp, err
 	}
 
-	serverConfig, err := actorWWW.Config()
-	if err != nil || serverConfig == nil {
-		return joinerOp, fmt.Errorf("on actorWWW.Config(): got %#v / %s", serverConfig, err)
+	actorConfig, endpointsConfig, pagesConfig, err := actorWWW.Config()
+	if err != nil || actorConfig == nil {
+		return joinerOp, fmt.Errorf("on actorWWW.Config(): got %#v / %#v / %#v / %s", actorConfig, endpointsConfig, pagesConfig, err)
 	}
 
 	port, _ := srvOp.Addr()
-	prefix := actorWWW.Options().StringDefault("prefix", "")
-	serverConfig.Complete("", port, prefix)
-	if err := serverConfig.HandlePages(srvOp, l); err != nil {
+	pagesConfig.Complete("", port, actorConfig.Prefix)
+	if err := pagesConfig.HandlePages(srvOp, l); err != nil {
 		return joinerOp, err
 	}
 

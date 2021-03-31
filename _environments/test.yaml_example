@@ -1,0 +1,67 @@
+
+
+## common ---------------------------------------------------------
+
+server_http:
+  port:
+
+http:
+  host: http://localhost
+  port:
+
+sqlite:
+  path: /test_sqlite_dir/test.sqlite
+
+pg:
+  host: localhost
+  port: 5432
+  user: test_pg_user
+  pass: test_pg_password
+  path: test_pg_database
+
+files_fs:
+  path: /test_fs_dir
+
+files_fs1:
+  path: /test_fs_dir_another
+
+
+## entities -------------------------------------------------------
+
+persons_files:
+  bucket: /persons_files
+
+records_sqlite:
+  table: records
+
+persons_sqlite:
+  table: persons
+
+
+## actors ---------------------------------------------------------
+
+actors:
+
+    notebook:
+      type:  notebook_www
+      title: нотатки
+      prefix: nb
+      order: 0
+
+    catalogue1:
+      type:  catalogue_www
+      title: test_catalogue1
+      prefix: catalogue1
+      order: 1
+      options:
+        files_fs:
+          config_key: files_fs
+
+    catalogue2:
+      type:  catalogue_www
+      title: test_catalogue2
+      prefix: catalogue2
+      order: 2
+      options:
+        files_fs:
+          config_key: files_fs1

@@ -4,19 +4,16 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
-
-	"github.com/pavlo67/tools/common/thread"
-
-	"github.com/pavlo67/common/common"
-
-	"github.com/pavlo67/tools/components/files_www/files_server_http"
+	"github.com/pavlo67/tools/components/catalogue/catalogue_www"
+	"github.com/pavlo67/tools/components/notebook/notebook_www"
 
 	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/filelib"
-	"github.com/pavlo67/tools/common/actor"
 
-	"github.com/pavlo67/tools/components/notebook_www/notebook_server_http"
+	"github.com/pavlo67/tools/common/actor"
+	"github.com/pavlo67/tools/common/thread"
+
+	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
 )
 
 var (
@@ -55,9 +52,15 @@ func main() {
 		l.Fatalf("on thread.NewFIFOKVItems(): %s", err)
 	}
 
+	var actorConfigs map[string]actor.Config
+	if err = cfgService.Value("actors", &actorConfigs); err != nil {
+		l.Fatalf(`on cfgService.Value("actors", &actorConfigs): %s`, err)
+	}
+
 	actorsWWW := []actor.OperatorWWW{
-		notebook_server_http.Actor(processMenu, common.Map{"prefix": "nb"}),
-		files_server_http.Actor(processMenu, common.Map{"prefix": "files"}),
+		notebook_www.Actor(processMenu, actorConfigs["notebook"]),
+		catalogue_www.Actor(processMenu, actorConfigs["catalogue_home"]),
+		catalogue_www.Actor(processMenu, actorConfigs["catalogue_cinnamon"]),
 	}
 
 	joinerOps, err := actor.RunWWW(
