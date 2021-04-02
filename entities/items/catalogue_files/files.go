@@ -7,10 +7,10 @@ import (
 	"github.com/pavlo67/common/common/errors"
 
 	"github.com/pavlo67/tools/common/files"
-	"github.com/pavlo67/tools/entities/catalogue"
+	"github.com/pavlo67/tools/entities/items"
 )
 
-var _ catalogue.Operator = &catalogueFiles{}
+var _ items.Operator = &catalogueFiles{}
 
 type catalogueFiles struct {
 	filesOp files.Operator
@@ -18,7 +18,7 @@ type catalogueFiles struct {
 
 const onNew = "on catalogueFiles.New(): "
 
-func New(filesOp files.Operator) (catalogue.Operator, db.Cleaner, error) {
+func New(filesOp files.Operator) (items.Operator, db.Cleaner, error) {
 	if filesOp == nil {
 		return nil, nil, errors.New(onNew + ": no files.Operator")
 	}
@@ -50,13 +50,13 @@ func (catalogueOp *catalogueFiles) Remove(path string, identity *auth.Identity) 
 
 const onList = "on catalogueFiles.Items()"
 
-func (catalogueOp *catalogueFiles) List(path string, depth int, identity *auth.Identity) (catalogue.Items, error) {
+func (catalogueOp *catalogueFiles) List(path string, depth int, identity *auth.Identity) (items.Items, error) {
 	return catalogueOp.filesOp.List(path, depth)
 }
 
 const onStat = "on catalogueFiles.Stat()"
 
-func (catalogueOp *catalogueFiles) Stat(path string, depth int, identity *auth.Identity) (*catalogue.Item, error) {
+func (catalogueOp *catalogueFiles) Stat(path string, depth int, identity *auth.Identity) (*items.Item, error) {
 	return catalogueOp.filesOp.Stat(path, depth)
 
 }

@@ -1,80 +1,120 @@
 package catalogue_server_http
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/pavlo67/common/common/auth"
-
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
+
+	"github.com/pavlo67/tools/entities/items"
+
 	"github.com/pavlo67/tools/components/catalogue"
 )
 
-var PagesConfig = server_http.ConfigPages{
-	ConfigCommon: server_http.ConfigCommon{
-		Title:   "Files pages",
-		Version: "0.0.1",
-	},
+const onPages = "on catalogue_server_http.newNotebookPages()"
 
-	EndpointsPageSettled: server_http.EndpointsPageSettled{
-		catalogue.IntefaceKeyHTMLList:   {Path: "/list", EndpointPage: listPage},
-		catalogue.IntefaceKeyHTMLDelete: {Path: "/delete", EndpointPage: deletePage},
+func newCataloguePages(prefix string, itemsOp items.Operator) (*server_http.ConfigPages, error) {
+	if itemsOp == nil {
+		return nil, errors.New(onPages + ": no items.Operator")
+	}
 
-		//files_www.IntefaceKeyHTMLView:   {Path: "/view", EndpointPage: viewPage},
-		//files_www.IntefaceKeyHTMLCreate: {Path: "/create", EndpointPage: createPage},
-		//files_www.IntefaceKeyHTMLEdit:   {Path: "/edit", EndpointPage: editPage},
-		//files_www.IntefaceKeyHTMLSave:   {Path: "/save", EndpointPage: savePage},
-	},
+	pages := cataloguePages{
+		prefix:  prefix,
+		itemsOp: itemsOp,
+	}
+
+	configPages := server_http.ConfigPages{
+		ConfigCommon: server_http.ConfigCommon{
+			Title:   "Catalogue pages",
+			Version: "0.0.1",
+			//Host:    "",
+			//Port:    "",
+			Prefix: prefix,
+		},
+		EndpointsPageSettled: server_http.EndpointsPageSettled{
+			catalogue.IntefaceKeyHTMLList:   {Path: "/list", EndpointPage: pages.list()},
+			catalogue.IntefaceKeyHTMLDelete: {Path: "/delete", EndpointPage: pages.delete()},
+
+			//files_www.IntefaceKeyHTMLView:   {Path: "/view", EndpointPage: viewPage},
+			//files_www.IntefaceKeyHTMLCreate: {Path: "/create", EndpointPage: createPage},
+			//files_www.IntefaceKeyHTMLEdit:   {Path: "/edit", EndpointPage: editPage},
+			//files_www.IntefaceKeyHTMLSave:   {Path: "/save", EndpointPage: savePage},
+		},
+	}
+
+	var err error
+	pages.catalogueHTMLOp, err = New(configPages, prefix)
+	if err != nil || pages.catalogueHTMLOp == nil {
+		return nil, fmt.Errorf(onPages+": on catalogue_html.New() got %#v / %s", pages.catalogueHTMLOp, err)
+	}
+
+	return &configPages, nil
 }
 
-var listPage = server_http.EndpointPage{
-	EndpointDescription: server_http.EndpointDescription{
-		Method:      "GET",
-		PathParams:  []string{"*path"},
-		QueryParams: []string{"depth"},
-	},
-	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		path := params["path"]
-		depth := 0
-		//depth, err := strconv.Atoi(params["depth"])
-		//if err != nil {
-		//	errors.Wrapf(err, "can't read depth (%s)", params["depth"])
-		//	return server_http.ErrorPage(0, err, "при catalogueOp.List()", req)
-		//}
-
-		filesItems, err := catalogueOp.List(path, depth, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при catalogueOp.List()", req)
-		}
-
-		htmlPage, err := filesHTMLOp.FragmentsList(path, filesItems, path, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при filesHTMLOp.FragmentsView()", req)
-		}
-
-		return server_http.ResponsePage{Status: http.StatusOK, Fragments: htmlPage}, nil
-	},
+type cataloguePages struct {
+	prefix          string
+	itemsOp         items.Operator
+	catalogueHTMLOp *catalogueHTML
 }
 
-var deletePage = server_http.EndpointPage{
+func (pages *cataloguePages) list() server_http.EndpointPage {
 
-	EndpointDescription: server_http.EndpointDescription{
-		Method:     "POST",
-		PathParams: []string{"*path"},
-	},
-	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		path := params["path"]
-		if err := catalogueOp.Remove(path, identity); err != nil {
-			return server_http.ErrorPage(0, err, "при catalogueOp.Remove()", req)
-		}
+	return server_http.EndpointPage{
 
-		htmlPage := server_http.CommonFragments(
-			"файл вилучено: "+path,
-			"Файл вилучено: "+path,
-			"", "", "", "",
-		)
+		EndpointDescription: server_http.EndpointDescription{
+			Method:      "GET",
+			PathParams:  []string{"*path"},
+			QueryParams: []string{"depth"},
+		},
+		WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
+			path := params["path"]
+			depth := 0
+			//depth, err := strconv.Atoi(params["depth"])
+			//if err != nil {
+			//	errors.Wrapf(err, "can't read depth (%s)", params["depth"])
+			//	return server_http.ErrorPage(0, err, "при itemsOp.List()", req)
+			//}
 
-		return server_http.ResponsePage{Status: http.StatusOK, Fragments: htmlPage}, nil
-	},
+			filesItems, err := pages.itemsOp.List(path, depth, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при itemsOp.List()", req)
+			}
+
+			htmlPage, err := pages.catalogueHTMLOp.FragmentsList(path, filesItems, path, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при filesHTMLOp.FragmentsView()", req)
+			}
+
+			return server_http.ResponsePage{Status: http.StatusOK, Fragments: htmlPage}, nil
+		},
+	}
+}
+
+func (pages *cataloguePages) delete() server_http.EndpointPage {
+
+	return server_http.EndpointPage{
+
+		EndpointDescription: server_http.EndpointDescription{
+			Method:     "POST",
+			PathParams: []string{"*path"},
+		},
+		WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
+			path := params["path"]
+			if err := pages.itemsOp.Remove(path, identity); err != nil {
+				return server_http.ErrorPage(0, err, "при itemsOp.Remove()", req)
+			}
+
+			htmlPage := server_http.CommonFragments(
+				"файл вилучено: "+path,
+				"Файл вилучено: "+path,
+				"", "", "", "",
+			)
+
+			return server_http.ResponsePage{Status: http.StatusOK, Fragments: htmlPage}, nil
+		},
+	}
 }
 
 //var viewPage = server_http.EndpointPage{
@@ -84,9 +124,9 @@ var deletePage = server_http.EndpointPage{
 //		PathParams: []string{"record_id"},
 //	},
 //	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-//		r, err := catalogueOp.Read(path)
+//		r, err := itemsOp.Read(path)
 //		if err != nil {
-//			return server_http.ErrorPage(0, err, "при catalogueOp.ReadWithChildren()", req)
+//			return server_http.ErrorPage(0, err, "при itemsOp.ReadWithChildren()", req)
 //		}
 //
 //		htmlPage, err := filesHTMLOp.FragmentsView(r, "", identity)
@@ -109,9 +149,9 @@ var deletePage = server_http.EndpointPage{
 //	},
 //	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
 //
-//		r, err := catalogueOp.Read(id, identity)
+//		r, err := itemsOp.Read(id, identity)
 //		if err != nil {
-//			return server_http.ErrorPage(0, err, "при catalogueOp.Read()", req)
+//			return server_http.ErrorPage(0, err, "при itemsOp.Read()", req)
 //		}
 //
 //		htmlPage, err := filesHTMLOp.FragmentsEdit(r,  "", identity)
@@ -165,14 +205,14 @@ var deletePage = server_http.EndpointPage{
 //			return server_http.ErrorPage(http.StatusBadRequest, fmt.Errorf("on files_html.RecordFromData(%#v): got nil", data), "при files_html.RecordFromData()", req)
 //		}
 //
-//		r.ID, err = catalogueOp.Save(*r, identity)
+//		r.ID, err = itemsOp.Save(*r, identity)
 //		if err != nil {
-//			return server_http.ErrorPage(0, err, "при catalogueOp.Save()", req)
+//			return server_http.ErrorPage(0, err, "при itemsOp.Save()", req)
 //		} else if r.ID == "" {
-//			return server_http.ErrorPage(0, fmt.Errorf("on catalogueOp.Save(%#v, %#v): got nil", *r, identity), "при catalogueOp.Save()", req)
+//			return server_http.ErrorPage(0, fmt.Errorf("on itemsOp.Save(%#v, %#v): got nil", *r, identity), "при itemsOp.Save()", req)
 //		}
 //
-//		r, children, err := files.ReadWithChildren(catalogueOp, r.ID, identity)
+//		r, children, err := files.ReadWithChildren(itemsOp, r.ID, identity)
 //		if err != nil {
 //			return server_http.ErrorPage(0, err, "при ReadWithChildren()", req)
 //		}
@@ -202,7 +242,7 @@ var deletePage = server_http.EndpointPage{
 //			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.CommonError(err, "reading body"), req)
 //		}
 //
-//		pathCorrected, err := catalogueOp.Save(bucketID, path, newFilePattern, data)
+//		pathCorrected, err := itemsOp.Save(bucketID, path, newFilePattern, data)
 //		if err != nil {
 //			return serverOp.ResponseRESTError(0, err, req)
 //		}
@@ -218,7 +258,7 @@ var deletePage = server_http.EndpointPage{
 //		bucketID := files.BucketID(params["bucket_id"])
 //		path := params["path"]
 //
-//		data, err := catalogueOp.Read(bucketID, path)
+//		data, err := itemsOp.Read(bucketID, path)
 //		if err != nil || data == nil {
 //			return serverOp.ResponseRESTError(0, err, req)
 //		}
@@ -238,7 +278,7 @@ var deletePage = server_http.EndpointPage{
 //			return serverOp.ResponseRESTError(0, errors.Wrapf(err, "can't read depth (%s)", params["depth"]), req)
 //		}
 //
-//		fileInfo, err := catalogueOp.Stat(bucketID, path, depth)
+//		fileInfo, err := itemsOp.Stat(bucketID, path, depth)
 //		if err != nil {
 //			return serverOp.ResponseRESTError(0, err, req)
 //		}

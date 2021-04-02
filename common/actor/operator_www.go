@@ -4,26 +4,22 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/pavlo67/tools/common/thread"
-
-	"github.com/pavlo67/common/common/joiner"
-
 	"github.com/pavlo67/common/common"
-
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/control"
+	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
 
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 	"github.com/pavlo67/tools/common/server/server_http_v2/server_http_v2_jschmhr"
+	"github.com/pavlo67/tools/common/thread"
 )
 
 type OperatorWWW interface {
 	Name() string
 	Starters() ([]starter.Starter, error)
-	Config() (*Config, *server_http.Config, *server_http.ConfigPages, error)
-
+	Config() (*Config, error)
 	//Root() *server_http.Endpoint
 	//Details() *server_http.Endpoint
 	//Accept() *server_http.Endpoint
@@ -33,7 +29,7 @@ type OperatorWWW interface {
 func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *config.Config, l logger.Operator) (joiner.Operator, error) {
 	starters, err := actorWWW.Starters()
 	if err != nil {
-		l.Fatal(err)
+		return nil, err
 	}
 
 	joinerOp, err := starter.Run(starters, cfgService, "ACTOR BUILD: "+actorWWW.Name(), l)
@@ -41,14 +37,25 @@ func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *c
 		return joinerOp, err
 	}
 
-	actorConfig, endpointsConfig, pagesConfig, err := actorWWW.Config()
-	if err != nil || actorConfig == nil {
-		return joinerOp, fmt.Errorf("on actorWWW.Config(): got %#v / %#v / %#v / %s", actorConfig, endpointsConfig, pagesConfig, err)
+	var configPages *server_http.ConfigPages
+	switch v := joinerOp.Interface(ConfigPages).(type) {
+	case server_http.ConfigPages:
+		configPages = &v
+	case *server_http.ConfigPages:
+		configPages = v
 	}
 
-	port, _ := srvOp.Addr()
-	pagesConfig.Complete("", port, actorConfig.Prefix)
-	if err := pagesConfig.HandlePages(srvOp, l); err != nil {
+	if configPages == nil {
+		return joinerOp, fmt.Errorf("no server_http.ConfigPages is exported")
+	}
+
+	//// port, _ := srvOp.Addr()
+	//actorConfig, endpointsConfig, pagesConfig, err := actorWWW.Config()
+	//if err != nil || actorConfig == nil {
+	//	return joinerOp, fmt.Errorf("on actorWWW.Config(): got %#v / %#v / %#v / %s", actorConfig, endpointsConfig, pagesConfig, err)
+	//}
+
+	if err := configPages.HandlePages(srvOp, l); err != nil {
 		return joinerOp, err
 	}
 

@@ -6,264 +6,312 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/pavlo67/common/common/errors"
+
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/selectors"
-
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 
 	"github.com/pavlo67/data_exchange/components/tags"
+
+	"github.com/pavlo67/tools/entities/records"
+
 	"github.com/pavlo67/tools/components/notebook"
 	"github.com/pavlo67/tools/components/notebook/notebook_server_http/notebook_html"
-	"github.com/pavlo67/tools/entities/records"
 )
 
-var PagesConfig = server_http.ConfigPages{
-	ConfigCommon: server_http.ConfigCommon{
-		Title:   "Notebook pages",
-		Version: "0.0.1",
-	},
+const onPages = "on notebook_server_http.newNotebookPages()"
 
-	EndpointsPageSettled: server_http.EndpointsPageSettled{
-		notebook.IntefaceKeyHTMLRoot:   {Path: "/", EndpointPage: rootPage},
-		notebook.IntefaceKeyHTMLView:   {Path: "/view", EndpointPage: viewPage},
-		notebook.IntefaceKeyHTMLCreate: {Path: "/create", EndpointPage: createPage},
-		notebook.IntefaceKeyHTMLEdit:   {Path: "/edit", EndpointPage: editPage},
-		notebook.IntefaceKeyHTMLSave:   {Path: "/save", EndpointPage: savePage},
-		notebook.IntefaceKeyHTMLDelete: {Path: "/delete", EndpointPage: deletePage},
-		notebook.IntefaceKeyHTMLTags:   {Path: "/tags", EndpointPage: tagsPage},
-		notebook.IntefaceKeyHTMLTagged: {Path: "/tagged", EndpointPage: taggedPage},
-		// notebook.IntefaceKeyHTMLList: {Path: "/list"},
-	},
+func newNotebookPages(prefix string, recordsOp records.Operator) (*server_http.ConfigPages, error) {
+	if recordsOp == nil {
+		return nil, errors.New(onPages + ": no records.Operator")
+	}
+
+	pages := notebookPages{
+		prefix:    prefix,
+		recordsOp: recordsOp,
+	}
+
+	configPages := server_http.ConfigPages{
+		ConfigCommon: server_http.ConfigCommon{
+			Title:   "Notebook pages",
+			Version: "0.0.1",
+			//Host:    "",
+			//Port:    "",
+			Prefix: prefix,
+		},
+		EndpointsPageSettled: server_http.EndpointsPageSettled{
+			notebook.IntefaceKeyHTMLRoot:   {Path: "/", EndpointPage: pages.root()},
+			notebook.IntefaceKeyHTMLView:   {Path: "/view", EndpointPage: pages.view()},
+			notebook.IntefaceKeyHTMLCreate: {Path: "/create", EndpointPage: pages.create()},
+			notebook.IntefaceKeyHTMLEdit:   {Path: "/edit", EndpointPage: pages.edit()},
+			notebook.IntefaceKeyHTMLSave:   {Path: "/save", EndpointPage: pages.save()},
+			notebook.IntefaceKeyHTMLDelete: {Path: "/delete", EndpointPage: pages.delete()},
+			notebook.IntefaceKeyHTMLTags:   {Path: "/tags", EndpointPage: pages.tags()},
+			notebook.IntefaceKeyHTMLTagged: {Path: "/tagged", EndpointPage: pages.tagged()},
+			// notebook.IntefaceKeyHTMLList: {Path: "/list"},
+		},
+	}
+
+	var err error
+	pages.notebookHTMLOp, err = notebook_html.New(configPages, l)
+	if err != nil || pages.notebookHTMLOp == nil {
+		return nil, fmt.Errorf(onPages+": on notebook_html.New() got %#v / %s", pages.notebookHTMLOp, err)
+	}
+
+	return &configPages, nil
 }
 
-var rootPage = server_http.EndpointPage{
-
-	EndpointDescription: server_http.EndpointDescription{
-		Method: "GET",
-	},
-	WorkerHTTPPage: func(_ server_http.OperatorV2, req *http.Request, _ server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		tagsStatMap, err := recordsOp.Tags(nil, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при recordsOp.Tags()", req)
-		}
-
-		htmlIndex := notebookHTMLOp.HTMLIndex(identity)
-		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, identity)
-
-		fragments := server_http.CommonFragments(
-			"вхід",
-			"Вхід",
-			"", "", htmlIndex,
-			"Розділи (теми) цієї бази даних: \n<p>"+htmlTags,
-		)
-
-		return server_http.ResponsePage{
-			Status:    http.StatusOK,
-			Fragments: fragments,
-		}, nil
-	},
+type notebookPages struct {
+	prefix         string
+	recordsOp      records.Operator
+	notebookHTMLOp *notebook_html.HTMLOp
 }
 
-var viewPage = server_http.EndpointPage{
+func (pages *notebookPages) root() server_http.EndpointPage {
+	return server_http.EndpointPage{
 
-	EndpointDescription: server_http.EndpointDescription{
-		Method:     "GET",
-		PathParams: []string{"record_id"},
-	},
-	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		id := records.ID(params["record_id"])
-		r, children, err := records.ReadWithChildren(recordsOp, id, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при recordsOp.ReadWithChildren()", req)
-		}
+		EndpointDescription: server_http.EndpointDescription{
+			Method: "GET",
+		},
+		WorkerHTTPPage: func(_ server_http.OperatorV2, req *http.Request, _ server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
+			tagsStatMap, err := pages.recordsOp.Tags(nil, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при recordsOp.Tags()", req)
+			}
 
-		fragments, err := notebookHTMLOp.FragmentsView(r, children, "", identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsView()", req)
-		}
+			htmlIndex := pages.notebookHTMLOp.HTMLIndex(identity)
+			htmlTags := pages.notebookHTMLOp.HTMLTags(tagsStatMap, identity)
 
-		return server_http.ResponsePage{
-			Status:    http.StatusOK,
-			Fragments: fragments,
-		}, nil
-	},
+			fragments := server_http.CommonFragments(
+				"вхід",
+				"Вхід",
+				"", "", htmlIndex,
+				"Розділи (теми) цієї бази даних: \n<p>"+htmlTags,
+			)
+
+			return server_http.ResponsePage{
+				Status:    http.StatusOK,
+				Fragments: fragments,
+			}, nil
+		},
+	}
 }
 
-var editPage = server_http.EndpointPage{
+func (pages *notebookPages) view() server_http.EndpointPage {
+	return server_http.EndpointPage{
 
-	EndpointDescription: server_http.EndpointDescription{
-		Method:     "GET",
-		PathParams: []string{"record_id"},
-	},
-	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		id := records.ID(params["record_id"])
+		EndpointDescription: server_http.EndpointDescription{
+			Method:     "GET",
+			PathParams: []string{"record_id"},
+		},
+		WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
+			id := records.ID(params["record_id"])
+			r, children, err := records.ReadWithChildren(pages.recordsOp, id, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при recordsOp.ReadWithChildren()", req)
+			}
 
-		r, err := recordsOp.Read(id, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при recordsOp.Read()", req)
-		}
+			fragments, err := pages.notebookHTMLOp.FragmentsView(r, children, "", identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsView()", req)
+			}
 
-		fragments, err := notebookHTMLOp.FragmentsEdit(r, nil, "", identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsEdit()", req)
-		}
-
-		return server_http.ResponsePage{
-			Status:    http.StatusOK,
-			Fragments: fragments,
-		}, nil
-	},
+			return server_http.ResponsePage{
+				Status:    http.StatusOK,
+				Fragments: fragments,
+			}, nil
+		},
+	}
 }
 
-var createPage = server_http.EndpointPage{
+func (pages *notebookPages) edit() server_http.EndpointPage {
+	return server_http.EndpointPage{
 
-	EndpointDescription: server_http.EndpointDescription{
-		Method: "GET",
-	},
-	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		fragments, err := notebookHTMLOp.FragmentsEdit(nil, nil, "", identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsEdit()", req)
-		}
+		EndpointDescription: server_http.EndpointDescription{
+			Method:     "GET",
+			PathParams: []string{"record_id"},
+		},
+		WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
+			id := records.ID(params["record_id"])
 
-		return server_http.ResponsePage{
-			Status:    http.StatusOK,
-			Fragments: fragments,
-		}, nil
-	},
+			r, err := pages.recordsOp.Read(id, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при recordsOp.Read()", req)
+			}
+
+			fragments, err := pages.notebookHTMLOp.FragmentsEdit(r, nil, "", identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsEdit()", req)
+			}
+
+			return server_http.ResponsePage{
+				Status:    http.StatusOK,
+				Fragments: fragments,
+			}, nil
+		},
+	}
 }
 
-var savePage = server_http.EndpointPage{
+func (pages *notebookPages) create() server_http.EndpointPage {
+	return server_http.EndpointPage{
 
-	EndpointDescription: server_http.EndpointDescription{
-		Method: "POST",
-	},
-	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		body, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			return server_http.ErrorPage(http.StatusBadRequest, err, "при ioutil.ReadAll(req.Body)", req)
-		}
+		EndpointDescription: server_http.EndpointDescription{
+			Method: "GET",
+		},
+		WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
+			fragments, err := pages.notebookHTMLOp.FragmentsEdit(nil, nil, "", identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsEdit()", req)
+			}
 
-		data, err := url.ParseQuery(string(body))
-		if err != nil {
-			return server_http.ErrorPage(http.StatusBadRequest, err, "при url.ParseQuery(body)", req)
-		}
-
-		r := notebook_html.RecordFromData(data)
-		if r == nil {
-			return server_http.ErrorPage(http.StatusBadRequest, fmt.Errorf("on notebook_html.RecordFromData(%#v): got nil", data), "при notebook_html.RecordFromData()", req)
-		}
-
-		r.ID, err = recordsOp.Save(*r, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при recordsOp.Save()", req)
-		} else if r.ID == "" {
-			return server_http.ErrorPage(0, fmt.Errorf("on recordsOp.Save(%#v, %#v): got nil", *r, identity), "при recordsOp.Save()", req)
-		}
-
-		r, children, err := records.ReadWithChildren(recordsOp, r.ID, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при ReadWithChildren()", req)
-		}
-
-		fragments, err := notebookHTMLOp.FragmentsView(r, children, "", identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsView()", req)
-		}
-
-		return server_http.ResponsePage{
-			Status:    http.StatusOK,
-			Fragments: fragments,
-		}, nil
-	},
+			return server_http.ResponsePage{
+				Status:    http.StatusOK,
+				Fragments: fragments,
+			}, nil
+		},
+	}
 }
 
-var deletePage = server_http.EndpointPage{
+func (pages *notebookPages) save() server_http.EndpointPage {
+	return server_http.EndpointPage{
 
-	EndpointDescription: server_http.EndpointDescription{
-		Method:     "POST",
-		PathParams: []string{"record_id"},
-	},
-	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		id := records.ID(params["record_id"])
+		EndpointDescription: server_http.EndpointDescription{
+			Method: "POST",
+		},
+		WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
+			body, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				return server_http.ErrorPage(http.StatusBadRequest, err, "при ioutil.ReadAll(req.Body)", req)
+			}
 
-		err := recordsOp.Remove(id, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при recordsOp.Remove()", req)
-		}
+			data, err := url.ParseQuery(string(body))
+			if err != nil {
+				return server_http.ErrorPage(http.StatusBadRequest, err, "при url.ParseQuery(body)", req)
+			}
 
-		fragments := server_http.CommonFragments(
-			"запис вилучено",
-			"Запис вилучено",
-			"", "", "", "",
-		)
+			r := notebook_html.RecordFromData(data)
+			if r == nil {
+				return server_http.ErrorPage(http.StatusBadRequest, fmt.Errorf("on notebook_html.RecordFromData(%#v): got nil", data), "при notebook_html.RecordFromData()", req)
+			}
 
-		return server_http.ResponsePage{
-			Status:    http.StatusOK,
-			Fragments: fragments,
-		}, nil
-	},
+			r.ID, err = pages.recordsOp.Save(*r, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при recordsOp.Save()", req)
+			} else if r.ID == "" {
+				return server_http.ErrorPage(0, fmt.Errorf("on recordsOp.Save(%#v, %#v): got nil", *r, identity), "при recordsOp.Save()", req)
+			}
+
+			r, children, err := records.ReadWithChildren(pages.recordsOp, r.ID, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при ReadWithChildren()", req)
+			}
+
+			fragments, err := pages.notebookHTMLOp.FragmentsView(r, children, "", identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsView()", req)
+			}
+
+			return server_http.ResponsePage{
+				Status:    http.StatusOK,
+				Fragments: fragments,
+			}, nil
+		},
+	}
 }
 
-var tagsPage = server_http.EndpointPage{
+func (pages *notebookPages) delete() server_http.EndpointPage {
+	return server_http.EndpointPage{
 
-	EndpointDescription: server_http.EndpointDescription{
-		Method: "GET",
-	},
-	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		tagsStatMap, err := recordsOp.Tags(nil, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при recordsOp.Tags()", req)
-		}
+		EndpointDescription: server_http.EndpointDescription{
+			Method:     "POST",
+			PathParams: []string{"record_id"},
+		},
+		WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
+			id := records.ID(params["record_id"])
 
-		htmlTags := notebookHTMLOp.HTMLTags(tagsStatMap, identity)
-		//if err != nil {
-		//	return ErrorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
-		//}
+			err := pages.recordsOp.Remove(id, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при recordsOp.Remove()", req)
+			}
 
-		fragments := server_http.CommonFragments(
-			"теґи",
-			"Теґи",
-			"", "", "",
-			"Розділи (теми) цієї бази даних: \n<p>"+htmlTags,
-		)
+			fragments := server_http.CommonFragments(
+				"запис вилучено",
+				"Запис вилучено",
+				"", "", "", "",
+			)
 
-		return server_http.ResponsePage{
-			Status:    http.StatusOK,
-			Fragments: fragments,
-		}, nil
-
-	},
+			return server_http.ResponsePage{
+				Status:    http.StatusOK,
+				Fragments: fragments,
+			}, nil
+		},
+	}
 }
 
-var taggedPage = server_http.EndpointPage{
+func (pages *notebookPages) tags() server_http.EndpointPage {
+	return server_http.EndpointPage{
 
-	EndpointDescription: server_http.EndpointDescription{
-		Method:     "GET",
-		PathParams: []string{"tag"},
-	},
-	WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
-		tag := tags.Item(params["tag"])
+		EndpointDescription: server_http.EndpointDescription{
+			Method: "GET",
+		},
+		WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
+			tagsStatMap, err := pages.recordsOp.Tags(nil, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при recordsOp.Tags()", req)
+			}
 
-		selectorTagged := selectors.Term{
-			Key:    records.HasTag,
-			Values: []string{tag},
-		}
+			htmlTags := pages.notebookHTMLOp.HTMLTags(tagsStatMap, identity)
+			//if err != nil {
+			//	return ErrorPage(0, notebookHTMLOp, err, "при notebookHTMLOp.HTMLTags()", req)
+			//}
 
-		rs, err := recordsOp.List(&selectorTagged, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при recordsOp.List()", req)
-		}
+			fragments := server_http.CommonFragments(
+				"теґи",
+				"Теґи",
+				"", "", "",
+				"Розділи (теми) цієї бази даних: \n<p>"+htmlTags,
+			)
 
-		fragments, err := notebookHTMLOp.FragmentsListTagged(tag, rs, identity)
-		if err != nil {
-			return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsView()", req)
-		}
+			return server_http.ResponsePage{
+				Status:    http.StatusOK,
+				Fragments: fragments,
+			}, nil
 
-		return server_http.ResponsePage{
-			Status:    http.StatusOK,
-			Fragments: fragments,
-		}, nil
+		},
+	}
+}
 
-	},
+func (pages *notebookPages) tagged() server_http.EndpointPage {
+	return server_http.EndpointPage{
+
+		EndpointDescription: server_http.EndpointDescription{
+			Method:     "GET",
+			PathParams: []string{"tag"},
+		},
+		WorkerHTTPPage: func(serverOp server_http.OperatorV2, req *http.Request, params server_http.PathParams, identity *auth.Identity) (server_http.ResponsePage, error) {
+			tag := tags.Item(params["tag"])
+
+			selectorTagged := selectors.Term{
+				Key:    records.HasTag,
+				Values: []string{tag},
+			}
+
+			rs, err := pages.recordsOp.List(&selectorTagged, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при recordsOp.List()", req)
+			}
+
+			fragments, err := pages.notebookHTMLOp.FragmentsListTagged(tag, rs, identity)
+			if err != nil {
+				return server_http.ErrorPage(0, err, "при notebookHTMLOp.FragmentsView()", req)
+			}
+
+			return server_http.ResponsePage{
+				Status:    http.StatusOK,
+				Fragments: fragments,
+			}, nil
+
+		},
+	}
 }

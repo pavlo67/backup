@@ -1,4 +1,4 @@
-package catalogue
+package items
 
 import (
 	"github.com/pavlo67/common/common/auth"

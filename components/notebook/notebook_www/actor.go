@@ -9,7 +9,6 @@ import (
 
 	"github.com/pavlo67/tools/common/actor"
 	"github.com/pavlo67/tools/common/kv"
-	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 	"github.com/pavlo67/tools/common/thread"
 	"github.com/pavlo67/tools/components/notebook/notebook_server_http"
 
@@ -30,16 +29,15 @@ func Actor(modifyMenu thread.FIFOKVItemsAdd, config actor.Config) actor.Operator
 			Title: config.Title,
 		},
 	})
+
 	return &notebookActor{
 		actorConfig: config,
-		pagesConfig: notebook_server_http.PagesConfig,
 		modifyMenu:  modifyMenu,
 	}
 }
 
 type notebookActor struct {
 	actorConfig actor.Config
-	pagesConfig server_http.ConfigPages
 	modifyMenu  thread.FIFOKVItemsAdd
 }
 
@@ -56,8 +54,6 @@ func (na *notebookActor) Starters() ([]starter.Starter, error) {
 		return nil, fmt.Errorf("notebookActor == nil")
 	}
 
-	prefix := na.actorConfig.Prefix
-
 	starters := []starter.Starter{
 		// general purposes components
 		{db_sqlite.Starter(), nil},
@@ -71,7 +67,7 @@ func (na *notebookActor) Starters() ([]starter.Starter, error) {
 		// notebook components
 		// {files_fs.Starter(), filesOptions},
 		{records_sqlite.Starter(), nil},
-		{notebook_server_http.Starter(), common.Map{"prefix": prefix}},
+		{notebook_server_http.Starter(), common.Map{"prefix": na.actorConfig.Prefix}},
 
 		// action managers
 
@@ -82,12 +78,12 @@ func (na *notebookActor) Starters() ([]starter.Starter, error) {
 	return starters, nil
 }
 
-func (na *notebookActor) Config() (*actor.Config, *server_http.Config, *server_http.ConfigPages, error) {
+func (na *notebookActor) Config() (*actor.Config, error) {
 	if na == nil {
-		return nil, nil, nil, fmt.Errorf("notebookActor == nil")
+		return nil, fmt.Errorf("notebookActor == nil")
 	}
 
-	return &na.actorConfig, nil, &na.pagesConfig, nil
+	return &na.actorConfig, nil
 }
 
 //func ClientComponents() ([]starter.Starter, error) {

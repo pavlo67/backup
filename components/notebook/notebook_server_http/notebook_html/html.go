@@ -28,22 +28,22 @@ const onNew = "on HTMLOp.New(): "
 
 var l logger.Operator
 
-func New(pagesConfig server_http.ConfigPages, lCommon logger.Operator) (*HTMLOp, error) { // , restConfig
+func New(configPages server_http.ConfigPages, lCommon logger.Operator) (*HTMLOp, error) { // , restConfig
 	if lCommon == nil {
 		return nil, fmt.Errorf(onNew + ": no logger.Operator")
 	}
 
-	epCreate, err := server_http.CheckGet0(pagesConfig, notebook.IntefaceKeyHTMLCreate, false)
+	epCreate, err := server_http.CheckGet0(configPages, notebook.IntefaceKeyHTMLCreate, false)
 	if err != nil {
 		return nil, errors.CommonError(err, onNew)
 	}
 
-	epView, err := server_http.CheckGet1(pagesConfig, notebook.IntefaceKeyHTMLView, false)
+	epView, err := server_http.CheckGet1(configPages, notebook.IntefaceKeyHTMLView, false)
 	if err != nil {
 		return nil, errors.CommonError(err, onNew)
 	}
 
-	epTagged, err := server_http.CheckGet1(pagesConfig, notebook.IntefaceKeyHTMLTagged, false)
+	epTagged, err := server_http.CheckGet1(configPages, notebook.IntefaceKeyHTMLTagged, false)
 	if err != nil {
 		return nil, errors.CommonError(err, onNew)
 	}

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/pavlo67/tools/components/catalogue/catalogue_www"
+
 	"github.com/pavlo67/tools/components/notebook/notebook_www"
 
 	"github.com/pavlo67/common/common/apps"
@@ -56,6 +57,9 @@ func main() {
 	if err = cfgService.Value("actors", &actorConfigs); err != nil {
 		l.Fatalf(`on cfgService.Value("actors", &actorConfigs): %s`, err)
 	}
+
+	//l.Infof("%#v", actorConfigs["catalogue_home"])
+	//l.Fatalf("%#v", actorConfigs["catalogue_cinnamon"])
 
 	actorsWWW := []actor.OperatorWWW{
 		notebook_www.Actor(processMenu, actorConfigs["notebook"]),

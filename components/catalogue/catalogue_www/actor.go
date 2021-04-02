@@ -9,11 +9,10 @@ import (
 	"github.com/pavlo67/tools/common/actor"
 	"github.com/pavlo67/tools/common/files/files_fs"
 	"github.com/pavlo67/tools/common/kv"
-	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 	"github.com/pavlo67/tools/common/thread"
-	"github.com/pavlo67/tools/components/catalogue/catalogue_server_http"
 
-	"github.com/pavlo67/tools/entities/catalogue/catalogue_files"
+	"github.com/pavlo67/tools/components/catalogue/catalogue_server_http"
+	"github.com/pavlo67/tools/entities/items/catalogue_files"
 
 	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
 )
@@ -33,14 +32,12 @@ func Actor(modifyMenu thread.FIFOKVItemsAdd, config actor.Config) actor.Operator
 
 	return &catalogueActor{
 		actorConfig: config,
-		pagesConfig: catalogue_server_http.PagesConfig,
 		modifyMenu:  modifyMenu,
 	}
 }
 
 type catalogueActor struct {
 	actorConfig actor.Config
-	pagesConfig server_http.ConfigPages
 	modifyMenu  thread.FIFOKVItemsAdd
 }
 
@@ -56,8 +53,6 @@ func (ca *catalogueActor) Starters() ([]starter.Starter, error) {
 		return nil, fmt.Errorf("catalogueActor == nil")
 	}
 
-	prefix := ca.actorConfig.Prefix
-
 	filesFSConfigKey := ca.actorConfig.Options["files_fs"].StringDefault("config_key", "")
 
 	//log.Printf("%s --> %#v --> %s", ca.actorConfig.Prefix, ca.actorConfig.Options, filesFSConfigKey)
@@ -65,15 +60,15 @@ func (ca *catalogueActor) Starters() ([]starter.Starter, error) {
 	starters := []starter.Starter{
 		{files_fs.Starter(), common.Map{"config_key": filesFSConfigKey}},
 		{catalogue_files.Starter(), nil},
-		{catalogue_server_http.Starter(), common.Map{"prefix": prefix}}}
+		{catalogue_server_http.Starter(), common.Map{"prefix": ca.actorConfig.Prefix}}}
 
 	return starters, nil
 }
 
-func (ca *catalogueActor) Config() (*actor.Config, *server_http.Config, *server_http.ConfigPages, error) {
+func (ca *catalogueActor) Config() (*actor.Config, error) {
 	if ca == nil {
-		return nil, nil, nil, fmt.Errorf("catalogueActor == nil")
+		return nil, fmt.Errorf("catalogueActor == nil")
 	}
 
-	return &ca.actorConfig, nil, &ca.pagesConfig, nil
+	return &ca.actorConfig, nil
 }

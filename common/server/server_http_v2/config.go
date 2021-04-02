@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/pavlo67/common/common"
@@ -45,21 +44,6 @@ type ConfigCommon struct {
 	Host    string
 	Port    string
 	Prefix  string
-}
-
-func (c *ConfigCommon) Complete(host string, port int, prefix string) error {
-	if c == nil {
-		return nil // errors.New("no server_http.Config to complete")
-	}
-
-	var portStr string
-	if port > 0 {
-		portStr = ":" + strconv.Itoa(port)
-	}
-
-	c.Host, c.Port, c.Prefix = host, portStr, prefix
-
-	return nil
 }
 
 // Config -----------------------------------------------------------------------------------

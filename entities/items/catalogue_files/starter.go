@@ -3,8 +3,6 @@ package catalogue_files
 import (
 	"fmt"
 
-	"github.com/pavlo67/tools/entities/catalogue"
-
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/errors"
@@ -12,6 +10,7 @@ import (
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
 	"github.com/pavlo67/tools/common/files"
+	"github.com/pavlo67/tools/entities/items"
 )
 
 func Starter() starter.Operator {
@@ -36,8 +35,8 @@ func (ffs *catalogueFilesStarter) Name() string {
 func (ffs *catalogueFilesStarter) Prepare(cfg *config.Config, options common.Map) error {
 
 	ffs.fileKey = joiner.InterfaceKey(options.StringDefault("files_key", string(files.InterfaceKey)))
-	ffs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(catalogue.InterfaceKey)))
-	ffs.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(catalogue.InterfaceKeyCleaner)))
+	ffs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(items.InterfaceKey)))
+	ffs.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(items.InterfaceKeyCleaner)))
 
 	return nil
 }
