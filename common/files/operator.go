@@ -31,6 +31,9 @@ func (fis Items) Append(basePath string, info os.FileInfo) (Items, error) {
 	//}
 
 	if info.IsDir() {
+		if path != "" && path[len(path)-1] != '/' {
+			path += "/"
+		}
 		fis = append(fis, Item{
 			Path: path,
 			// Path:      path[len(basePath):],

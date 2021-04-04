@@ -46,8 +46,6 @@ func (ffs *catalogueFilesStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
-	l.Infof("!!!!!!!!!!!", ffs.fileKey)
-
 	filesOp, _ := joinerOp.Interface(ffs.fileKey).(files.Operator)
 	if filesOp == nil {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)

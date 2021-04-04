@@ -30,7 +30,7 @@ func New(basePath string) (files.Operator, db.Cleaner, error) {
 		return nil, nil, fmt.Errorf(onNew+": creating base path '%s' got %s", basePath, err)
 	}
 
-	l.Infof("%s --> %s", basePath, filesOp.basePath)
+	// l.Infof("%s --> %s", basePath, filesOp.basePath)
 
 	return &filesOp, &filesOp, nil
 }
