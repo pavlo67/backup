@@ -3,6 +3,8 @@ package catalogue_files
 import (
 	"testing"
 
+	"github.com/pavlo67/common/common/files/files_fs"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common"
@@ -10,7 +12,7 @@ import (
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/starter"
 
-	"github.com/pavlo67/tools/common/files"
+	"github.com/pavlo67/common/common/files"
 )
 
 func TestFilesFS(t *testing.T) {
@@ -22,6 +24,7 @@ func TestFilesFS(t *testing.T) {
 	require.NoErrorf(t, err, "%#v", cfgService)
 
 	components := []starter.Starter{
+		{files_fs.Starter(), nil},
 		{Starter(), common.Map{"base_path": cfg.Path}},
 	}
 

@@ -2,7 +2,7 @@ package catalogue
 
 import (
 	"github.com/pavlo67/common/common/joiner"
-	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
+	"github.com/pavlo67/common/common/server/server_http"
 )
 
 const InterfaceKey joiner.InterfaceKey = "catalogue_www"

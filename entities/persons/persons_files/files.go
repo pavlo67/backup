@@ -1,7 +1,7 @@
 package persons_files
 
 import (
-	"github.com/pavlo67/tools/common/files"
+	"github.com/pavlo67/common/common/files"
 
 	_ "github.com/GehirnInc/crypt/sha256_crypt"
 

@@ -3,9 +3,9 @@ package catalogue_server_http
 import (
 	"path"
 
-	"github.com/pavlo67/tools/common/files"
-
 	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/files"
+
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 )
 

@@ -233,6 +233,8 @@ github.com/onsi/gomega v1.9.0/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoT
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pavlo67/common v0.1.11 h1:HRSETXzBV+F+wdMFJ8ZjWVEsP/nVZFfzSnqRZJNRn0s=
 github.com/pavlo67/common v0.1.11/go.mod h1:URj2WuuL552B2paIv3hRP9Kz0uSkHWDfqhu4F897oCo=
+github.com/pavlo67/common v0.1.12 h1:ubKtz+SA8YYT+8MXC1IBPGtFaY4GJfy5Cc0cLnB8v1Y=
+github.com/pavlo67/common v0.1.12/go.mod h1:URj2WuuL552B2paIv3hRP9Kz0uSkHWDfqhu4F897oCo=
 github.com/pavlo67/data_exchange v0.1.0 h1:/ehIfFmSjfkZ0yH3dzHWs3Me6/IJ6cACdoUwuU7ev6s=
 github.com/pavlo67/data_exchange v0.1.0/go.mod h1:MLzmJSwd2Gt91/ZoDGCnFQSP4iN2ZXAG9p/M4btMqYc=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=

@@ -8,8 +8,8 @@ import (
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
+	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pavlo67/common/common/starter"
-	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
 
 	"github.com/pavlo67/tools/entities/records"
 )

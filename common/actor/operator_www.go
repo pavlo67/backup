@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/pavlo67/common/common/server/server_http"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/control"
@@ -11,7 +13,7 @@ import (
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
 
-	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
+	server_http_v2 "github.com/pavlo67/tools/common/server/server_http_v2"
 	"github.com/pavlo67/tools/common/server/server_http_v2/server_http_v2_jschmhr"
 	"github.com/pavlo67/tools/common/thread"
 )
@@ -20,13 +22,13 @@ type OperatorWWW interface {
 	Name() string
 	Starters() ([]starter.Starter, error)
 	Config() (*Config, error)
-	//Root() *server_http.Endpoint
-	//Details() *server_http.Endpoint
-	//Accept() *server_http.Endpoint
-	//Search() *server_http.Endpoint
+	//Root() *server_http_v2.EndpointREST
+	//Details() *server_http_v2.EndpointREST
+	//Accept() *server_http_v2.EndpointREST
+	//Search() *server_http_v2.EndpointREST
 }
 
-func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *config.Config, l logger.Operator) (joiner.Operator, error) {
+func RunOneWWW(srvOp server_http_v2.OperatorV2, actorWWW OperatorWWW, cfgService *config.Config, l logger.Operator) (joiner.Operator, error) {
 	starters, err := actorWWW.Starters()
 	if err != nil {
 		return nil, err
@@ -37,16 +39,16 @@ func RunOneWWW(srvOp server_http.OperatorV2, actorWWW OperatorWWW, cfgService *c
 		return joinerOp, err
 	}
 
-	var configPages *server_http.ConfigPages
+	var configPages *server_http_v2.ConfigPages
 	switch v := joinerOp.Interface(ConfigPages).(type) {
-	case server_http.ConfigPages:
+	case server_http_v2.ConfigPages:
 		configPages = &v
-	case *server_http.ConfigPages:
+	case *server_http_v2.ConfigPages:
 		configPages = v
 	}
 
 	if configPages == nil {
-		return joinerOp, fmt.Errorf("no server_http.ConfigPages is exported")
+		return joinerOp, fmt.Errorf("no server_http_v2.ConfigPages is exported")
 	}
 
 	//// port, _ := srvOp.Addr()
@@ -84,9 +86,9 @@ func RunWWW(cfgService *config.Config, label, htmlTemplate, staticPath string, p
 		return joinerOps, err
 	}
 
-	srvOp, _ := joinerOp.Interface(server_http.InterfaceKey).(server_http.OperatorV2)
+	srvOp, _ := joinerOp.Interface(server_http.InterfaceKey).(server_http_v2.OperatorV2)
 	if srvOp == nil {
-		return joinerOps, fmt.Errorf("no server_http.OperatorV2 with key %s", server_http.InterfaceKey)
+		return joinerOps, fmt.Errorf("no server_http_v2.OperatorV2 with key %s", server_http.InterfaceKey)
 	}
 
 	if err = srvOp.HandleFiles("static", "/static/", server_http.StaticPath{LocalPath: staticPath}); err != nil {

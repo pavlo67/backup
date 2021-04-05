@@ -6,7 +6,7 @@ import (
 	"github.com/pavlo67/common/common/db"
 	"github.com/pavlo67/common/common/errors"
 
-	"github.com/pavlo67/tools/common/files"
+	"github.com/pavlo67/common/common/files"
 	"github.com/pavlo67/tools/entities/items"
 )
 

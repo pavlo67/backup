@@ -3,7 +3,7 @@ package persons_files
 import (
 	"fmt"
 
-	"github.com/pavlo67/tools/common/files"
+	"github.com/pavlo67/common/common/files"
 
 	"github.com/pkg/errors"
 

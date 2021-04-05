@@ -2,7 +2,7 @@ package items
 
 import (
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/tools/common/files"
+	"github.com/pavlo67/common/common/files"
 )
 
 type Items = files.Items

@@ -6,10 +6,11 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/files"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
-	"github.com/pavlo67/tools/common/files"
+
 	"github.com/pavlo67/tools/entities/items"
 )
 
@@ -48,7 +49,7 @@ func (ffs *catalogueFilesStarter) Run(joinerOp joiner.Operator) error {
 
 	filesOp, _ := joinerOp.Interface(ffs.fileKey).(files.Operator)
 	if filesOp == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+		return fmt.Errorf("no files.Operator with key %s", ffs.fileKey)
 	}
 
 	catalogueOp, catalogueCleanerOp, err := New(filesOp)

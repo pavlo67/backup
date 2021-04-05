@@ -9,21 +9,22 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/server/server_http"
 
-	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
+	server_http_v2 "github.com/pavlo67/tools/common/server/server_http_v2"
 )
 
 // REST ----------------------------------------------------------------------------------------------------
 
-var _ server_http.WrapperHTTP = WrapperHTTPREST
+var _ server_http_v2.WrapperHTTP = WrapperHTTPREST
 
-func WrapperHTTPREST(serverOpV2 server_http.OperatorV2, serverPath string, data interface{}) (string, string, server_http.HandlerHTTP, error) {
-	var ep *server_http.Endpoint
+func WrapperHTTPREST(serverOpV2 server_http_v2.OperatorV2, serverPath string, data interface{}) (string, string, server_http_v2.HandlerHTTP, error) {
+	var ep *server_http_v2.EndpointREST
 
 	switch v := data.(type) {
-	case server_http.Endpoint:
+	case server_http_v2.EndpointREST:
 		ep = &v
-	case *server_http.Endpoint:
+	case *server_http_v2.EndpointREST:
 		ep = v
 	}
 
@@ -51,7 +52,7 @@ func WrapperHTTPREST(serverOpV2 server_http.OperatorV2, serverPath string, data 
 		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
 		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
 
-		responseData, err := ep.WorkerHTTP(serverOpV2, r, params, identity)
+		responseData, err := ep.WorkerHTTPv2(serverOpV2, r, params, identity)
 		if err != nil {
 			l.Error(err)
 		}

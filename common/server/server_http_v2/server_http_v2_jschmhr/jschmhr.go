@@ -12,10 +12,12 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/pavlo67/common/common/errors"
-	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
+	"github.com/pavlo67/common/common/server/server_http"
+
+	server_http_v2 "github.com/pavlo67/tools/common/server/server_http_v2"
 )
 
-var _ server_http.OperatorV2 = &serverHTTPJschmhr{}
+var _ server_http_v2.OperatorV2 = &serverHTTPJschmhr{}
 
 type serverHTTPJschmhr struct {
 	httpServer   *http.Server
@@ -25,18 +27,18 @@ type serverHTTPJschmhr struct {
 	tlsCertFile string
 	tlsKeyFile  string
 
-	// onRequest server_http.OnRequestMiddleware
+	// onRequest server_http_v2.OnRequestMiddleware
 
-	wrappersHTTP map[server_http.WrapperHTTPKey]server_http.WrapperHTTP
+	wrappersHTTP map[server_http_v2.WrapperHTTPKey]server_http_v2.WrapperHTTP
 }
 
-func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnRequestMiddleware, wrappersHTTP map[server_http.WrapperHTTPKey]server_http.WrapperHTTP) (server_http.OperatorV2, error) {
+func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnRequestMiddleware, wrappersHTTP map[server_http_v2.WrapperHTTPKey]server_http_v2.WrapperHTTP) (server_http_v2.OperatorV2, error) {
 	if port <= 0 {
 		return nil, fmt.Errorf("on server_http_jschmhr.New(): wrong port = %d", port)
 	}
 
 	//if onRequest == nil {
-	//	return nil, errors.New("on server_http_jschmhr.New(): no server_http.OnRequestMiddleware")
+	//	return nil, errors.New("on server_http_jschmhr.New(): no server_http_v2.OnRequestMiddleware")
 	//}
 
 	router := httprouter.New()
@@ -80,7 +82,7 @@ func (s *serverHTTPJschmhr) Addr() (port int, https bool) {
 
 const onHandle = "on serverHTTPJschmhr.Handle()"
 
-func (s *serverHTTPJschmhr) Handle(key server_http.EndpointKey, serverPath string, wrapperHTTPKey server_http.WrapperHTTPKey, data interface{}) error {
+func (s *serverHTTPJschmhr) Handle(key server_http.EndpointKey, serverPath string, wrapperHTTPKey server_http_v2.WrapperHTTPKey, data interface{}) error {
 	wrapperHTTP := s.wrappersHTTP[wrapperHTTPKey]
 	if wrapperHTTP == nil {
 		return fmt.Errorf(onHandle+": wrong wrapperHTTPKey (%s) on %s [%s]", wrapperHTTPKey, key, serverPath)

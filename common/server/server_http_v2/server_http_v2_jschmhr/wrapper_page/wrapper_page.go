@@ -5,28 +5,30 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/pavlo67/common/common/logger"
-
 	"github.com/cbroglie/mustache"
 	"github.com/julienschmidt/httprouter"
+
 	"github.com/pavlo67/common/common/auth"
-	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
+	"github.com/pavlo67/common/common/logger"
+	"github.com/pavlo67/common/common/server/server_http"
+
+	server_http_v2 "github.com/pavlo67/tools/common/server/server_http_v2"
 )
 
 // Page ----------------------------------------------------------------------------------------------------
 
 type CommonFragments interface {
-	Set(fragments server_http.Fragments) (server_http.Fragments, error)
+	Set(fragments server_http_v2.Fragments) (server_http_v2.Fragments, error)
 }
 
-func WrapperHTTPPage(htmlTemplate string, commonFragments CommonFragments, l logger.Operator) server_http.WrapperHTTP {
-	return func(serverOpV2 server_http.OperatorV2, serverPath string, data interface{}) (string, string, server_http.HandlerHTTP, error) {
-		var ep *server_http.EndpointPage
+func WrapperHTTPPage(htmlTemplate string, commonFragments CommonFragments, l logger.Operator) server_http_v2.WrapperHTTP {
+	return func(serverOpV2 server_http_v2.OperatorV2, serverPath string, data interface{}) (string, string, server_http_v2.HandlerHTTP, error) {
+		var ep *server_http_v2.EndpointPage
 
 		switch v := data.(type) {
-		case server_http.EndpointPage:
+		case server_http_v2.EndpointPage:
 			ep = &v
-		case *server_http.EndpointPage:
+		case *server_http_v2.EndpointPage:
 			ep = v
 		}
 
@@ -60,7 +62,7 @@ func WrapperHTTPPage(htmlTemplate string, commonFragments CommonFragments, l log
 				w.WriteHeader(http.StatusOK)
 			}
 
-			var fragments server_http.Fragments
+			var fragments server_http_v2.Fragments
 			if commonFragments == nil {
 				fragments = responseData.Fragments
 			} else if fragments, err = commonFragments.Set(responseData.Fragments); err != nil {

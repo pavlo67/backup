@@ -3,12 +3,6 @@ package server_http_v2_jschmhr
 import (
 	"fmt"
 
-	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
-
-	"github.com/pavlo67/tools/common/thread"
-
-	"github.com/pavlo67/tools/common/server/server_http_v2/server_http_v2_jschmhr/wrapper_page"
-
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
@@ -16,8 +10,14 @@ import (
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server"
+	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pavlo67/common/common/starter"
-	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
+
+	server_http_v2 "github.com/pavlo67/tools/common/server/server_http_v2"
+	"github.com/pavlo67/tools/common/server/server_http_v2/server_http_v2_jschmhr/wrapper_page"
+	"github.com/pavlo67/tools/common/thread"
+
+	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
 )
 
 func Starter() starter.Operator {
@@ -65,8 +65,8 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 	//	return fmt.Errorf("no server_http.OnRequestMiddleware with key %s", server_http.OnRequestMiddlewareInterfaceKey)
 	//}
 
-	wrappersHTTP := map[server_http.WrapperHTTPKey]server_http.WrapperHTTP{
-		server_http.WrapperHTTPREST: WrapperHTTPREST,
+	wrappersHTTP := map[server_http_v2.WrapperHTTPKey]server_http_v2.WrapperHTTP{
+		server_http_v2.WrapperHTTPREST: WrapperHTTPREST,
 	}
 	if ss.htmlTemplate != "" {
 		var processMenu wrapper_page.CommonFragments
@@ -75,7 +75,7 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 			processMenu = &nb_www_menu.SetMenu{Process: ss.processMenu}
 		}
 
-		wrappersHTTP[server_http.WrapperHTTPPage] = wrapper_page.WrapperHTTPPage(
+		wrappersHTTP[server_http_v2.WrapperHTTPPage] = wrapper_page.WrapperHTTPPage(
 			ss.htmlTemplate,
 			processMenu,
 			l,
