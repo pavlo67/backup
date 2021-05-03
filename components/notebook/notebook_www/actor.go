@@ -12,7 +12,7 @@ import (
 	"github.com/pavlo67/tools/common/thread"
 	"github.com/pavlo67/tools/components/notebook/notebook_server_http"
 
-	"github.com/pavlo67/tools/entities/records/records_sqlite"
+	"github.com/pavlo67/data/entities/records/records_sqlite"
 
 	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
 )

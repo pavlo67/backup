@@ -3,14 +3,14 @@ package notebook_html
 import (
 	"strings"
 
-	"github.com/pavlo67/data_exchange/components/ns"
-	"github.com/pavlo67/data_exchange/components/structures"
+	"github.com/pavlo67/data/components/ns"
+	"github.com/pavlo67/data/components/structures"
 
 	"github.com/pavlo67/common/common"
 
-	"github.com/pavlo67/data_exchange/components/tags"
+	"github.com/pavlo67/data/components/tags"
+	"github.com/pavlo67/data/entities/records"
 	"github.com/pavlo67/tools/common/views/views_html"
-	"github.com/pavlo67/tools/entities/records"
 )
 
 var dataFields = []views_html.Field{

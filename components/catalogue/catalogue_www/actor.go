@@ -11,8 +11,8 @@ import (
 	"github.com/pavlo67/tools/common/kv"
 	"github.com/pavlo67/tools/common/thread"
 
+	"github.com/pavlo67/data/entities/items/catalogue_files"
 	"github.com/pavlo67/tools/components/catalogue/catalogue_server_http"
-	"github.com/pavlo67/tools/entities/items/catalogue_files"
 
 	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
 )

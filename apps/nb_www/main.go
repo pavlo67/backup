@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/pavlo67/tools/components/catalogue/catalogue_www"
@@ -17,17 +19,19 @@ import (
 	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
 )
 
-var (
-	BuildDate   = ""
-	BuildTag    = ""
-	BuildCommit = ""
-)
+var BuildDate, BuildTag, BuildCommit string
+var versionOnly bool
 
 func main() {
-	versionOnly, _, cfgService, l := apps.Prepare(BuildDate, BuildTag, BuildCommit, "_environments/")
+	log.Printf("builded: %s, tag: %s, commit: %s\n", BuildDate, BuildTag, BuildCommit)
+	flag.BoolVar(&versionOnly, "v", false, "show build vars only")
+	flag.Parse()
+
 	if versionOnly {
 		return
 	}
+
+	_, cfgService, l := apps.Prepare("_environments/")
 
 	// static files & templates preparation --------------------------------------------------------
 

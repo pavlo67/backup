@@ -2,10 +2,10 @@ package notebook_html
 
 import (
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/data_exchange/components/ns"
-	"github.com/pavlo67/data_exchange/components/tags"
+	"github.com/pavlo67/data/components/ns"
+	"github.com/pavlo67/data/components/tags"
+	"github.com/pavlo67/data/entities/records"
 	server_http "github.com/pavlo67/tools/common/server/server_http_v2"
-	"github.com/pavlo67/tools/entities/records"
 )
 
 const No = `<b style="size:18px;">»</b> `

@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
 
-	"github.com/pavlo67/tools/entities/items"
+	"github.com/pavlo67/data/entities/items"
 )
 
 const InterfaceKey joiner.InterfaceKey = "catalogue_server_http"

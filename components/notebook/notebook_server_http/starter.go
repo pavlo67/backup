@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
 
-	"github.com/pavlo67/tools/entities/records"
+	"github.com/pavlo67/data/entities/records"
 )
 
 const InterfaceKey joiner.InterfaceKey = "notebook_server_http"

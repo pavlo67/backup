@@ -10,7 +10,7 @@ import (
 
 	server_http_v2 "github.com/pavlo67/tools/common/server/server_http_v2"
 
-	"github.com/pavlo67/tools/entities/items"
+	"github.com/pavlo67/data/entities/items"
 
 	"github.com/pavlo67/tools/components/catalogue"
 )

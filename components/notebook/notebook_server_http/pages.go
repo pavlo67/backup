@@ -14,9 +14,9 @@ import (
 	"github.com/pavlo67/common/common/selectors"
 	server_http_v2 "github.com/pavlo67/tools/common/server/server_http_v2"
 
-	"github.com/pavlo67/data_exchange/components/tags"
+	"github.com/pavlo67/data/components/tags"
 
-	"github.com/pavlo67/tools/entities/records"
+	"github.com/pavlo67/data/entities/records"
 
 	"github.com/pavlo67/tools/components/notebook"
 	"github.com/pavlo67/tools/components/notebook/notebook_server_http/notebook_html"
