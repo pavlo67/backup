@@ -30,17 +30,17 @@ func main() {
 
 	envPath, cfgService, l := apps.Prepare("_environments/")
 	if cfgService == nil {
-		l.Fatalf(`on apps.Prepare("_environments/") got nil cfgService`)
+		l.Fatalf(`on apps.Run("_environments/") got nil cfgService`)
 	}
 
 	// server preparation --------------------------------------------------------------------------
 
-	srvOp, commonChannel := app_www_layout.Serve(*cfgService, l)
+	srvOp, commonChannel := app_www_layout.Run(*cfgService, l)
 
 	// starting actors -----------------------------------------------------------------------------
 
 	actorsWWW := []actor_www.Actor{
-		{"nb", "nb", "нотатник", notebook_www.Actor()},
+		{"nb", "/nb", "нотатник", notebook_www.Actor()},
 
 		//catalogue_www2.Actor(commonChannel, actorConfigs["catalogue_home"]),
 		//catalogue_www2.Actor(commonChannel, actorConfigs["catalogue_cinnamon"]),
@@ -56,6 +56,7 @@ func main() {
 		}
 
 		joinerOp, configPages, err := actorWWW.Run(*cfgService, l, actorWWW.Prefix, actor_www.Config{
+			Key:      actorWWW.Key,
 			Title:    actorWWW.Title,
 			Callback: commonChannel,
 		})

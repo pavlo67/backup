@@ -20,7 +20,7 @@ import (
 	"github.com/pavlo67/tools/common/thread"
 )
 
-func Serve(cfgService config.Config, l logger.Operator) (server_http_v2.OperatorV2, thread.KV) {
+func Run(cfgService config.Config, l logger.Operator) (server_http_v2.OperatorV2, thread.KV) {
 	commonChannel, err := thread.NewKV(&MenuWWW{})
 	if err != nil {
 		l.Fatalf("on thread.NewKV(): %s", err)

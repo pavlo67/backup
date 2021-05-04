@@ -81,10 +81,18 @@ func (na *notebookActor) Run(cfgService config.Config, l logger.Operator, prefix
 
 	}
 
+	if len(prefix) == 0 || prefix[0] != '/' {
+		prefix = "/" + prefix
+	}
+
+	if config.Key == "" {
+		config.Key = prefix
+	}
+
 	config.Callback.Add(kv.Item{
-		Key: []string{prefix},
+		Key: []string{config.Key},
 		Value: app_www_layout.MenuItemWWW{
-			HRef:  "/" + prefix,
+			HRef:  prefix,
 			Title: config.Title,
 		},
 	})

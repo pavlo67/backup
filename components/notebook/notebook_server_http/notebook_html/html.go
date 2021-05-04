@@ -32,6 +32,7 @@ func New(configPages server_http.ConfigPages, lCommon logger.Operator) (*HTMLOp,
 	if lCommon == nil {
 		return nil, fmt.Errorf(onNew + ": no logger.Operator")
 	}
+	l = lCommon
 
 	epCreate, err := server_http.CheckGet0(configPages, notebook.IntefaceKeyHTMLCreate, false)
 	if err != nil {

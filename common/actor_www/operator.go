@@ -13,6 +13,7 @@ type ConfigPages = server_http_v2.ConfigPages
 
 type Config struct {
 	//Name string
+	Key      string
 	Title    string
 	Callback thread.KVAdd
 }
