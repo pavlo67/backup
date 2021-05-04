@@ -3,7 +3,7 @@ package notebook_server_http
 import (
 	"fmt"
 
-	"github.com/pavlo67/tools/common/actor"
+	"github.com/pavlo67/tools/common/actor_www"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
@@ -68,8 +68,8 @@ func (nshs *notebookServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf(onRun+": can't newNotebookPages(), got %#v / %s", np, err)
 	}
 
-	if err := joinerOp.Join(np, actor.ConfigPages); err != nil {
-		return fmt.Errorf(onRun+": can't join *configPages with key %s, got %s", actor.ConfigPages, err)
+	if err := joinerOp.Join(np, actor_www.ConfigPagesInterfaceKey); err != nil {
+		return fmt.Errorf(onRun+": can't join *configPages with key %s, got %s", actor_www.ConfigPagesInterfaceKey, err)
 	}
 
 	return nil

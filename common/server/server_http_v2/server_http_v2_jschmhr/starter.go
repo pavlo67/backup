@@ -3,6 +3,8 @@ package server_http_v2_jschmhr
 import (
 	"fmt"
 
+	"github.com/pavlo67/tools/common/actor_www"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
@@ -13,11 +15,8 @@ import (
 	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pavlo67/common/common/starter"
 
-	server_http_v2 "github.com/pavlo67/tools/common/server/server_http_v2"
+	"github.com/pavlo67/tools/common/server/server_http_v2"
 	"github.com/pavlo67/tools/common/server/server_http_v2/server_http_v2_jschmhr/wrapper_page"
-	"github.com/pavlo67/tools/common/thread"
-
-	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
 )
 
 func Starter() starter.Operator {
@@ -28,9 +27,9 @@ var l logger.Operator
 var _ starter.Operator = &server_http_jschmhrStarter{}
 
 type server_http_jschmhrStarter struct {
-	config       server.Config
-	htmlTemplate string
-	processMenu  thread.FIFOKVItemsGetString
+	config          server.Config
+	htmlTemplate    string
+	commonFragments wrapper_page.CommonFragments
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -41,8 +40,10 @@ func (ss *server_http_jschmhrStarter) Name() string {
 
 func (ss *server_http_jschmhrStarter) Prepare(cfg *config.Config, options common.Map) error {
 	ss.htmlTemplate = options.StringDefault("html_template", "")
-	if ss.processMenu, _ = options["process_menu"].(thread.FIFOKVItemsGetString); ss.processMenu == nil {
-		return fmt.Errorf("no thread.FIFOKVItemsGetString in options[process_menu]: %#v", options)
+	ss.commonFragments, _ = options[string(actor_www.CommonFragmentsInterfaceKey)].(wrapper_page.CommonFragments)
+
+	if ss.htmlTemplate != "" && ss.commonFragments == nil {
+		return fmt.Errorf("no wrapper_page.CommonFragments in options[%s]: %#v", actor_www.CommonFragmentsInterfaceKey, options)
 	}
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
@@ -69,15 +70,9 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 		server_http_v2.WrapperHTTPREST: WrapperHTTPREST,
 	}
 	if ss.htmlTemplate != "" {
-		var processMenu wrapper_page.CommonFragments
-
-		if ss.processMenu != nil {
-			processMenu = &nb_www_menu.SetMenu{Process: ss.processMenu}
-		}
-
 		wrappersHTTP[server_http_v2.WrapperHTTPPage] = wrapper_page.WrapperHTTPPage(
 			ss.htmlTemplate,
-			processMenu,
+			ss.commonFragments,
 			l,
 		)
 	}

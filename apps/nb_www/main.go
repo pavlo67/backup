@@ -2,21 +2,16 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
 	"log"
-	"os"
-
-	"github.com/pavlo67/tools/components/catalogue/catalogue_www"
-
-	"github.com/pavlo67/tools/components/notebook/notebook_www"
+	"sync"
 
 	"github.com/pavlo67/common/common/apps"
-	"github.com/pavlo67/common/common/filelib"
+	"github.com/pavlo67/common/common/config"
 
-	"github.com/pavlo67/tools/common/actor"
-	"github.com/pavlo67/tools/common/thread"
+	"github.com/pavlo67/tools/common/actor_www"
 
-	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
+	"github.com/pavlo67/tools/app_parts/app_www_layout"
+	"github.com/pavlo67/tools/app_parts/notebook_www"
 )
 
 var BuildDate, BuildTag, BuildCommit string
@@ -31,58 +26,62 @@ func main() {
 		return
 	}
 
-	_, cfgService, l := apps.Prepare("_environments/")
+	// common environment preparation --------------------------------------------------------------
 
-	// static files & templates preparation --------------------------------------------------------
-
-	templatePath := filelib.CurrentPath() + "templates/local.html"
-	htmlTemplateBytes, err := ioutil.ReadFile(templatePath)
-	if err != nil {
-		l.Fatalf("reading template (%s): %s", templatePath, err)
+	envPath, cfgService, l := apps.Prepare("_environments/")
+	if cfgService == nil {
+		l.Fatalf(`on apps.Prepare("_environments/") got nil cfgService`)
 	}
 
-	staticPath := filelib.CurrentPath() + "static/"
-	fileInfo, err := os.Stat(staticPath)
-	if err != nil {
-		l.Fatalf("checking static files path (%s): %s", staticPath, err)
-	}
-	if !fileInfo.IsDir() {
-		l.Fatalf("static files path (%s) is not a directory", staticPath)
-	}
+	// server preparation --------------------------------------------------------------------------
 
-	// actors start --------------------------------------------------------------------------------
+	srvOp, commonChannel := app_www_layout.Serve(*cfgService, l)
 
-	processMenu, err := thread.NewFIFOKVItems(&nb_www_menu.MenuWWW{})
-	if err != nil {
-		l.Fatalf("on thread.NewFIFOKVItems(): %s", err)
+	// starting actors -----------------------------------------------------------------------------
+
+	actorsWWW := []actor_www.Actor{
+		{"nb", "nb", "нотатник", notebook_www.Actor()},
+
+		//catalogue_www2.Actor(commonChannel, actorConfigs["catalogue_home"]),
+		//catalogue_www2.Actor(commonChannel, actorConfigs["catalogue_cinnamon"]),
 	}
 
-	var actorConfigs map[string]actor.Config
-	if err = cfgService.Value("actors", &actorConfigs); err != nil {
-		l.Fatalf(`on cfgService.Value("actors", &actorConfigs): %s`, err)
-	}
+	var err error
 
-	//l.Infof("%#v", actorConfigs["catalogue_home"])
-	//l.Fatalf("%#v", actorConfigs["catalogue_cinnamon"])
+	for _, actorWWW := range actorsWWW {
+		cfgServicePath := envPath + actorWWW.Key + ".yaml"
+		cfgService, err = config.Get(cfgServicePath, config.MarshalerYAML)
+		if err != nil || cfgService == nil {
+			l.Fatalf("on config.Get(%s, serializer.MarshalerYAML)", cfgServicePath, cfgService, err)
+		}
 
-	actorsWWW := []actor.OperatorWWW{
-		notebook_www.Actor(processMenu, actorConfigs["notebook"]),
-		catalogue_www.Actor(processMenu, actorConfigs["catalogue_home"]),
-		catalogue_www.Actor(processMenu, actorConfigs["catalogue_cinnamon"]),
-	}
+		joinerOp, configPages, err := actorWWW.Run(*cfgService, l, actorWWW.Prefix, actor_www.Config{
+			Title:    actorWWW.Title,
+			Callback: commonChannel,
+		})
+		if err != nil {
+			l.Fatal(err)
+		}
+		defer joinerOp.CloseAll()
 
-	joinerOps, err := actor.RunWWW(
-		cfgService, "NB/HTML/REST BUILD",
-		string(htmlTemplateBytes), staticPath, processMenu,
-		actorsWWW,
-		l,
-	)
-	for _, joinerOp := range joinerOps {
-		if joinerOp != nil {
-			defer joinerOp.CloseAll()
+		if configPages != nil {
+			if err := configPages.HandlePages(srvOp, l); err != nil {
+				l.Fatal(err)
+			}
 		}
 	}
 
-	l.Fatal(err)
+	// starting http server ---------------------------------------------------------------
 
+	var WG sync.WaitGroup
+	WG.Add(1)
+
+	go func() {
+		defer WG.Done()
+		if err := srvOp.Start(); err != nil {
+			l.Error("on srvOp.Start(): ", err)
+		}
+	}()
+
+	WG.Wait()
 }

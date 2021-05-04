@@ -1,4 +1,4 @@
-package server_http
+package server_http_v2
 
 import "github.com/pavlo67/common/common/server/server_http"
 

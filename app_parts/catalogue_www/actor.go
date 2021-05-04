@@ -3,28 +3,28 @@ package catalogue_www
 import (
 	"fmt"
 
+	nb_www_menu2 "github.com/pavlo67/tools/app_parts/nb_www_menu"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/starter"
 
 	"github.com/pavlo67/common/common/files/files_fs"
-	"github.com/pavlo67/tools/common/actor"
+	"github.com/pavlo67/tools/common/actor_www"
 	"github.com/pavlo67/tools/common/kv"
 	"github.com/pavlo67/tools/common/thread"
 
 	"github.com/pavlo67/data/entities/items/catalogue_files"
 	"github.com/pavlo67/tools/components/catalogue/catalogue_server_http"
-
-	"github.com/pavlo67/tools/apps/nb_www/nb_www_menu"
 )
 
-var _ actor.OperatorWWW = &catalogueActor{}
+var _ actor_www.Operator = &catalogueActor{}
 
 // var key = logger.GetCallInfo().PackageName
 
-func Actor(modifyMenu thread.FIFOKVItemsAdd, config actor.Config) actor.OperatorWWW {
+func Actor(modifyMenu thread.KVAdd, config actor_www.ConfigPages) actor_www.Operator {
 	modifyMenu.Add(kv.Item{
 		Key: []string{config.Prefix},
-		Value: nb_www_menu.MenuItemWWW{
+		Value: nb_www_menu2.MenuItemWWW{
 			HRef:  "/" + config.Prefix + "/list",
 			Title: config.Title,
 		},
@@ -37,8 +37,8 @@ func Actor(modifyMenu thread.FIFOKVItemsAdd, config actor.Config) actor.Operator
 }
 
 type catalogueActor struct {
-	actorConfig actor.Config
-	modifyMenu  thread.FIFOKVItemsAdd
+	actorConfig actor_www.ConfigPages
+	modifyMenu  thread.KVAdd
 }
 
 func (ca *catalogueActor) Name() string {
@@ -65,7 +65,7 @@ func (ca *catalogueActor) Starters() ([]starter.Starter, error) {
 	return starters, nil
 }
 
-func (ca *catalogueActor) Config() (*actor.Config, error) {
+func (ca *catalogueActor) Config() (*actor_www.ConfigPages, error) {
 	if ca == nil {
 		return nil, fmt.Errorf("catalogueActor == nil")
 	}

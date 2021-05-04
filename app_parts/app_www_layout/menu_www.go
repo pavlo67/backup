@@ -1,4 +1,4 @@
-package nb_www_menu
+package app_www_layout
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ import (
 var _ wrapper_page.CommonFragments = &SetMenu{}
 
 type SetMenu struct {
-	Process thread.FIFOKVItemsGetString
+	Process thread.KVGetString
 }
 
 func (sm *SetMenu) Set(fragments server_http.Fragments) (server_http.Fragments, error) {

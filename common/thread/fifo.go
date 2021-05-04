@@ -9,9 +9,9 @@ import (
 	"github.com/pavlo67/tools/common/kv"
 )
 
-const onNewFIFOKVStrings = "on thread.FIFOKVItems()"
+const onNewFIFOKVStrings = "on thread.KV()"
 
-func NewFIFOKVItems(process kv.ItemsProcess) (FIFOKVItems, error) {
+func NewKV(process kv.ItemsProcess) (KV, error) {
 	if process == nil {
 		return nil, fmt.Errorf(onNewFIFOKVStrings + ": no processKVStrings interface")
 	}
@@ -22,22 +22,22 @@ func NewFIFOKVItems(process kv.ItemsProcess) (FIFOKVItems, error) {
 	}, nil
 }
 
-type FIFOKVItems interface {
-	FIFOKVItemsAdd
-	FIFOKVItemsGetString
+type KV interface {
+	KVAdd
+	KVGetString
 }
 
-type FIFOKVItemsAdd interface {
+type KVAdd interface {
 	Add(kvItem kv.Item)
 }
 
-type FIFOKVItemsGetString interface {
+type KVGetString interface {
 	GetString() (string, error)
 }
 
 // implementation ------------------------------------------------
 
-var _ FIFOKVItems = &fifoKVItems{}
+var _ KV = &fifoKVItems{}
 
 type fifoKVItems struct {
 	mutex   *sync.Mutex

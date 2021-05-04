@@ -3,8 +3,6 @@ package catalogue_server_http
 import (
 	"fmt"
 
-	"github.com/pavlo67/tools/common/actor"
-
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
@@ -61,8 +59,8 @@ func (fshs *catalogueServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf(onRun+": can't newCataloguePages(), got %#v / %s", cp, err)
 	}
 
-	if err := joinerOp.Join(cp, actor.ConfigPages); err != nil {
-		return fmt.Errorf(onRun+": can't join *configPages with key %s, got %s", actor.ConfigPages, err)
+	if err := joinerOp.Join(cp, actor_www.ConfigPages); err != nil {
+		return fmt.Errorf(onRun+": can't join *configPages with key %s, got %s", actor_www.ConfigPages, err)
 	}
 
 	return nil
